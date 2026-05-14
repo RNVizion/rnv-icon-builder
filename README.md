@@ -1,15 +1,15 @@
 # RNV Icon Builder
 
-![Python](https://img.shields.io/badge/python-3.10%2B-blue)
+![Python](https://img.shields.io/badge/python-3.10%2B-blue?logo=python&logoColor=white)
 ![PyQt6](https://img.shields.io/badge/PyQt-6-41CD52)
 ![Version](https://img.shields.io/badge/version-3.0.0-orange)
 ![License](https://img.shields.io/badge/license-MIT-yellow)
 ![Platform](https://img.shields.io/badge/platform-Windows%20%7C%20macOS%20%7C%20Linux-lightgrey)
 ![Tests](https://img.shields.io/badge/tests-896%20passing-brightgreen)
-![Coverage](https://img.shields.io/badge/branch%20coverage-70.21%25-brightgreen)
+![Coverage](https://img.shields.io/badge/coverage-70.21%25-brightgreen)
 
-[![Tests (Linux)](https://github.com/RNVizion/rnv-icon-builder/actions/workflows/tests-linux.yml/badge.svg)](https://github.com/RNVizion/rnv-icon-builder/actions/workflows/tests-linux.yml)
-[![Tests (Windows)](https://github.com/RNVizion/rnv-icon-builder/actions/workflows/tests-windows.yml/badge.svg)](https://github.com/RNVizion/rnv-icon-builder/actions/workflows/tests-windows.yml)
+[![Tests (Linux)](https://img.shields.io/github/actions/workflow/status/RNVizion/rnv-icon-builder/tests-linux.yml?branch=main&label=Tests%20%28Linux%29&logo=linux)](https://github.com/RNVizion/rnv-icon-builder/actions/workflows/tests-linux.yml)
+[![Tests (Windows)](https://img.shields.io/github/actions/workflow/status/RNVizion/rnv-icon-builder/tests-windows.yml?branch=main&label=Tests%20%28Windows%29&logo=windows)](https://github.com/RNVizion/rnv-icon-builder/actions/workflows/tests-windows.yml)
 
 A professional-grade desktop application for creating multi-resolution ICO files from PNG, ICO, and SVG sources. Built with PyQt6 and Pillow, featuring a polished three-theme UI, cross-platform icon exports, batch processing, and a full command-line interface.
 
