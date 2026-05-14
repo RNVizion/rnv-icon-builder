@@ -1,0 +1,178 @@
+# ─────────────────────────────────────────────────────────────────────
+# Python — bytecode, compiled extensions, distribution artifacts
+# ─────────────────────────────────────────────────────────────────────
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+*.pyd
+*.dll
+
+# Distribution & packaging
+*.egg
+*.egg-info/
+*.whl
+*.tar.gz
+dist/
+build/
+develop-eggs/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+share/python-wheels/
+MANIFEST
+pip-wheel-metadata/
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Type checker caches
+.mypy_cache/
+.pyre/
+.pytype/
+.dmypy.json
+dmypy.json
+.pyright/
+.ruff_cache/
+
+# ─────────────────────────────────────────────────────────────────────
+# Virtual environments
+# ─────────────────────────────────────────────────────────────────────
+venv/
+.venv/
+env/
+ENV/
+env.bak/
+venv.bak/
+.python-version
+
+# ─────────────────────────────────────────────────────────────────────
+# Editor / IDE
+# ─────────────────────────────────────────────────────────────────────
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+*.sublime-project
+*.sublime-workspace
+.spyderproject
+.spyproject
+.ropeproject
+
+# ─────────────────────────────────────────────────────────────────────
+# OS-generated
+# ─────────────────────────────────────────────────────────────────────
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+desktop.ini
+$RECYCLE.BIN/
+
+# ─────────────────────────────────────────────────────────────────────
+# Application user data
+# ─────────────────────────────────────────────────────────────────────
+.rnv_icon_builder/
+
+# ─────────────────────────────────────────────────────────────────────
+# Logs & diagnostics
+# ─────────────────────────────────────────────────────────────────────
+*.log
+logs/
+*.log.*
+
+# ─────────────────────────────────────────────────────────────────────
+# Test artifacts — pytest
+# ─────────────────────────────────────────────────────────────────────
+.pytest_cache/
+.cache/
+pytestdebug.log
+
+# ─────────────────────────────────────────────────────────────────────
+# Test artifacts — coverage.py
+# Canonical data file + parallel-mode subprocess data files (e.g.
+# .coverage.HOSTNAME.PID.RAND from CLI subprocess tests) + HTML report.
+# ─────────────────────────────────────────────────────────────────────
+.coverage
+.coverage.*
+htmlcov/
+coverage.xml
+*.cover
+*.py,cover
+nosetests.xml
+
+# ─────────────────────────────────────────────────────────────────────
+# Test artifacts — Hypothesis (property-based testing)
+# ─────────────────────────────────────────────────────────────────────
+.hypothesis/
+
+# ─────────────────────────────────────────────────────────────────────
+# Test artifacts — mutmut (mutation testing)
+# ─────────────────────────────────────────────────────────────────────
+.mutmut-cache
+mutants/
+html-mutants/
+
+# ─────────────────────────────────────────────────────────────────────
+# Test artifacts — pytest-benchmark
+# ─────────────────────────────────────────────────────────────────────
+.benchmarks/
+
+# ─────────────────────────────────────────────────────────────────────
+# Build / packaging side outputs
+# Note: keep RNV_Icon_Builder.spec tracked; only ignore backups and
+# auto-generated PyInstaller intermediates.
+# ─────────────────────────────────────────────────────────────────────
+*.manifest
+*.spec.bak
+__pyinstaller__/
+
+# ─────────────────────────────────────────────────────────────────────
+# Secrets & local config
+# Common patterns; harmless to ignore even if you never have one.
+# ─────────────────────────────────────────────────────────────────────
+.env
+.env.local
+.env.*.local
+*.pem
+secrets.json
+credentials.json
+
+# ─────────────────────────────────────────────────────────────────────
+# Tooling caches & lock files
+# ─────────────────────────────────────────────────────────────────────
+.tox/
+.nox/
+.coverage.lock
+celerybeat-schedule
+celerybeat.pid
+
+# Jupyter (in case you ever explore data interactively)
+.ipynb_checkpoints/
+*.ipynb_checkpoints
+
+# ─────────────────────────────────────────────────────────────────────
+# Documentation builds
+# ─────────────────────────────────────────────────────────────────────
+docs/_build/
+site/
+
+# ─────────────────────────────────────────────────────────────────────
+# Misc local artifacts
+# ─────────────────────────────────────────────────────────────────────
+*.bak
+*.tmp
+*.orig
+*.rej
+.scratch/
+scratch/
+TODO.local.md

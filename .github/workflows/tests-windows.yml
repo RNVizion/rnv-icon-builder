@@ -1,0 +1,61 @@
+name: Tests (Windows)
+
+# Push to main + manual run only. Windows minutes cost 2x on GitHub
+# Actions, so we deliberately don't run on every PR or branch push.
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    name: Python ${{ matrix.python-version }} on Windows
+    runs-on: windows-latest
+    timeout-minutes: 40
+
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.10", "3.11", "3.12", "3.13"]
+
+    env:
+      PYTHONUNBUFFERED: "1"
+      # Windows GitHub runners have a real display context, so Qt does
+      # not need the offscreen plugin. If a test ever needs to skip
+      # display-dependent paths, gate it on platform.system() == 'Windows'
+      # rather than disabling the platform plugin here.
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: pip
+          cache-dependency-path: |
+            requirements.txt
+            requirements-test.txt
+
+      - name: Install Python dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install -r requirements-test.txt
+
+      - name: Run test suite
+        run: python run_tests.py
+
+      - name: Upload coverage HTML report
+        if: matrix.python-version == '3.13' && always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-html-windows
+          path: htmlcov/
+          if-no-files-found: ignore
+          retention-days: 14

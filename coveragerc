@@ -1,0 +1,52 @@
+# RNV Icon Builder — coverage.py configuration
+# Used by pytest-cov in Phase 2 to establish the branch-coverage baseline.
+
+[run]
+# Branch coverage catches missed if/else paths that line coverage hides.
+branch = True
+
+# Enable parallel mode so each subprocess writes its own data file
+# (.coverage.<hostname>.<pid>.<rand>). The run_tests.py runner calls
+# `coverage combine` afterwards to merge them. Required for the CLI
+# subprocess tests in test_cli.py to actually contribute coverage.
+parallel = True
+
+# Measure coverage for every .py file in the project root and its package dirs.
+source =
+    .
+
+# Exclude tests, generated artifacts, and third-party paths.
+omit =
+    tests/*
+    test_*.py
+    run_tests.py
+    setup.py
+    sitecustomize.py
+    */__pycache__/*
+    */site-packages/*
+    */.venv/*
+    */venv/*
+    */build/*
+    */dist/*
+
+[report]
+# Lines that don't need coverage — boilerplate that's either unreachable
+# in tests or trivially correct. Keep this list conservative.
+exclude_lines =
+    pragma: no cover
+    def __repr__
+    raise AssertionError
+    raise NotImplementedError
+    if __name__ == .__main__.:
+    if TYPE_CHECKING:
+    @abstractmethod
+    \.\.\.
+
+show_missing = True
+skip_covered = False
+precision = 2
+sort = -Cover
+
+[html]
+directory = htmlcov
+title = RNV Icon Builder — Coverage Report

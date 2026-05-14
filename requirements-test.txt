@@ -1,0 +1,32 @@
+# RNV Icon Builder — Test Dependencies
+# =====================================
+# Install with:
+#     pip install -r requirements-test.txt
+#
+# Phased rollout — packages are listed by the phase that introduces them.
+# All can be installed up front; nothing breaks if a package isn't used yet.
+#
+# Phase 1 (now)        : pytest, pytest-qt, pytest-cov, coverage
+# Phase 6              : hypothesis      (property-based tests)
+# Phase 7              : (no new package — snapshots are plain files)
+# Phase 8              : pytest-benchmark
+# Phase 9              : mutmut
+
+# ── Core test runner ────────────────────────────────────────────────
+pytest>=8.0.0,<9.0.0
+
+# ── PyQt6 integration: qtbot, waitSignal, mouseClick, keyClicks ─────
+pytest-qt>=4.4.0,<5.0.0
+
+# ── Coverage measurement (branch coverage via .coveragerc) ──────────
+pytest-cov>=5.0.0,<7.0.0
+coverage[toml]>=7.4.0,<8.0.0
+
+# ── Property-based testing (Phase 6) ────────────────────────────────
+hypothesis>=6.100.0,<7.0.0
+
+# ── Performance regression tests (Phase 8) ──────────────────────────
+pytest-benchmark>=4.0.0,<6.0.0
+
+# ── Mutation testing (Phase 9) ──────────────────────────────────────
+mutmut>=2.5.0,<4.0.0
