@@ -7,6 +7,8 @@ Features:
 - Background image loading and scaling
 - Theme cycling
 - Scrollbar style generation
+
+Version: 3.0 (Phase 8 - Quality of Life & Polish)
 """
 
 from __future__ import annotations
@@ -29,8 +31,11 @@ from ui.colors import (
 logger: Logger = get_logger_instance(__name__)
 
 
-# Type alias for theme dictionary
-type ThemeDict = dict[str, str]
+# Type alias for theme dictionary.
+# Note: written as a plain assignment rather than PEP 695 `type ThemeDict = ...`
+# so the module imports on Python 3.10 and 3.11 (PEP 695 requires 3.12+).
+# The right-hand side `dict[str, str]` works on 3.10+ via PEP 585.
+ThemeDict = dict[str, str]
 
 
 class ThemeManager:
