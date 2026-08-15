@@ -24,15 +24,15 @@ BRAND_GOLD_DARK_RGB: Final[tuple[int, int, int]] = (177, 145, 69)
 DARK_THEME_COLORS: Final[dict[str, str]] = {
     # Base colors
     'window_bg': '#000000',
-    'panel_bg': '#1A1A1A',
-    'card_bg': '#2A2A2A',
-    'input_bg': '#2A2A2A',
-    'hover_bg': '#3A3A3A',
+    'panel_bg': '#1a1a1a',
+    'card_bg': '#2a2a2a',
+    'input_bg': '#2a2a2a',
+    'hover_bg': '#3a3a3a',
     'pressed_bg': '#333333',
     'selected_bg': BRAND_GOLD,
     
     # Text colors
-    'text_primary': '#E0E0E0',
+    'text_primary': '#e0e0e0',
     'text_secondary': '#888888',
     'text_muted': '#888888',
     'text_disabled': '#555555',
@@ -47,27 +47,27 @@ DARK_THEME_COLORS: Final[dict[str, str]] = {
     'input_border': '#333333',
     
     # Button colors (dialog buttons - gold accent system)
-    'button_bg': '#2A2A2A',
-    'button_hover_bg': '#3A3A3A',
+    'button_bg': '#2a2a2a',
+    'button_hover_bg': '#3a3a3a',
     'button_pressed_bg': BRAND_GOLD,
-    'button_text': '#E0E0E0',
+    'button_text': '#e0e0e0',
     'button_hover_text': BRAND_GOLD,
     'button_pressed_text': '#000000',
     'button_border': '#333333',
     'button_hover_border': BRAND_GOLD,
 
     # Main window buttons - color inverse system (no brand gold)
-    # Dark: rest=#1A1A1A bg / hover=#333333 bg / pressed=#444444 bg
-    'main_btn_bg': '#1A1A1A',
-    'main_btn_text': '#E0E0E0',
+    # Dark: rest=#1a1a1a bg / hover=#333333 bg / pressed=#444444 bg
+    'main_btn_bg': '#1a1a1a',
+    'main_btn_text': '#e0e0e0',
     'main_btn_border': '#333333',
     'main_btn_hover_bg': '#333333',
-    'main_btn_hover_text': '#E0E0E0',
+    'main_btn_hover_text': '#e0e0e0',
     'main_btn_pressed_bg': '#444444',
     'main_btn_pressed_text': '#000000',
 
     # Accent button (gold border)
-    'accent_button_bg': '#2A2A2A',
+    'accent_button_bg': '#2a2a2a',
     'accent_button_text': BRAND_GOLD,
     'accent_button_border': BRAND_GOLD,
     'accent_button_hover_bg': '#333333',
@@ -79,17 +79,17 @@ DARK_THEME_COLORS: Final[dict[str, str]] = {
     'platform_btn_hover_bg': '#333333',
     
     # Clear/subtle button
-    'clear_btn_bg': '#2A2A2A',
+    'clear_btn_bg': '#2a2a2a',
     
     # Checkbox
-    'checkbox_bg': '#2A2A2A',
+    'checkbox_bg': '#2a2a2a',
     'checkbox_border': '#555555',
     'checkbox_checked_bg': BRAND_GOLD,
     'checkbox_checked_border': BRAND_GOLD,
     'checkbox_hover_border': BRAND_GOLD,
     
     # Tab widget
-    'tab_bg': '#2A2A2A',
+    'tab_bg': '#2a2a2a',
     'tab_selected_bg': '#333333',
     'tab_hover_bg': '#333333',
     'tab_border': '#333333',
@@ -102,35 +102,35 @@ DARK_THEME_COLORS: Final[dict[str, str]] = {
     'scrollbar_border': '#333333',
     
     # List/Table
-    'list_bg': '#1A1A1A',
+    'list_bg': '#1a1a1a',
     'list_alt_bg': '#252525',
     'list_selected_bg': BRAND_GOLD,
-    'list_hover_bg': '#3A3A3A',
-    'list_header_bg': '#2A2A2A',
+    'list_hover_bg': '#3a3a3a',
+    'list_header_bg': '#2a2a2a',
     'list_grid': '#333333',
     
     # Dialog
-    'dialog_bg': '#1A1A1A',
+    'dialog_bg': '#1a1a1a',
     'dialog_border': '#333333',
     
     # Status bar
-    'statusbar_bg': '#1A1A1A',
+    'statusbar_bg': '#1a1a1a',
     'statusbar_border': '#333333',
     
     # Drop zone
-    'dropzone_bg': '#1A1A1A',
+    'dropzone_bg': '#1a1a1a',
     'dropzone_border': '#333333',
     'dropzone_active_border': BRAND_GOLD_DARK,
     'dropzone_active_bg': 'rgba(210, 188, 147, 0.2)',
     
     # Tooltip
-    'tooltip_bg': '#2A2A2A',
+    'tooltip_bg': '#2a2a2a',
     'tooltip_border': BRAND_GOLD,
-    'tooltip_text': '#E0E0E0',
+    'tooltip_text': '#e0e0e0',
     
     # Success/Warning/Error
     'success': '#28a745',
-    'warning': '#FFC107',
+    'warning': '#ffc107',
     'error': '#dc3545',
 }
 
@@ -138,114 +138,114 @@ DARK_THEME_COLORS: Final[dict[str, str]] = {
 # ==================== Light Theme Colors ====================
 LIGHT_THEME_COLORS: Final[dict[str, str]] = {
     # Base colors
-    'window_bg': '#F5F5F5',
-    'panel_bg': '#FFFFFF',
-    'card_bg': '#FFFFFF',
-    'input_bg': '#FFFFFF',
-    'hover_bg': '#EEEEEE',
-    'pressed_bg': '#E0E0E0',
+    'window_bg': '#f5f5f5',
+    'panel_bg': '#ffffff',
+    'card_bg': '#ffffff',
+    'input_bg': '#ffffff',
+    'hover_bg': '#eeeeee',
+    'pressed_bg': '#e0e0e0',
     'selected_bg': BRAND_GOLD_DARK,
     
     # Text colors
     'text_primary': '#000000',
     'text_secondary': '#666666',
     'text_muted': '#666666',
-    'text_disabled': '#AAAAAA',
+    'text_disabled': '#aaaaaa',
     'text_accent': BRAND_GOLD_DARK,
-    'text_on_accent': '#FFFFFF',
+    'text_on_accent': '#ffffff',
     
     # Border colors
-    'border_default': '#CCCCCC',
+    'border_default': '#cccccc',
     'border_focus': BRAND_GOLD_DARK,
-    'border_hover': '#AAAAAA',
+    'border_hover': '#aaaaaa',
     'border_accent': BRAND_GOLD_DARK,
-    'input_border': '#CCCCCC',
+    'input_border': '#cccccc',
     
     # Button colors (dialog buttons - gold accent system)
-    'button_bg': '#FFFFFF',
-    'button_hover_bg': '#EEEEEE',
+    'button_bg': '#ffffff',
+    'button_hover_bg': '#eeeeee',
     'button_pressed_bg': BRAND_GOLD_DARK,
     'button_text': '#000000',
     'button_hover_text': BRAND_GOLD_DARK,
-    'button_pressed_text': '#FFFFFF',
-    'button_border': '#CCCCCC',
+    'button_pressed_text': '#ffffff',
+    'button_border': '#cccccc',
     'button_hover_border': BRAND_GOLD_DARK,
 
     # Main window buttons - color inverse system (no brand gold)
-    # Light: rest=#FFFFFF bg / hover=#333333 bg / pressed=#444444 bg
-    'main_btn_bg': '#FFFFFF',
+    # Light: rest=#ffffff bg / hover=#333333 bg / pressed=#444444 bg
+    'main_btn_bg': '#ffffff',
     'main_btn_text': '#000000',
-    'main_btn_border': '#CCCCCC',
+    'main_btn_border': '#cccccc',
     'main_btn_hover_bg': '#333333',
     'main_btn_hover_text': '#000000',
     'main_btn_pressed_bg': '#444444',
-    'main_btn_pressed_text': '#FFFFFF',
+    'main_btn_pressed_text': '#ffffff',
 
     # Accent button (gold border)
-    'accent_button_bg': '#FFFFFF',
+    'accent_button_bg': '#ffffff',
     'accent_button_text': BRAND_GOLD_DARK,
     'accent_button_border': BRAND_GOLD_DARK,
-    'accent_button_hover_bg': '#EEEEEE',
+    'accent_button_hover_bg': '#eeeeee',
     'accent_button_pressed_bg': BRAND_GOLD_DARK,
-    'accent_button_pressed_text': '#FFFFFF',
+    'accent_button_pressed_text': '#ffffff',
     
     # Platform button
-    'platform_btn_bg': '#FAFAFA',
-    'platform_btn_hover_bg': '#F0F0F0',
+    'platform_btn_bg': '#fafafa',
+    'platform_btn_hover_bg': '#f0f0f0',
     
     # Clear/subtle button
-    'clear_btn_bg': '#F5F5F5',
+    'clear_btn_bg': '#f5f5f5',
     
     # Checkbox
-    'checkbox_bg': '#FFFFFF',
-    'checkbox_border': '#AAAAAA',
+    'checkbox_bg': '#ffffff',
+    'checkbox_border': '#aaaaaa',
     'checkbox_checked_bg': BRAND_GOLD_DARK,
     'checkbox_checked_border': BRAND_GOLD_DARK,
     'checkbox_hover_border': BRAND_GOLD_DARK,
     
     # Tab widget
-    'tab_bg': '#E0E0E0',
-    'tab_selected_bg': '#FFFFFF',
-    'tab_hover_bg': '#D0D0D0',
-    'tab_border': '#CCCCCC',
+    'tab_bg': '#e0e0e0',
+    'tab_selected_bg': '#ffffff',
+    'tab_hover_bg': '#d0d0d0',
+    'tab_border': '#cccccc',
     'tab_indicator': BRAND_GOLD_DARK,
     
     # Scrollbar
-    'scrollbar_bg': '#E0E0E0',
-    'scrollbar_handle': '#AAAAAA',
+    'scrollbar_bg': '#e0e0e0',
+    'scrollbar_handle': '#aaaaaa',
     'scrollbar_handle_hover': BRAND_GOLD_DARK,
-    'scrollbar_border': '#CCCCCC',
+    'scrollbar_border': '#cccccc',
     
     # List/Table
-    'list_bg': '#FFFFFF',
-    'list_alt_bg': '#F8F8F8',
+    'list_bg': '#ffffff',
+    'list_alt_bg': '#f8f8f8',
     'list_selected_bg': BRAND_GOLD_DARK,
-    'list_hover_bg': '#EEEEEE',
-    'list_header_bg': '#F0F0F0',
-    'list_grid': '#DDDDDD',
+    'list_hover_bg': '#eeeeee',
+    'list_header_bg': '#f0f0f0',
+    'list_grid': '#dddddd',
     
     # Dialog
-    'dialog_bg': '#F5F5F5',
-    'dialog_border': '#CCCCCC',
+    'dialog_bg': '#f5f5f5',
+    'dialog_border': '#cccccc',
     
     # Status bar
-    'statusbar_bg': '#F5F5F5',
-    'statusbar_border': '#CCCCCC',
+    'statusbar_bg': '#f5f5f5',
+    'statusbar_border': '#cccccc',
     
     # Drop zone
-    'dropzone_bg': '#FFFFFF',
-    'dropzone_border': '#CCCCCC',
+    'dropzone_bg': '#ffffff',
+    'dropzone_border': '#cccccc',
     'dropzone_active_border': BRAND_GOLD_DARK,
     'dropzone_active_bg': 'rgba(210, 188, 147, 0.3)',
     
     # Tooltip
-    'tooltip_bg': '#FFFFFF',
+    'tooltip_bg': '#ffffff',
     'tooltip_border': BRAND_GOLD_DARK,
     'tooltip_text': '#000000',
     
     # Success/Warning/Error
     'success': '#28a745',
-    'warning': '#FFC107',
+    'warning': '#ffc107',
     'error': '#dc3545',
 }
 
@@ -342,16 +342,16 @@ DEFAULT_CUSTOM_BG_COLOR: Final[str] = "#808080"
 CONTRAST_ON_LIGHT: Final[str] = "#000000"
 """Black — used as contrast text on light/bright backgrounds (e.g. color swatches)"""
 
-CONTRAST_ON_DARK: Final[str] = "#FFFFFF"
+CONTRAST_ON_DARK: Final[str] = "#ffffff"
 """White — used as contrast text on dark/dim backgrounds (e.g. color swatches)"""
 
 SWATCH_BORDER_ON_LIGHT: Final[str] = "#333"
 """Dark border for color swatch buttons on light-colored swatches"""
 
-SWATCH_BORDER_ON_DARK: Final[str] = "#CCC"
+SWATCH_BORDER_ON_DARK: Final[str] = "#ccc"
 """Light border for color swatch buttons on dark-colored swatches"""
 
-STATUS_ACTIVE_COLOR: Final[str] = "#4CAF50"
+STATUS_ACTIVE_COLOR: Final[str] = "#4caf50"
 """Green — used for active/running status indicators (e.g. folder watcher)"""
 
 

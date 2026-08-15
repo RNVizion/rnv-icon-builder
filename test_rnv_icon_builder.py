@@ -213,7 +213,7 @@ class TestColors(unittest.TestCase):
         self.assertEqual(CONTRAST_ON_LIGHT, "#000000")
 
     def test_contrast_on_dark_is_white(self):
-        self.assertEqual(CONTRAST_ON_DARK, "#FFFFFF")
+        self.assertEqual(CONTRAST_ON_DARK, "#ffffff")
 
     def test_status_active_color_nonempty(self):
         self.assertGreater(len(STATUS_ACTIVE_COLOR), 3)
@@ -288,7 +288,7 @@ class TestColors(unittest.TestCase):
 
     # ── Main button inverse system ─────────────────────────────────────────────
     def test_dark_main_btn_rest_bg(self):
-        self.assertEqual(DARK_THEME_COLORS['main_btn_bg'], '#1A1A1A')
+        self.assertEqual(DARK_THEME_COLORS['main_btn_bg'], '#1a1a1a')
 
     def test_dark_main_btn_hover_bg(self):
         self.assertEqual(DARK_THEME_COLORS['main_btn_hover_bg'], '#333333')
@@ -297,7 +297,7 @@ class TestColors(unittest.TestCase):
         self.assertEqual(DARK_THEME_COLORS['main_btn_pressed_bg'], '#444444')
 
     def test_light_main_btn_rest_bg(self):
-        self.assertEqual(LIGHT_THEME_COLORS['main_btn_bg'], '#FFFFFF')
+        self.assertEqual(LIGHT_THEME_COLORS['main_btn_bg'], '#ffffff')
 
     def test_light_main_btn_hover_bg(self):
         self.assertEqual(LIGHT_THEME_COLORS['main_btn_hover_bg'], '#333333')
@@ -446,7 +446,7 @@ class TestThemeManager(unittest.TestCase):
         self.assertEqual(self.tm.DARK_THEME['button_pressed_text'], '#000000')
 
     def test_light_theme_main_btn_pressed_text_is_white(self):
-        self.assertEqual(self.tm.LIGHT_THEME['button_pressed_text'], '#FFFFFF')
+        self.assertEqual(self.tm.LIGHT_THEME['button_pressed_text'], '#ffffff')
 
 
 # ══════════════════════════════════════════════════════════════════════════════
