@@ -2,6 +2,7 @@
 """
 Brand-gold alignment for RNVizion/rnv-icon-builder.
 =================================================
+RNV-GOLD-ALIGNMENT-TOOL-DO-NOT-SWEEP
 
 Run from the repository root:
 
@@ -49,6 +50,7 @@ from __future__ import annotations
 
 import argparse
 import ast
+import importlib.util
 import json
 import os
 import re
@@ -469,6 +471,14 @@ OFF = "\033[0m"
 
 SELF = Path(__file__).resolve()
 
+# Any file containing this marker is this script, whatever it has been
+# renamed to. Excluding by path alone is not enough: this tool is normally
+# committed to the repository under a working name (up.py) so it can be
+# pulled into a codespace, so a tracked copy of it exists during the run.
+# If a copy is swept, it rewrites its own OLD_GOLD constant into the new
+# gold and destroys its definition of what it is looking for.
+TOOL_MARKER = "RNV-GOLD-ALIGNMENT-TOOL-DO-NOT-SWEEP"
+
 
 def say(msg: str, colour: str = "") -> None:
     print(f"{colour}{msg}{OFF}" if colour else msg)
@@ -497,6 +507,12 @@ def tracked(*suffixes: str) -> list[Path]:
             continue
         if suffixes and p.suffix not in suffixes:
             continue
+        if p.suffix == ".py":
+            try:
+                if TOOL_MARKER in p.read_text(encoding="utf-8", errors="ignore"):
+                    continue          # a copy of this script under any name
+            except OSError:
+                pass
         out.append(p)
     return sorted(out)
 
@@ -528,7 +544,33 @@ def contrast(a: str, b: str) -> float:
 # PREFLIGHT
 # ══════════════════════════════════════════════════════════════════════════
 
+def check_dependencies() -> None:
+    """Refuse to start if the run cannot finish.
+
+    Step 8 regenerates tests/snapshots.json by running the repository's own
+    helper, and that helper imports pytest at module scope. Without pytest
+    the helper cannot run, the snapshots keep the retired gold, and the run
+    aborts at the last step -- leaving the repository half-applied with
+    every source change in place and stale snapshots beside them.
+
+    Checking here costs nothing and turns a half-applied repository into a
+    one-line message with the working tree untouched.
+    """
+    missing = []
+    for mod, why in (("pytest", "regenerating tests/snapshots.json"),):
+        if importlib.util.find_spec(mod) is None:
+            missing.append(f"{mod} (needed for {why})")
+    if missing:
+        die("this environment is missing:\n"
+            + "\n".join(f"         - {m}" for m in missing)
+            + "\n\n       Install the test dependencies first:\n"
+              "         pip install -r requirements-test.txt\n\n"
+              "       Nothing has been changed.")
+    say("preflight: dependencies present", OK)
+
+
 def preflight() -> None:
+    check_dependencies()
     if not COLORS.exists():
         die(f"{COLORS} not found -- run this from the repository root.")
     src = COLORS.read_text(encoding="utf-8")
@@ -778,6 +820,18 @@ def step_snapshots() -> None:
     # an unrelated failure elsewhere must not be reported as "snapshots broke".
     blob = json.dumps(data).lower()
     if OLD_GOLD in blob:
+        # Report the cause, not the symptom. "Snapshots still carry the old
+        # gold" is what was observed; it is almost never what went wrong.
+        err = r.stderr or r.stdout
+        m = re.search(r"ModuleNotFoundError: No module named '([^']+)'", err)
+        if m:
+            die(f"the snapshot helper could not run: {m.group(1)} is not "
+                f"installed in this environment.\n\n"
+                f"       Steps 1-7 HAVE been applied. To finish:\n"
+                f"         pip install -r requirements-test.txt\n"
+                f"         python {Path(__file__).name} --snapshots-only\n\n"
+                f"       Or to start over:  git checkout -- . && "
+                f"git clean -fd tests/")
         die(f"snapshots still carry {OLD_GOLD} after regeneration.\n"
             f"{r.stdout[-2000:]}\n{r.stderr[-2000:]}")
     if NEW_GOLD not in blob:
@@ -957,12 +1011,31 @@ def run_suite() -> bool:
 
 
 def main() -> int:
-    ap = argparse.ArgumentParser()
-    ap.add_argument("--verify-only", action="store_true")
-    ap.add_argument("--skip-tests", action="store_true")
+    ap = argparse.ArgumentParser(
+        description="Brand-gold alignment for rnv-icon-builder.",
+        epilog="If a run aborted at step 8 because pytest was missing, "
+               "install requirements-test.txt and re-run with "
+               "--snapshots-only to finish it.")
+    ap.add_argument("--verify-only", action="store_true",
+                    help="check an already-aligned repository, change nothing")
+    ap.add_argument("--snapshots-only", action="store_true",
+                    help="resume a half-applied run: regenerate snapshots "
+                         "and verify, skipping steps 1-7")
+    ap.add_argument("--skip-tests", action="store_true",
+                    help="skip the full pytest run at the end")
     args = ap.parse_args()
 
-    if not args.verify_only:
+    if args.snapshots_only:
+        check_dependencies()
+        src = COLORS.read_text(encoding="utf-8")
+        if OLD_SYM in src or NEW_SYM not in src:
+            die("--snapshots-only is for finishing a run that already "
+                "applied steps 1-7, and this repository has not had them "
+                "applied. Run the script without flags instead.")
+        say("resuming at step 8 -- steps 1-7 are already in place", OK)
+        step_snapshots()
+
+    if not (args.verify_only or args.snapshots_only):
         preflight()
         step_header()
         step_rename()
