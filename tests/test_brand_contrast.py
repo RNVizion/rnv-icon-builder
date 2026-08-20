@@ -1,6 +1,14 @@
 """
 RNV Icon Builder — Brand contrast and derivation guards
 ========================================================
+RNV-GOLD-GUARD-FILE-NAMES-RETIRED-VALUES-BY-DESIGN
+
+That marker tells any value-sweeping tool to skip this file. Its whole
+purpose is to name retired colours -- #b19145, (177, 145, 69) -- and
+assert they never come back. A sweep that rewrites those mentions turns
+the guard into "#8c7337 must never equal #8c7337", which passes forever
+and protects nothing. Use and mention are different things, and the file
+that states a rule about a value must never be searched for that value.
 
 These tests do not check that colours have particular values. They check
 two things that a value test cannot:
