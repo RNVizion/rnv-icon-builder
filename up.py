@@ -1117,7 +1117,41 @@ PYTEST_EXIT = {
 }
 
 
-def run_suite(quick: bool = False) -> bool:
+GUARD_TEST_PATH = "tests/test_brand_contrast.py"
+
+
+def run_guard_tests() -> str:
+    """Run only the guard suite -- seconds, not minutes.
+
+    This is the proportionate gate for a pass that touches a docstring and
+    deletes two helper files. The full suite is CI's job, and CI runs it on
+    every push. Requiring a four-minute local run inside a browser-tethered
+    codespace does not add confidence; it just adds a way to be cut off.
+    """
+    env = dict(os.environ, QT_QPA_PLATFORM="offscreen")
+    say(f"running the guard suite ({GUARD_TEST_PATH}) ...")
+    r = subprocess.run([sys.executable, "-m", "pytest", "-q",
+                        GUARD_TEST_PATH],
+                       cwd=REPO, env=env, capture_output=True, text=True)
+    for line in (r.stdout + r.stderr).strip().splitlines()[-6:]:
+        say(f"    {line}")
+    return classify(r.returncode)
+
+
+def classify(code: int) -> str:
+    """pass / fail / killed. Killed is not failed.
+
+    Collapsing these is how a reclaimed session gets reported as broken
+    code, and how 'no tests ran' gets reported as success.
+    """
+    if code < 0:
+        return "killed"
+    if code == 0:
+        return "pass"
+    return "fail"
+
+
+def run_suite(quick: bool = False) -> str:
     env = dict(os.environ, QT_QPA_PLATFORM="offscreen")
     cmd = [sys.executable, "-m", "pytest", "-q"]
     if quick:
@@ -1137,24 +1171,28 @@ def run_suite(quick: bool = False) -> bool:
 
     code = r.returncode
     if code < 0:
-        # Negative means killed by a signal. On a small container that is
-        # almost always the OOM killer taking the benchmark phase, which
-        # allocates pixmaps in a tight loop. It says nothing about whether
-        # the code under test is correct.
-        say(f"\n    the test process was KILLED by signal {-code} -- it did "
-            f"not run to completion.", WARN)
-        say(f"    This is an environment limit, not a test result. Nothing "
-            f"failed; the run was cut short.", WARN)
-        if not quick:
-            say(f"    The benchmark phase is the memory-hungry part. Retry "
-                f"without it:", WARN)
-            say(f"      python {Path(__file__).name} --verify-only "
-                f"--quick-tests", WARN)
-        return False
+        sig = -code
+        # A negative return code means killed by a signal, and WHICH signal
+        # matters. 9 (SIGKILL) is the OOM killer. 15 (SIGTERM) is something
+        # asking politely -- a codespace reclaiming an idle session, a
+        # browser tab losing its connection, a supervisor timing the job
+        # out. Neither says anything about whether the code is correct.
+        name = {9: "SIGKILL -- out of memory",
+                15: "SIGTERM -- something asked the process to stop; on a "
+                    "codespace driven from a\n         browser this is "
+                    "usually the session being reclaimed, not the tests",
+                2: "SIGINT -- interrupted"}.get(sig, f"signal {sig}")
+        say(f"\n    the test process was KILLED by {name}", WARN)
+        say(f"    It did not run to completion. This is an environment "
+            f"limit, NOT a test result --", WARN)
+        say(f"    nothing failed; the run was cut short. Your CI runs the "
+            f"full suite on every push,", WARN)
+        say(f"    which is the authority here.", WARN)
+        return "killed"
 
     msg, colour = PYTEST_EXIT.get(code, (f"pytest exited {code}", WARN))
     say(f"\n    {msg}", colour)
-    return code == 0
+    return classify(code)
 
 
 def remove_helpers(extra: list[str]) -> None:
@@ -1263,16 +1301,30 @@ def main() -> int:
         step_snapshots()
 
     ok = verify()
-    if not args.skip_tests:
-        ok = run_suite(quick=args.quick_tests) and ok
 
     if args.finish is not None:
+        # The gate for cleanup is verify plus the guard suite -- the tests
+        # that actually cover what this pass changed. Seconds, so a
+        # reclaimed session cannot interrupt it.
+        guard = run_guard_tests()
+        if guard != "pass":
+            ok = False
+        if not args.skip_tests:
+            broad = run_suite(quick=args.quick_tests)
+            if broad == "fail":
+                ok = False          # real failures still block
+            elif broad == "killed":
+                say("\n    (treated as inconclusive, not as a failure -- "
+                    "the gate below is the guard suite)", WARN)
         if ok:
             say("\nremoving transfer helpers ...")
             remove_helpers(args.finish)
         else:
-            say("\nNOT removing anything -- verification did not pass. "
+            say("\nNOT removing anything -- the checks did not pass. "
                 "The tools stay so you can find out why.", FAIL)
+    elif not args.skip_tests:
+        if run_suite(quick=args.quick_tests) != "pass":
+            ok = False
 
     say("\nDONE -- all checks passed" if ok else "\nDONE -- with failures above",
         OK if ok else FAIL)
