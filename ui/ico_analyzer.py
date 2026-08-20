@@ -26,7 +26,7 @@ from PyQt6.QtGui import QFont
 from utils.config import ICO_FILE_FILTER
 from utils.dialog_helper import DialogHelper
 from ui.base_dialog import BaseDialog
-from ui.colors import BRAND_GOLD, BRAND_GOLD_DARK, get_theme_colors
+from ui.colors import BRAND_GOLD, BRAND_DARK_GOLD, get_theme_colors
 from core.icon_builder_core import IconBuilderCore
 from utils.logger import Logger, get_logger_instance
 
@@ -373,7 +373,7 @@ class IcoAnalyzerDialog(BaseDialog):
     def _apply_theme(self, dark_mode: bool = True) -> None:
         """Apply theme styling to the dialog."""
         c = get_theme_colors(is_dark=dark_mode)
-        accent = BRAND_GOLD if dark_mode else BRAND_GOLD_DARK
+        accent = BRAND_GOLD if dark_mode else BRAND_DARK_GOLD
 
         self.setStyleSheet(f"""
             QDialog {{

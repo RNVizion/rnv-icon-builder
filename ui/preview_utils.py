@@ -40,7 +40,7 @@ from utils.logger import Logger, get_logger_instance
 from utils.pixmap_cache import ThumbnailCache
 from ui.base_dialog import BaseDialog
 from ui.colors import (
-    BRAND_GOLD, BRAND_GOLD_DARK, get_theme_colors,
+    BRAND_GOLD, BRAND_DARK_GOLD, get_theme_colors,
     CONTRAST_ON_LIGHT, CONTRAST_ON_DARK, DARK_THEME_COLORS,
     DEFAULT_CUSTOM_BG_COLOR,
 )
@@ -1137,8 +1137,8 @@ class ZoomControlsWidget(QFrame):
     def apply_theme(self, is_dark: bool = True) -> None:
         """Apply theme styling to zoom controls."""
         colors = get_theme_colors(is_dark=is_dark)
-        accent = BRAND_GOLD if is_dark else BRAND_GOLD_DARK
-        accent_hover = BRAND_GOLD_DARK if is_dark else BRAND_GOLD
+        accent = BRAND_GOLD if is_dark else BRAND_DARK_GOLD
+        accent_hover = BRAND_DARK_GOLD if is_dark else BRAND_GOLD
         
         button_style = f"""
             QPushButton {{
@@ -1290,8 +1290,8 @@ class BackgroundSelectorWidget(QFrame):
     def apply_theme(self, is_dark: bool = True) -> None:
         """Apply theme styling to background selector."""
         colors = get_theme_colors(is_dark=is_dark)
-        accent = BRAND_GOLD if is_dark else BRAND_GOLD_DARK
-        accent_dark = BRAND_GOLD_DARK if is_dark else BRAND_GOLD
+        accent = BRAND_GOLD if is_dark else BRAND_DARK_GOLD
+        accent_dark = BRAND_DARK_GOLD if is_dark else BRAND_GOLD
         
         self.bg_label.setStyleSheet(f"color: {colors['text_primary']};")
         

@@ -67,7 +67,12 @@ Three themes are supported: **Dark**, **Light**, and **Image Mode** (background 
 All colors are defined in `ui/colors.py`:
 
 - `BRAND_GOLD` (`#d2bc93`) — Primary brand accent
-- `BRAND_GOLD_DARK` (`#b19145`) — Pressed states, borders
+- `BRAND_DARK_GOLD` (`#8c7337`) — Light-mode gold FILLS: pressed states,
+  borders, selections. Carries white text at 4.5429:1.
+- `BRAND_DARK_GOLD_DEEP` (derived, `#7e6529`) — Light-mode gold TEXT.
+  `BRAND_DARK_GOLD` clears 4.5:1 as text only against pure white, so gold
+  text on any grey surface uses this instead. Computed from
+  `BRAND_DARK_GOLD`, never written down.
 - `DARK_THEME_COLORS` / `LIGHT_THEME_COLORS` / `IMAGE_MODE_COLORS` — Dictionaries keyed by semantic role (`window_bg`, `panel_bg`, `text_primary`, `button_hover_bg`, etc.)
 
 The `get_theme_colors(is_dark: bool)` helper returns the appropriate dict for dialogs.

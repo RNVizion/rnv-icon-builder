@@ -112,7 +112,7 @@ from utils.logger            import (
 from utils.pixmap_cache      import QPixmapCache, ImagePixmapCache, ThumbnailCache, create_cache_key
 from utils.dialog_helper     import DialogHelper, DialogResult
 from ui.colors               import (
-    BRAND_GOLD, BRAND_GOLD_DARK, BRAND_GOLD_RGB, BRAND_GOLD_DARK_RGB,
+    BRAND_GOLD, BRAND_DARK_GOLD, BRAND_GOLD_RGB, BRAND_DARK_GOLD_RGB,
     DARK_THEME_COLORS, LIGHT_THEME_COLORS, IMAGE_MODE_COLORS,
     get_theme_colors,
     DEFAULT_CUSTOM_BG_COLOR, CONTRAST_ON_LIGHT, CONTRAST_ON_DARK,
@@ -181,19 +181,19 @@ class TestColors(unittest.TestCase):
         self.assertRegex(BRAND_GOLD, r'^#[0-9a-fA-F]{6}$')
 
     def test_brand_gold_dark_hex_format(self):
-        self.assertRegex(BRAND_GOLD_DARK, r'^#[0-9a-fA-F]{6}$')
+        self.assertRegex(BRAND_DARK_GOLD, r'^#[0-9a-fA-F]{6}$')
 
     def test_brand_gold_value(self):
         self.assertEqual(BRAND_GOLD.lower(), "#d2bc93")
 
     def test_brand_gold_dark_value(self):
-        self.assertEqual(BRAND_GOLD_DARK.lower(), "#b19145")
+        self.assertEqual(BRAND_DARK_GOLD.lower(), "#8c7337")
 
     def test_brand_gold_rgb_tuple(self):
         self.assertEqual(BRAND_GOLD_RGB, (210, 188, 147))
 
     def test_brand_gold_dark_rgb_tuple(self):
-        self.assertEqual(BRAND_GOLD_DARK_RGB, (177, 145, 69))
+        self.assertEqual(BRAND_DARK_GOLD_RGB, (140, 115, 55))
 
     def test_rgb_matches_hex_gold(self):
         r, g, b = BRAND_GOLD_RGB
@@ -201,9 +201,9 @@ class TestColors(unittest.TestCase):
         self.assertEqual(BRAND_GOLD.lower(), expected)
 
     def test_rgb_matches_hex_gold_dark(self):
-        r, g, b = BRAND_GOLD_DARK_RGB
+        r, g, b = BRAND_DARK_GOLD_RGB
         expected = f"#{r:02x}{g:02x}{b:02x}"
-        self.assertEqual(BRAND_GOLD_DARK.lower(), expected)
+        self.assertEqual(BRAND_DARK_GOLD.lower(), expected)
 
     # ── Standalone constants ───────────────────────────────────────────────────
     def test_default_custom_bg_color(self):
@@ -278,13 +278,13 @@ class TestColors(unittest.TestCase):
         self.assertEqual(DARK_THEME_COLORS['tooltip_border'].lower(), BRAND_GOLD.lower())
 
     def test_light_tooltip_border_is_brand_gold_dark(self):
-        self.assertEqual(LIGHT_THEME_COLORS['tooltip_border'].lower(), BRAND_GOLD_DARK.lower())
+        self.assertEqual(LIGHT_THEME_COLORS['tooltip_border'].lower(), BRAND_DARK_GOLD.lower())
 
     def test_dark_scrollbar_hover_is_brand_gold(self):
         self.assertEqual(DARK_THEME_COLORS['scrollbar_handle_hover'].lower(), BRAND_GOLD.lower())
 
     def test_light_scrollbar_hover_is_brand_gold_dark(self):
-        self.assertEqual(LIGHT_THEME_COLORS['scrollbar_handle_hover'].lower(), BRAND_GOLD_DARK.lower())
+        self.assertEqual(LIGHT_THEME_COLORS['scrollbar_handle_hover'].lower(), BRAND_DARK_GOLD.lower())
 
     # ── Main button inverse system ─────────────────────────────────────────────
     def test_dark_main_btn_rest_bg(self):
@@ -419,7 +419,7 @@ class TestThemeManager(unittest.TestCase):
 
     def test_scrollbar_contains_brand_gold_hover_light(self):
         self.tm.set_theme('light')
-        self.assertIn(BRAND_GOLD_DARK.lower(), self.tm.get_scrollbar_style().lower())
+        self.assertIn(BRAND_DARK_GOLD.lower(), self.tm.get_scrollbar_style().lower())
 
     def test_get_available_themes_no_image(self):
         self.tm.image_mode_available = False
@@ -1624,7 +1624,7 @@ class TestEdgeCases(unittest.TestCase):
     def test_brand_gold_not_main_btn_hover_bg_light(self):
         self.assertNotEqual(
             LIGHT_THEME_COLORS['main_btn_hover_bg'].lower(),
-            BRAND_GOLD_DARK.lower()
+            BRAND_DARK_GOLD.lower()
         )
 
     def test_both_themes_hover_bg_same(self):
@@ -3129,7 +3129,7 @@ class TestFinalIntegration(unittest.TestCase):
         dark_hover = tm.DARK_THEME.get('button_hover_bg', '')
         self.assertNotEqual(dark_hover.lower(), BRAND_GOLD.lower())
         light_hover = tm.LIGHT_THEME.get('button_hover_bg', '')
-        self.assertNotEqual(light_hover.lower(), BRAND_GOLD_DARK.lower())
+        self.assertNotEqual(light_hover.lower(), BRAND_DARK_GOLD.lower())
 
     def test_session_and_export_history_independent(self):
         """SessionManager and ExportHistory should be independently patchable."""

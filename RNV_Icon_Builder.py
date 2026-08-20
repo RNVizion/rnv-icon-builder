@@ -123,7 +123,7 @@ from utils.config import (
     STATUS_MESSAGE_TIMEOUT
 )
 from ui.colors import (
-    BRAND_GOLD, BRAND_GOLD_DARK,
+    BRAND_GOLD, BRAND_DARK_GOLD,
     DARK_THEME_COLORS, LIGHT_THEME_COLORS, IMAGE_MODE_COLORS,
     get_theme_colors,
 )
@@ -2031,7 +2031,7 @@ class IconBuilderApp(QMainWindow):
         if show:
             self.drop_label.setStyleSheet(f"""
                 QLabel {{
-                    border: 3px dashed {BRAND_GOLD_DARK};
+                    border: 3px dashed {BRAND_DARK_GOLD};
                     border-radius: 8px;
                     padding: 40px;
                     background-color: {DARK_THEME_COLORS['dropzone_active_bg']};
@@ -2194,7 +2194,7 @@ class IconBuilderApp(QMainWindow):
                 item.setForeground(QColor(BRAND_GOLD))
             else:
                 item = QListWidgetItem(f"{size}x{size} \u2717")  # X mark
-                item.setForeground(QColor(BRAND_GOLD_DARK))
+                item.setForeground(QColor(BRAND_DARK_GOLD))
             self.file_listbox.addItem(item)
     
     def clear_preview(self) -> None:
@@ -2330,7 +2330,7 @@ class IconBuilderApp(QMainWindow):
         if theme and theme['name'] == 'Light':
             text_label.setStyleSheet(f"""
                 QLabel {{ color: {LIGHT_THEME_COLORS['text_secondary']}; font-size: 11px; }}
-                QLabel:hover {{ color: {BRAND_GOLD_DARK}; }}
+                QLabel:hover {{ color: {BRAND_DARK_GOLD}; }}
             """)
         else:
             text_label.setStyleSheet(f"""
@@ -3218,7 +3218,7 @@ class IconBuilderApp(QMainWindow):
             return {
                 'bg_secondary': LIGHT_THEME_COLORS['panel_bg'],
                 'text': LIGHT_THEME_COLORS['text_primary'],
-                'tooltip_border': BRAND_GOLD_DARK,
+                'tooltip_border': BRAND_DARK_GOLD,
             }
         else:
             # Dark and Image modes both use dark tooltip colors
@@ -3349,7 +3349,7 @@ class IconBuilderApp(QMainWindow):
 
         window_color = QColor(theme['window_bg'])
         text_color = QColor(theme['text_color'])
-        highlight = QColor(BRAND_GOLD_DARK if is_light else BRAND_GOLD)
+        highlight = QColor(BRAND_DARK_GOLD if is_light else BRAND_GOLD)
         highlight_text = QColor(c['text_on_accent'])
         base = QColor(c['input_bg'])
         
@@ -3426,11 +3426,11 @@ class IconBuilderApp(QMainWindow):
                 padding: 3px 6px;
             }}
             QListWidget::item:hover {{
-                background-color: {BRAND_GOLD_DARK if theme['name'] == 'Light' else BRAND_GOLD};
+                background-color: {BRAND_DARK_GOLD if theme['name'] == 'Light' else BRAND_GOLD};
                 color: {LIGHT_THEME_COLORS['text_on_accent'] if theme['name'] == 'Light' else DARK_THEME_COLORS['text_on_accent']};
             }}
             QListWidget::item:selected {{
-                background-color: {BRAND_GOLD_DARK if theme['name'] == 'Light' else BRAND_GOLD};
+                background-color: {BRAND_DARK_GOLD if theme['name'] == 'Light' else BRAND_GOLD};
                 color: {LIGHT_THEME_COLORS['text_on_accent'] if theme['name'] == 'Light' else DARK_THEME_COLORS['text_on_accent']};
             }}
             QScrollArea {{

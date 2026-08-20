@@ -32,7 +32,7 @@ from utils.config import (
 )
 from utils.logger import Logger, get_logger_instance
 from ui.base_dialog import BaseDialog
-from ui.colors import BRAND_GOLD, BRAND_GOLD_DARK, OS_SIM_COLORS, get_theme_colors
+from ui.colors import BRAND_GOLD, BRAND_DARK_GOLD, OS_SIM_COLORS, get_theme_colors
 from ui.preview_utils import pil_to_qpixmap, composite_on_checkerboard
 
 # Setup logger for this module
@@ -717,7 +717,7 @@ class ContextPreviewDialog(BaseDialog):
             is_dark: Whether to apply dark theme (True) or light theme (False)
         """
         colors = get_theme_colors(is_dark=is_dark)
-        accent = BRAND_GOLD if is_dark else BRAND_GOLD_DARK
+        accent = BRAND_GOLD if is_dark else BRAND_DARK_GOLD
         
         self.setStyleSheet(f"""
             QDialog {{

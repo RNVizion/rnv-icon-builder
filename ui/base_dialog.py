@@ -43,7 +43,7 @@ from PyQt6.QtGui import QMoveEvent
 from utils.signal_manager import SignalMixin, WindowMoveMixin
 from utils.logger import Logger, get_logger_instance
 from utils.dialog_helper import DialogHelper
-from ui.colors import get_theme_colors, BRAND_GOLD, BRAND_GOLD_DARK
+from ui.colors import get_theme_colors, BRAND_GOLD, BRAND_DARK_GOLD
 
 if TYPE_CHECKING:
     pass
@@ -250,8 +250,8 @@ class ThemedDialog(BaseDialog):
         is_dark = self._is_dark_theme()
         theme = get_theme_colors(is_dark)
 
-        # Use BRAND_GOLD for dark theme, BRAND_GOLD_DARK for light
-        accent = BRAND_GOLD if is_dark else BRAND_GOLD_DARK
+        # Use BRAND_GOLD for dark theme, BRAND_DARK_GOLD for light
+        accent = BRAND_GOLD if is_dark else BRAND_DARK_GOLD
 
         self.setStyleSheet(f"""
             QDialog {{
