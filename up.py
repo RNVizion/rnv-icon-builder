@@ -544,28 +544,74 @@ def contrast(a: str, b: str) -> float:
 # PREFLIGHT
 # ══════════════════════════════════════════════════════════════════════════
 
+# The system libraries PyQt6 links against. Taken from this repository's own
+# .github/workflows/tests-linux.yml, so the two cannot drift apart. A fresh
+# codespace has the Python package but none of these, and PyQt6 then fails to
+# load before QT_QPA_PLATFORM is ever consulted -- offscreen does not help,
+# because the shared object cannot be opened at all.
+QT_APT_PACKAGES = (
+    "libegl1 libgl1 libglib2.0-0 libxkbcommon0 libdbus-1-3 libfontconfig1 "
+    "libxcb-cursor0 libxcb-icccm4 libxcb-image0 libxcb-keysyms1 "
+    "libxcb-randr0 libxcb-render-util0 libxcb-shape0 libxcb-sync1 "
+    "libxcb-xfixes0 libxcb-xinerama0 libxcb-xkb1 libxkbcommon-x11-0"
+)
+
+
+def diagnose(err: str) -> str | None:
+    """Turn an import traceback into the command that fixes it.
+
+    Environment failures are the cheapest class of problem to fix and the
+    most expensive to read, because what the tool observes ("snapshots
+    still carry the old gold") is several steps removed from what actually
+    broke ("this box has no OpenGL").
+    """
+    m = re.search(r"ModuleNotFoundError: No module named '([^']+)'", err)
+    if m:
+        return (f"the Python package {m.group(1)!r} is not installed.\n\n"
+                f"       Fix:\n"
+                f"         pip install -r requirements-test.txt")
+    m = re.search(r"ImportError: (lib[\w.+-]*\.so[.\d]*): cannot open shared "
+                  r"object file", err)
+    if m:
+        return (f"PyQt6 cannot load: the system library {m.group(1)} is "
+                f"missing.\n"
+                f"       The Python package is installed; the C libraries it "
+                f"links against are not.\n"
+                f"       QT_QPA_PLATFORM=offscreen does not help -- the "
+                f"shared object fails to open\n"
+                f"       before any platform plugin is chosen.\n\n"
+                f"       Fix (same list this repo's CI installs):\n"
+                f"         sudo apt-get update && sudo apt-get install -y "
+                f"--no-install-recommends \\\n"
+                f"           {QT_APT_PACKAGES}")
+    return None
+
+
 def check_dependencies() -> None:
     """Refuse to start if the run cannot finish.
 
     Step 8 regenerates tests/snapshots.json by running the repository's own
-    helper, and that helper imports pytest at module scope. Without pytest
-    the helper cannot run, the snapshots keep the retired gold, and the run
-    aborts at the last step -- leaving the repository half-applied with
-    every source change in place and stale snapshots beside them.
+    helper, and that helper needs both pytest and a loadable PyQt6. If
+    either is absent the helper cannot run, the snapshots keep the retired
+    gold, and the run aborts at the last step -- leaving the repository
+    half-applied, every source change in place beside stale snapshots.
 
-    Checking here costs nothing and turns a half-applied repository into a
-    one-line message with the working tree untouched.
+    So probe for real, in a subprocess, doing exactly what the helper does.
+    An import that succeeds here is an import that will succeed there.
+    Checking costs a second and turns a half-applied repository into a
+    message with the working tree untouched.
     """
-    missing = []
-    for mod, why in (("pytest", "regenerating tests/snapshots.json"),):
-        if importlib.util.find_spec(mod) is None:
-            missing.append(f"{mod} (needed for {why})")
-    if missing:
-        die("this environment is missing:\n"
-            + "\n".join(f"         - {m}" for m in missing)
-            + "\n\n       Install the test dependencies first:\n"
-              "         pip install -r requirements-test.txt\n\n"
-              "       Nothing has been changed.")
+    probe = ("import pytest\n"
+             "import os; os.environ.setdefault('QT_QPA_PLATFORM','offscreen')\n"
+             "from PyQt6.QtWidgets import QApplication\n")
+    r = subprocess.run([sys.executable, "-c", probe], cwd=REPO,
+                       capture_output=True, text=True,
+                       env=dict(os.environ, QT_QPA_PLATFORM="offscreen"))
+    if r.returncode != 0:
+        hint = diagnose(r.stderr) or (
+            "the snapshot helper's imports fail in this environment:\n\n"
+            + "\n".join(f"       {ln}" for ln in r.stderr.strip().splitlines()[-6:]))
+        die(f"{hint}\n\n       Nothing has been changed.")
     say("preflight: dependencies present", OK)
 
 
@@ -822,15 +868,13 @@ def step_snapshots() -> None:
     if OLD_GOLD in blob:
         # Report the cause, not the symptom. "Snapshots still carry the old
         # gold" is what was observed; it is almost never what went wrong.
-        err = r.stderr or r.stdout
-        m = re.search(r"ModuleNotFoundError: No module named '([^']+)'", err)
-        if m:
-            die(f"the snapshot helper could not run: {m.group(1)} is not "
-                f"installed in this environment.\n\n"
-                f"       Steps 1-7 HAVE been applied. To finish:\n"
-                f"         pip install -r requirements-test.txt\n"
+        hint = diagnose(r.stderr or r.stdout)
+        if hint:
+            die(f"the snapshot helper could not run.\n\n       {hint}\n\n"
+                f"       Steps 1-7 HAVE been applied. Once the fix above is "
+                f"in place, finish with:\n"
                 f"         python {Path(__file__).name} --snapshots-only\n\n"
-                f"       Or to start over:  git checkout -- . && "
+                f"       Or start over:  git checkout -- . && "
                 f"git clean -fd tests/")
         die(f"snapshots still carry {OLD_GOLD} after regeneration.\n"
             f"{r.stdout[-2000:]}\n{r.stderr[-2000:]}")
