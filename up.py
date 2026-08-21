@@ -482,7 +482,7 @@ def test_the_dead_key_stays_dead():
 # records that someone looked, and says which. Outstanding entries are visible
 # rather than silently permitted.
 
-_BYPASS = re.compile(r"\{BRAND_[A-Z_]+\}")
+_BYPASS = re.compile(r"\\{BRAND_[A-Z_]+\\}")
 
 
 def _bypass_sites():
@@ -611,19 +611,43 @@ def edit(rel: str, fn) -> bool:
     return True
 
 
+APT_PACKAGES = (
+    "libgl1 libegl1 libxkbcommon-x11-0 libdbus-1-3 "
+    "libxcb-cursor0 libxcb-icccm4 libxcb-image0 libxcb-keysyms1 "
+    "libxcb-randr0 libxcb-render-util0 libxcb-shape0 "
+    "libxcb-sync1 libxcb-xfixes0 libxcb-xkb1"
+)
+
+
 def probe() -> None:
-    code = "import PyQt6.QtWidgets, pytest; print('ok')"
+    """Run the real import in a subprocess rather than asking if it is findable.
+
+    A missing SYSTEM library is not something pip can fix. Reporting
+    'pip install -r ...' when the failure is libGL.so.1 sends the reader in a
+    circle -- they have already installed the requirements.
+    """
+    code = ("import PyQt6.QtWidgets, pytest; "
+            "from PyQt6.QtWidgets import QApplication; print('ok')")
     env = dict(os.environ, QT_QPA_PLATFORM="offscreen")
     proc = subprocess.run([sys.executable, "-c", code],
                           capture_output=True, text=True, env=env)
     if proc.returncode == 0:
         return
     err = (proc.stderr or "").strip()
+    last = err.splitlines()[-1] if err else "(no error text)"
     print("\nThis environment cannot run the suite yet.\n")
-    print(err.splitlines()[-1] if err else "(no error text)")
-    print("\nUse this repo's own workflow list, then:\n")
-    print("  pip install -r requirements.txt -r requirements-test.txt")
-    print("\nNothing has been changed.\n")
+    print(last)
+    if any(tok in err for tok in ("libGL", "libEGL", "libxkb", "xcb", "libdbus")):
+        print("\nThat is a SYSTEM library, not a Python package -- pip cannot")
+        print("install it, and re-running the requirements files will not help.")
+        print("This repo's own workflow installs these. Run, in the terminal:\n")
+        print("  sudo apt-get update && sudo apt-get install -y " + APT_PACKAGES)
+        print("\nThen: python ib.py")
+    else:
+        print("\nInstall the Python dependencies:\n")
+        print("  pip install -r requirements.txt -r requirements-test.txt")
+    print("\nThat is a SHELL command. Run it in the terminal, not with python.")
+    print("Nothing has been changed.\n")
     raise SystemExit(2)
 
 
