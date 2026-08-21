@@ -173,7 +173,9 @@ class AboutDialog(BaseDialog):
         text_layout.addWidget(name_label)
         
         version_label = QLabel(f"Version {app_info['version']}")
-        version_label.setStyleSheet(f"font-size: 14px; color: {BRAND_GOLD}; border: none; background: transparent;")
+        version_label.setStyleSheet(
+            f"font-size: 14px; color: {get_theme_colors(is_dark=self._is_dark)['text_accent']}; "
+            f"border: none; background: transparent;")
         text_layout.addWidget(version_label)
         
         desc_label = QLabel(app_info['description'])
@@ -416,6 +418,7 @@ image manipulation, multiple export formats, and workflow automation.</p>
         layout = QVBoxLayout(tab)
         layout.setContentsMargins(10, 10, 10, 10)
         
+        _c = get_theme_colors(is_dark=self._is_dark)
         credits_text = f"""
 <h3>Credits & Acknowledgments</h3>
 
@@ -456,7 +459,7 @@ create professional icon assets efficiently.</p>
 
 <hr>
 
-<p style="text-align: center; color: {BRAND_GOLD};">
+<p style="text-align: center; color: {_c['text_accent']};">
 <b>RNV Icon Builder</b><br>
 Crafted pixel by pixel for developers and designers<br>
 <small>© 2026 RNV · MIT Licensed · Part of the RNVizion toolkit</small>

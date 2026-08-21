@@ -46,7 +46,7 @@ from PyQt6.QtGui import QIcon, QPixmap, QColor
 
 from utils.config import ICON_SIZES
 from ui.colors import (
-    BRAND_GOLD, BRAND_DARK_GOLD, get_theme_colors,
+    BRAND_GOLD, get_theme_colors,
     SWATCH_BORDER_ON_LIGHT, SWATCH_BORDER_ON_DARK, STATUS_ACTIVE_COLOR,
 )
 from utils.logger import Logger, get_logger_instance
@@ -2060,8 +2060,8 @@ class SettingsDialog(BaseDialog):
             }}
             
             QCheckBox::indicator:checked:hover {{
-                background-color: {BRAND_DARK_GOLD};
-                border-color: {BRAND_DARK_GOLD};
+                background-color: {c['accent_hover']};
+                border-color: {c['accent_hover']};
             }}
             
             /* Buttons - Gold hover */
@@ -2082,7 +2082,7 @@ class SettingsDialog(BaseDialog):
             
             QPushButton:pressed {{
                 background-color: {c['button_pressed_bg']};
-                border-color: {BRAND_DARK_GOLD};
+                border-color: {c['button_pressed_bg']};
                 color: {c['button_pressed_text']};
             }}
             
@@ -2172,7 +2172,7 @@ class SettingsDialog(BaseDialog):
             
             /* Author label */
             QLabel[objectName="author_label"] {{
-                color: {BRAND_DARK_GOLD};
+                color: {c['text_accent']};
                 font-size: 10px;
             }}
             
@@ -2402,7 +2402,7 @@ class SettingsDialog(BaseDialog):
             QPushButton[objectName="clear_btn"]:pressed {{
                 background-color: {c['button_pressed_bg']};
                 color: {c['text_on_accent']};
-                border-color: {BRAND_DARK_GOLD};
+                border-color: {c['button_pressed_bg']};
             }}
         """
 

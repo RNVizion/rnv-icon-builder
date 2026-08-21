@@ -432,3 +432,223 @@ def test_retired_app_gold_is_gone() -> None:
                     C.IMAGE_MODE_COLORS):
         assert not [k for k, v in palette.items()
                     if isinstance(v, str) and v.lower() == "#b19145"]
+
+
+# ---------------------------------------------------------------------------
+# Palette-walking gold count.   Added 2026-08-21.
+#
+# The counts above read a fixed list of CONSTANTS. That cannot see a third gold
+# sitting on a palette key the list does not name -- which is exactly what
+# `dropzone_active_border` was: BRAND_DARK_GOLD, the light-mode gold, parked in
+# the DARK and IMAGE palettes on a key nothing read.
+#
+# Walk the palette instead of naming keys, so the next one cannot hide.
+
+import pathlib
+import re
+
+_PALETTES = {
+    "DARK": C.DARK_THEME_COLORS,
+    "LIGHT": C.LIGHT_THEME_COLORS,
+    "IMAGE": C.IMAGE_MODE_COLORS,
+}
+
+# Values that are gold-adjacent but are not brand gold, with the reason.
+NOT_BRAND_GOLD = {
+    "#ffc107": "Material amber -- the semantic warning colour, not brand gold",
+}
+
+
+def _is_goldish(value: object) -> bool:
+    if not (isinstance(value, str) and len(value) == 7 and value.startswith("#")):
+        return False
+    try:
+        r, g, b = (int(value[i:i + 2], 16) for i in (1, 3, 5))
+    except ValueError:
+        return False
+    return r > g > b and (r - b) >= 30
+
+
+def _brand_golds(palette: dict) -> dict:
+    out = {}
+    for key, value in palette.items():
+        if _is_goldish(value) and value.lower() not in NOT_BRAND_GOLD:
+            out.setdefault(value.lower(), []).append(key)
+    return out
+
+
+# The four values the system holds: two registered, two derived.
+KNOWN_GOLDS = {
+    C.BRAND_GOLD.lower(): "registered",
+    C.BRAND_DARK_GOLD.lower(): "registered",
+    C.BRAND_DARK_GOLD_DEEP.lower(): "derived, lighten(BRAND_DARK_GOLD, -14)",
+    C.BRAND_GOLD_HOVER.lower(): "derived, lighten(BRAND_GOLD, 13)",
+}
+
+
+@pytest.mark.parametrize("name", sorted(_PALETTES))
+def test_at_most_two_brand_golds_per_palette(name):
+    """At most the registered gold and one derivative.
+
+    AT MOST, not exactly. This repo's dark palettes need only #d2bc93 -- hover
+    text and the pressed fill both take the accent, so there is no role for a
+    dark derivative and none is minted. Spending a derivative you do not need
+    is how an orphan gets created; requiring one would force that.
+    """
+    golds = _brand_golds(_PALETTES[name])
+    assert len(golds) <= 2, (
+        f"{name} holds {len(golds)} brand golds -- "
+        + "; ".join(f"{v} on {sorted(ks)}" for v, ks in sorted(golds.items())))
+
+
+@pytest.mark.parametrize("name", sorted(_PALETTES))
+def test_every_gold_is_a_known_value(name):
+    """A gold outside the register is an orphan, and an orphan can be perfectly
+    legible -- no contrast check would ever object to it."""
+    unknown = {v: sorted(ks) for v, ks in _brand_golds(_PALETTES[name]).items()
+               if v not in KNOWN_GOLDS}
+    assert not unknown, f"{name} holds golds outside the register: {unknown}"
+
+
+@pytest.mark.parametrize("name", sorted(_PALETTES))
+def test_the_palette_walk_is_still_looking(name):
+    """Guard the guard: if the goldish test or the exclusion ever matched
+    nothing, the count above would pass by measuring an empty set."""
+    assert _brand_golds(_PALETTES[name]), f"{name}: the walk found no golds at all"
+
+
+def test_the_not_brand_gold_list_has_no_dead_entries():
+    """A dead exemption is a licence waiting for a future defect."""
+    seen = {str(v).lower() for p in _PALETTES.values() for v in p.values()}
+    stale = [v for v in NOT_BRAND_GOLD if v not in seen]
+    assert not stale, f"NOT_BRAND_GOLD names nothing in any palette: {stale}"
+
+
+def test_the_light_gold_stays_out_of_the_dark_palettes():
+    """The specific defect this pass removed, pinned so it cannot return."""
+    for name in ("DARK", "IMAGE"):
+        offenders = [k for k, v in _PALETTES[name].items()
+                     if isinstance(v, str) and v.lower() == C.BRAND_DARK_GOLD.lower()]
+        assert not offenders, (
+            f"{name} carries the light-mode gold {C.BRAND_DARK_GOLD} on "
+            f"{offenders}")
+
+
+def test_the_dead_key_stays_dead():
+    """Deleted because nothing read it. Give it a consumer or leave it out."""
+    for name, palette in _PALETTES.items():
+        assert "dropzone_active_border" not in palette, (
+            f"{name} re-grew dropzone_active_border")
+
+
+# ---------------------------------------------------------------------------
+# Palette bypass review.
+#
+# A stylesheet that writes {BRAND_GOLD} directly, instead of reading a palette
+# key, renders the SAME gold in every mode. Sometimes that is right; usually it
+# is the light gold appearing in dark mode, or the reverse. The palette walk
+# above cannot see any of them, because the value never enters a palette.
+#
+# Every bypass must be REVIEWED. An entry does not make a site correct -- it
+# records that someone looked, and says which. Outstanding entries are visible
+# rather than silently permitted.
+
+_BYPASS = re.compile(r"\{BRAND_[A-Z_]+\}")
+
+
+def _bypass_sites():
+    import subprocess
+    root = pathlib.Path(C.__file__).resolve().parent.parent
+    files = subprocess.run(["git", "ls-files", "*.py"], cwd=root,
+                           capture_output=True, text=True).stdout.split()
+    for rel in files:
+        if rel == "ui/colors.py" or rel.startswith("tests/") or rel.startswith("test_"):
+            continue
+        text = (root / rel).read_text(encoding="utf-8", errors="surrogateescape")
+        if "RNV-GOLD-ALIGNMENT-TOOL-DO-NOT-SWEEP" in text:
+            continue
+        for line in text.splitlines():
+            if _BYPASS.search(line):
+                # Keyed by TEXT, not line number. Any edit above a site shifts
+                # its line and would silently un-review it; the declaration
+                # itself is stable.
+                yield rel + " :: " + " ".join(line.split())
+
+
+REVIEWED = {
+    # Each of these was read. A bypass renders the same gold in BOTH modes, so
+    # it is only correct where the mode has already been chosen, or where the
+    # ground is not a themed surface at all.
+    "RNV_Icon_Builder.py :: QLabel:hover {{ color: {BRAND_DARK_GOLD}; }}":
+        "correct: inside the light branch of an explicit theme check",
+    "RNV_Icon_Builder.py :: QLabel:hover {{ color: {BRAND_GOLD}; }}":
+        "correct: the dark branch of that same check",
+    "RNV_Icon_Builder.py :: background-color: {BRAND_GOLD};":
+        "correct: image-mode stylesheet block, and image mode is dark-based",
+    "ui/metadata_panel.py :: color: {BRAND_GOLD};":
+        "correct: mode-guarded by the caller",
+    "ui/preview_utils.py :: border: 2px solid {BRAND_GOLD};":
+        "correct: mode-guarded by the caller",
+    "ui/preview_utils.py :: border-color: {BRAND_GOLD};":
+        "correct: mode-guarded by the caller",
+    "ui/settings_dialog.py :: border-color: {BRAND_GOLD};":
+        "correct: hover border drawn over an arbitrary user colour swatch, so "
+        "it is deliberately mode-independent -- the ground is the swatch, not "
+        "a themed surface",
+
+}
+
+
+def test_every_palette_bypass_has_been_reviewed():
+    """A new bypass must be looked at, not inherited silently."""
+    unreviewed = [s for s in _bypass_sites() if s not in REVIEWED]
+    assert not unreviewed, (
+        "stylesheets write a brand constant directly, with no review "
+        "entry: " + ", ".join(unreviewed)
+        + " -- read the palette instead, or add an entry saying why not.")
+
+
+def test_no_reviewed_entry_is_stale():
+    """Line numbers move. A stale entry silently un-reviews a real site."""
+    live = set(_bypass_sites())
+    stale = [k for k in REVIEWED if k not in live]
+    assert not stale, (
+        "REVIEWED names sites that no longer bypass the palette: "
+        + "; ".join(stale) + " -- delete them.")
+
+
+def test_the_bypass_scan_is_still_looking():
+    sites = list(_bypass_sites())
+    assert len(sites) >= 5, f"the bypass scan found only {len(sites)} sites"
+
+
+def test_the_checkbox_hover_reads_the_palette():
+    """The one bypass this pass fixed, pinned so it cannot come back."""
+    src = (pathlib.Path(C.__file__).resolve().parent / "settings_dialog.py"
+           ).read_text(encoding="utf-8")
+    block = src.split("QCheckBox::indicator:checked:hover", 1)
+    assert len(block) == 2, "the checked-hover rule is gone"
+    body = block[1][:220]
+    assert "accent_hover" in body, "checked-hover no longer reads accent_hover"
+    assert "BRAND_DARK_GOLD" not in body, (
+        "checked-hover is hardcoding the light gold again")
+
+
+def test_dark_hover_is_the_published_derivative():
+    assert C.BRAND_GOLD_HOVER == C.lighten(C.BRAND_GOLD, 13)
+    assert C.DARK_THEME_COLORS["accent_hover"] == C.BRAND_GOLD_HOVER
+    assert C.IMAGE_MODE_COLORS["accent_hover"] == C.BRAND_GOLD_HOVER
+    assert C.LIGHT_THEME_COLORS["accent_hover"] == C.BRAND_DARK_GOLD_DEEP
+
+
+def test_hover_moves_away_from_the_ground():
+    def lum(v):
+        v = v.lstrip("#")
+        ch = [int(v[i:i + 2], 16) / 255 for i in (0, 2, 4)]
+        ch = [c / 12.92 if c <= 0.03928 else ((c + 0.055) / 1.055) ** 2.4 for c in ch]
+        return 0.2126 * ch[0] + 0.7152 * ch[1] + 0.0722 * ch[2]
+    for name in ("DARK", "IMAGE"):
+        pal = _PALETTES[name]
+        assert lum(pal["accent_hover"]) > lum(pal["text_accent"]),             f"{name} hover must go lighter, away from a dark ground"
+    light = _PALETTES["LIGHT"]
+    assert lum(light["accent_hover"]) < lum(C.BRAND_DARK_GOLD),         "light hover must go deeper, away from a light ground"

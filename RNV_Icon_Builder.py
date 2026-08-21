@@ -2029,13 +2029,15 @@ class IconBuilderApp(QMainWindow):
             show: Whether to show highlight
         """
         if show:
+            _c = get_theme_colors(
+                is_dark=self.theme_manager.current_theme != 'light')
             self.drop_label.setStyleSheet(f"""
                 QLabel {{
-                    border: 3px dashed {BRAND_DARK_GOLD};
+                    border: 3px dashed {_c['border_accent']};
                     border-radius: 8px;
                     padding: 40px;
-                    background-color: {DARK_THEME_COLORS['dropzone_active_bg']};
-                    color: {DARK_THEME_COLORS['text_on_accent']};
+                    background-color: {_c['dropzone_active_bg']};
+                    color: {_c['text_on_accent']};
                     font-size: 14px;
                     font-weight: bold;
                 }}

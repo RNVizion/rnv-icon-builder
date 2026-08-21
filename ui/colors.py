@@ -66,6 +66,12 @@ BRAND_DARK_GOLD_RGB: Final[tuple[int, int, int]] = _to_rgb(BRAND_DARK_GOLD)
 
 
 # ==================== Dark Theme Colors ====================
+
+# DERIVED. The dark-mode hover gold, published in rnv-brand engine/brand.py.
+# Hover moves AWAY from the ground in both modes: lighter on dark, deeper on
+# light. Stated as "a lighter tint for hover" it is wrong half the time.
+BRAND_GOLD_HOVER: Final[str] = lighten(BRAND_GOLD, 13)   # -> #dfc9a0
+
 DARK_THEME_COLORS: Final[dict[str, str]] = {
     # Base colors
     'window_bg': '#000000',
@@ -81,6 +87,7 @@ DARK_THEME_COLORS: Final[dict[str, str]] = {
     'text_secondary': '#888888',
     'text_muted': '#888888',
     'text_disabled': '#555555',
+    'accent_hover': BRAND_GOLD_HOVER,
     'text_accent': BRAND_GOLD,
     'text_on_accent': '#000000',
     
@@ -165,7 +172,6 @@ DARK_THEME_COLORS: Final[dict[str, str]] = {
     # Drop zone
     'dropzone_bg': '#1a1a1a',
     'dropzone_border': '#333333',
-    'dropzone_active_border': BRAND_DARK_GOLD,
     'dropzone_active_bg': 'rgba(210, 188, 147, 0.2)',
     
     # Tooltip
@@ -196,6 +202,7 @@ LIGHT_THEME_COLORS: Final[dict[str, str]] = {
     'text_secondary': '#666666',
     'text_muted': '#666666',
     'text_disabled': '#aaaaaa',
+    'accent_hover': BRAND_DARK_GOLD_DEEP,
     'text_accent': BRAND_DARK_GOLD_DEEP,
     'text_on_accent': '#ffffff',
     
@@ -280,7 +287,6 @@ LIGHT_THEME_COLORS: Final[dict[str, str]] = {
     # Drop zone
     'dropzone_bg': '#ffffff',
     'dropzone_border': '#cccccc',
-    'dropzone_active_border': BRAND_DARK_GOLD,
     'dropzone_active_bg': 'rgba(210, 188, 147, 0.3)',
     
     # Tooltip
