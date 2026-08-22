@@ -9,7 +9,7 @@ maintain it going forward.
 ## TL;DR
 
 ```bash
-pip install -r requirements-test.txt   # one time
+pip install -r tests/requirements-dev.txt   # one time
 python run_tests.py                    # everyday: full suite + coverage
 python run_tests.py --html             # also produce htmlcov/index.html
 python run_tests.py --benchmark        # timing report (no coverage)
@@ -33,11 +33,11 @@ RNV_Icon_Builder/
 │   ├── test_snapshots.py       ← Output format locks (Phase 7)
 │   ├── test_benchmarks.py      ← pytest-benchmark perf tests (Phase 8)
 │   ├── test_utilities.py       ← error/signal/font/dialog/session (Phase 8b)
-│   └── snapshots.json          ← Reference data for snapshot tests
+│   ├── snapshots.json          ← Reference data for snapshot tests
+│   └── requirements-dev.txt    ← Pinned test dependencies
 ├── pytest.ini                  ← pytest config, marker registry
 ├── .coveragerc                 ← branch coverage config
 ├── setup.cfg                   ← mutmut config
-├── requirements-test.txt       ← Pinned test dependencies
 └── run_tests.py                ← Unified runner (both suites + report)
 ```
 

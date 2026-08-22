@@ -1,7 +1,7 @@
 # RNV Icon Builder — Test Dependencies
 # =====================================
 # Install with:
-#     pip install -r requirements-test.txt
+#     pip install -r tests/requirements-dev.txt
 #
 # Phased rollout — packages are listed by the phase that introduces them.
 # All can be installed up front; nothing breaks if a package isn't used yet.

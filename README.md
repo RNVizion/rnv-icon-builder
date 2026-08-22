@@ -180,7 +180,6 @@ RNV_Icon_Builder/
 ├── RNV_Icon_Builder.spec      # PyInstaller build spec
 ├── pyproject.toml             # Package metadata & entry points
 ├── requirements.txt           # Runtime dependencies
-├── requirements-test.txt      # Test-only dependencies
 ├── README.md                  # This file
 ├── LICENSE                    # MIT license
 ├── .gitignore
@@ -242,6 +241,7 @@ RNV_Icon_Builder/
 │   ├── signal_manager.py      # Qt signal connection tracking
 │   └── async_file_ops.py      # Non-blocking file operations
 ├── tests/
+│   ├── requirements-dev.txt   # Test-only dependencies
 │   ├── conftest.py            # Shared fixtures + Qt/font/theme bootstrapping
 │   ├── snapshots.json         # Syrupy snapshot baselines
 │   ├── test_application.py    # Main window lifecycle, theme, public API
@@ -305,7 +305,7 @@ python -m pytest tests/ --benchmark-only       # benchmarks only
 Install test-only dependencies separately:
 
 ```bash
-pip install -r requirements-test.txt
+pip install -r tests/requirements-dev.txt
 ```
 
 This pulls in `pytest`, `pytest-qt`, `pytest-cov`, `pytest-benchmark`, `pytest-timeout`, `hypothesis`, `syrupy`, `coverage`, and `mutmut`.

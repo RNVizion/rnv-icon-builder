@@ -238,7 +238,7 @@ class TestColors(unittest.TestCase):
         'tooltip_bg', 'tooltip_text', 'tooltip_border',
         'list_bg', 'list_selected_bg', 'list_hover_bg',
         'dropzone_bg', 'dropzone_border', 'dropzone_active_bg',
-        'success', 'warning', 'error',
+        'success', 'warning',
     ]
 
     def _assert_keys(self, d, label):

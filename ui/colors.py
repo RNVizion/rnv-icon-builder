@@ -182,7 +182,6 @@ DARK_THEME_COLORS: Final[dict[str, str]] = {
     # Success/Warning/Error
     'success': '#28a745',
     'warning': '#ffc107',
-    'error': '#dc3545',
 }
 
 
@@ -297,7 +296,6 @@ LIGHT_THEME_COLORS: Final[dict[str, str]] = {
     # Success/Warning/Error
     'success': '#28a745',
     'warning': '#ffc107',
-    'error': '#dc3545',
 }
 
 
