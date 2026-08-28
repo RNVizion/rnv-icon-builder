@@ -2,8 +2,7 @@
 """
 RNV-GOLD-ALIGNMENT-TOOL-DO-NOT-SWEEP
 
-Align rnv-icon-builder's light panel and dark input to the surfaces the other
-apps use.
+Name the APP register in rnv-icon-builder, and move the dark ink onto the grid.
 
     python up.py             # apply, then verify
     python up.py --check     # rehearse every edit in memory, write nothing
@@ -12,31 +11,44 @@ apps use.
 
 WHAT MOVES
 
-  LIGHT panel_bg   #ffffff -> #f5f5f5     three apps already use it
-  DARK  input_bg   #2a2a2a -> #1a1a1a     three apps already use it
+  DARK  text_primary, button_text, main_btn_text, main_btn_hover_text,
+        tooltip_text      #e0e0e0 -> APP_TEXT (#dddddd)
 
-BOTH CHANGES CREATE AN EDGE THAT WAS NOT THERE
+  IMAGE inherits, because IMAGE_MODE_COLORS spreads DARK_THEME_COLORS.
 
-This app painted the light panel, the card and the input all #ffffff, so a card
-sitting on a panel had no edge at all. It does now. The same in dark: the input
-was the card colour, so a field on a card was invisible except for its border.
-At #1a1a1a it has an edge against the card -- and matches the panel, which is
-how the three apps that already use it draw a field. The border is what
-separates a field from the panel there, not a fill difference, and the guard
-asserts that border still differs from both.
+  LIGHT pressed_bg, tab_bg, scrollbar_bg      UNCHANGED at #e0e0e0.
 
-ONE EXEMPTION IS RE-KEYED, NOT ADDED
+WHY THE VALUE MOVED, AND WHY ONLY HALF OF IT
 
-tests/test_brand_contrast.py carries `("#aaaaaa", "#ffffff")` for disabled
-control text, which WCAG 1.4.3 exempts. Moving the panel moves that ground, so
-the pair becomes `("#aaaaaa", "#f5f5f5")` at 2.1309 -- the same text on the
-same control, one step of ground away. The app's own guard caught both halves
-of this on the first run: the new pair as an unaccepted failure, and the old
-key as an exemption that no longer matches anything. Nothing was hidden; the
-key was moved and the reason recorded beside it.
+#e0e0e0 was one hex doing two unrelated jobs: ink in dark mode, and a light
+surface in the light palette. It sat off the published ink grid at n = 13.18
+and refused to be pulled onto it -- because the grid governs inks and half its
+uses were not ink. Split the roles and both halves land: the ink moves to
+grey(13) #dddddd, the surface stays where it is. rnv-brand@68d195e publishes
+both the move and the rule, including the sentence that the grid does not
+govern surfaces and never can.
 
-IMAGE MODE IS DELIBERATELY UNTOUCHED. Its surfaces here are rgba strings rather
-than flat hex, and it was not part of the comparison this ruling came from.
+WHY THE NAMING HAD TO COME FIRST
+
+This app held #e0e0e0 -- and #1a1a1a, #2a2a2a, #333333 -- as bare literals
+with no constant and no provenance. The brand could have moved and nothing
+here would have noticed. Naming them without moving anything would have been
+half a job; moving them without naming them would have left nothing holding
+the new value. So the same pass does both, and the guard asserts the ink is
+spelled as a NAME rather than a value.
+
+TWO GUARDS, NOT ONE
+
+rnv-text-transformer's mirror test guards with importorskip('engine.brand'),
+so where rnv-brand is not importable it reports clean and drift hides. Every
+register value is therefore pinned locally as well as mirrored upstream. The
+pin catches drift when the brand is absent; the mirror catches the brand
+moving. Neither alone is enough, and this one nearly proved it.
+
+THE OTHER FIVE CONSTANTS ARE DEFINED BUT NOT YET WIRED. That is deliberate and
+said out loud in ui/colors.py: rewiring them is a mechanical substitution and
+this pass is a value change. Mixing the two would make the diff unreadable and
+the snapshot evidence worthless.
 """
 from __future__ import annotations
 
@@ -49,12 +61,11 @@ import tempfile
 from pathlib import Path
 
 REPO = "rnv-icon-builder"
-DESCRIPTION = "align the light panel and dark input surfaces"
+DESCRIPTION = "name the APP register and move the dark ink to grey(13)"
 SENTINEL_FILE = "ui/colors.py"
-SENTINEL = "'panel_bg': '#f5f5f5'"
-GUARD = "tests/test_surface_alignment.py"
+SENTINEL = 'APP_TEXT: Final[str] = "#dddddd"'
+GUARD = "tests/test_app_mirror.py"
 SHADOWS = {"colors.py", "config.py", "conftest.py", "run_tests.py"}
-CONTRAST = "tests/test_brand_contrast.py"
 
 SUITES = [
     ("pytest tests/ (about 5 minutes)",
@@ -63,22 +74,19 @@ SUITES = [
      [sys.executable, "-m", "unittest", "test_rnv_icon_builder"]),
 ]
 
-OLD_EXEMPTION = '''    ("#aaaaaa", "#ffffff"):
-        "disabled control text. WCAG 1.4.3 exempts disabled controls.",'''
-NEW_EXEMPTION = '''    ("#aaaaaa", "#f5f5f5"):
-        "disabled control text. WCAG 1.4.3 exempts disabled controls. Re-keyed "
-        "from #ffffff on 2026-08-27 when the light panel moved to #f5f5f5 to "
-        "match the other four apps -- the same text on the same control, one "
-        "step of ground away.",'''
+ANCHOR = "\n\n# ==================== Dark Theme Colors ====================\n"
 
+INK_KEYS = ("text_primary", "button_text", "main_btn_text",
+            "main_btn_hover_text", "tooltip_text")
+OLD_INK = "'#e0e0e0'"
+NEW_INK = "APP_TEXT"
 
-LIGHT_PANEL = "'#f5f5f5'"
-DARK_INPUT = "'#1a1a1a'"
+APP_BLOCK = '\n\n# ==================== APP Neutrals ====================\n#\n# MIRRORED FROM RNVizion/rnv-brand engine/brand.py APP. Until 2026-08-28 these\n# were bare hex literals in the palettes below -- no constant, no provenance --\n# and every one of them is a REGISTERED brand value. A registered value could\n# move upstream and this app would keep the old one silently, which is the\n# failure #c4a458 had, one level down. It nearly happened: APP["text"] moved\n# from #e0e0e0 to #dddddd in rnv-brand@68d195e.\n#\n# THE INK GRID, published in the brand beside that move:\n#\n#     grey(n) = n * 0x11, n in 0..15.   TRUE_BLACK -> WHITE in fifteen steps.\n#\n# IT GOVERNS INKS AND EDGES AND DELIBERATELY DOES NOT GOVERN SURFACES.\n# BRAND_BLACK sits at n = 1.53 and APP_CARD at n = 2.47; BRAND_BLACK is a\n# permanent and will not move to fit a ladder. The scope is part of the rule.\n#\n# THIS PASS WIRES THE INK ONLY. The other five constants are defined and\n# mirrored here so drift is caught, but the palettes below still spell them as\n# literals; rewiring those is the grey-ramp derivation pass, and doing it here\n# would have mixed a mechanical substitution into a value change.\n\nTRUE_BLACK: Final[str] = "#000000"\n"""engine/brand.py TRUE_BLACK, and APP["window"]. Primary text in light mode,\nand the label on a pressed control in dark. grey(0)."""\n\nWHITE: Final[str] = "#ffffff"\n"""engine/brand.py WHITE. Control surface in light mode. grey(15)."""\n\nBRAND_BLACK: Final[str] = "#1a1a1a"\n"""engine/brand.py BRAND_BLACK, and APP["panel"]. Charcoal; a permanent.\nNot on the ink grid (n = 1.53) and not required to be -- it is a surface."""\n\nAPP_CARD: Final[str] = "#2a2a2a"\n"""engine/brand.py APP["card"]. A surface, not on the grid (n = 2.47)."""\n\nAPP_BORDER: Final[str] = "#333333"\n"""engine/brand.py APP["border"]. grey(3). An edge, so the grid governs it."""\n\nAPP_TEXT: Final[str] = "#dddddd"\n"""engine/brand.py APP["text"]. grey(13). Primary ink in dark and image mode.\n\nMOVED FROM #e0e0e0 ON 2026-08-28, with the brand rather than after it.\n#e0e0e0 was one hex doing two unrelated jobs -- ink in dark mode, and a light\nSURFACE in the light palette below. It refused to sit on the grid because the\ngrid governs inks and half its uses were not ink. Only the ink half moved.\nContrast falls 0.21 to 0.45 and the floor afterwards is 7.17:1 on the pressed\nplate #444444, the darkest ground it is ever drawn on.\n"""\n\nAPP_TEXT_DIM: Final[str] = "#aaaaaa"\n"""engine/brand.py APP["text-dim"]. grey(10)."""\n\nAPP_PROVENANCE: Final[dict[str, str]] = {\n    "TRUE_BLACK": "register",\n    "WHITE": "register",\n    "BRAND_BLACK": "register",\n    "APP_CARD": "register",\n    "APP_BORDER": "register",\n    "APP_TEXT": "register",\n    "APP_TEXT_DIM": "register",\n}\n"""Declarative, and read by tests/test_app_mirror.py. A classification that\nlives only in a test drifts from the thing it classifies."""\n\n'
 
 
 def _bounds(lines):
-    """The three palettes carry identical key lines, so a plain string replace
-    cannot tell dark from image. Every edit is scoped to its own dict."""
+    """DARK and LIGHT carry identically-spelled key lines, so a plain string
+    replace cannot tell them apart. Every edit is scoped to its own dict."""
     starts = {}
     for i, line in enumerate(lines):
         m = re.match(r"^(DARK_THEME_COLORS|LIGHT_THEME_COLORS|IMAGE_MODE_COLORS)\s*:", line)
@@ -102,29 +110,39 @@ def _set(lines, span, key, expect, value):
 
 
 def edits(tree) -> None:
-    lines = tree.read(SENTINEL_FILE).splitlines(keepends=True)
+    src = tree.read(SENTINEL_FILE)
+    if src.count(ANCHOR) != 1:
+        raise SystemExit("could not find the single Dark Theme Colors heading; "
+                         "the file moved, re-derive this edit")
+    src = src.replace(ANCHOR, APP_BLOCK + ANCHOR.lstrip("\n"), 1)
+
+    lines = src.splitlines(keepends=True)
     b = _bounds(lines)
-    _set(lines, b["LIGHT_THEME_COLORS"], "panel_bg", "'#ffffff'", LIGHT_PANEL)
-    _set(lines, b["DARK_THEME_COLORS"], "input_bg", "'#2a2a2a'", DARK_INPUT)
+    for key in INK_KEYS:
+        _set(lines, b["DARK_THEME_COLORS"], key, OLD_INK, NEW_INK)
     tree.write(SENTINEL_FILE, "".join(lines))
-    tree.sub(CONTRAST, OLD_EXEMPTION, NEW_EXEMPTION)
 
 
 def checks(tree) -> None:
     src = tree.read(SENTINEL_FILE)
-    if src.count("'panel_bg': '#f5f5f5',") != 1:
-        raise SystemExit("expected exactly one light panel at #f5f5f5")
-    if src.count("'input_bg': '#1a1a1a',") != 1:
-        raise SystemExit("expected exactly one dark input at #1a1a1a")
-    guard = tree.read(CONTRAST)
-    if '("#aaaaaa", "#ffffff")' in guard:
-        raise SystemExit("the stale exemption key survives")
-    if guard.count('("#aaaaaa", "#f5f5f5")') != 1:
-        raise SystemExit("the re-keyed exemption is not present exactly once")
+    if src.count(SENTINEL) != 1:
+        raise SystemExit("APP_TEXT was not defined exactly once")
+    for key in INK_KEYS:
+        # These palettes align their values in a column, so the gap after the
+        # colon is not one space. Matching on a fixed string here is how a
+        # correct edit gets reported as a failure.
+        if not re.search(rf"'{key}':\s+APP_TEXT,", src):
+            raise SystemExit(f"dark {key} does not read APP_TEXT")
+    # The light surfaces must survive untouched -- three of them.
+    if src.count(OLD_INK) != 3:
+        raise SystemExit(
+            f"expected exactly three surviving #e0e0e0 (the light surfaces), "
+            f"found {src.count(OLD_INK)}")
+    if "APP_TEXT: Final[str] = \"#e0e0e0\"" in src:
+        raise SystemExit("APP_TEXT still holds the old ink")
 
 
-GUARD_SOURCE = '"""\nPanel and input surfaces, and the edges that have to survive aligning them.\n\nRULED 2026-08-27. Light panels are #f5f5f5 in every app; dark input fields are\n#1a1a1a, which is what three of the five already used.\n\nWHAT THE ALIGNMENT ACTUALLY DID TO THE EDGES, measured from the adjacency map\nrather than assumed:\n\n  LIGHT   panel and card were the same colour here, so a card had no edge\n          against the panel it sat on. Moving the panel to #f5f5f5 CREATES\n          that edge.\n\n  DARK    the input field was the same colour as the card, so a field sitting\n          on a card had no edge either. Moving it to #1a1a1a creates one --\n          and makes it equal to the panel, which is how the three apps that\n          already used #1a1a1a have always drawn it: the input border is what\n          separates a field from the panel, not a fill difference.\n\nThat second one is the reason these tests exist. The alignment trades one\nmissing edge for another arrangement, and the arrangement only works while the\ninput keeps a border that differs from both. That is asserted below.\n\nIMAGE MODE IS DELIBERATELY UNTOUCHED. It was not part of the three-against-two\ncomparison this ruling came from, and in one of these two apps its surfaces are\nrgba strings rather than flat hex.\n"""\nfrom __future__ import annotations\n\nimport pytest\n\nfrom ui.colors import (DARK_THEME_COLORS as DARK, IMAGE_MODE_COLORS as IMAGE,\n                          LIGHT_THEME_COLORS as LIGHT)\n\nFLAT = {"DARK": DARK, "LIGHT": LIGHT}\n\n\ndef _hex(value) -> bool:\n    return isinstance(value, str) and value.startswith("#") and len(value) == 7\n\n\ndef test_both_flat_palettes_carry_the_surface_keys():\n    """Guard the guard: every test below reads these."""\n    for name, theme in FLAT.items():\n        for key in ("window_bg", "panel_bg", "card_bg", "input_bg",\n                    "input_border_key_present"):\n            if key == "input_border_key_present":\n                assert any(k in theme for k in ("input_border", "border_color",\n                                                "border_default")), (\n                    f"{name} has no border key for the input")\n                continue\n            assert key in theme, f"{name} has no {key}"\n            assert _hex(theme[key]), f"{name} {key} is {theme[key]!r}, not flat hex"\n\n\ndef test_the_light_panel_is_the_agreed_surface():\n    assert LIGHT["panel_bg"] == "#f5f5f5", (\n        f"light panel is {LIGHT[\'panel_bg\']}, not the #f5f5f5 all five apps use")\n\n\ndef test_the_dark_input_is_the_agreed_surface():\n    assert DARK["input_bg"] == "#1a1a1a", (\n        f"dark input is {DARK[\'input_bg\']}, not the #1a1a1a all five apps use")\n\n\ndef test_a_card_still_has_an_edge_against_its_panel():\n    """This edge did not exist before the alignment in either app -- panel and\n    card were the same colour. It exists now and must not be merged away."""\n    for name, theme in FLAT.items():\n        assert theme["card_bg"] != theme["panel_bg"], (\n            f"{name}: card {theme[\'card_bg\']} is the panel colour again, so a "\n            f"card sitting on the panel has no edge")\n\n\ndef test_the_input_is_separated_from_the_surface_it_sits_on():\n    """Dark deliberately draws the field in the panel colour and relies on the\n    border. That only works while the border differs from both."""\n    for name, theme in FLAT.items():\n        border = (theme.get("input_border") or theme.get("border_default")\n                  or theme["border_color"])\n        assert border != theme["input_bg"], (\n            f"{name}: the input border is the same colour as its fill")\n        if theme["input_bg"] == theme["panel_bg"]:\n            assert border != theme["panel_bg"], (\n                f"{name}: the input fill matches the panel AND the border "\n                f"matches the panel -- the field has no visible extent")\n\n\ndef test_image_mode_was_left_alone():\n    """Recorded rather than trusted: if image mode is aligned later, this test\n    is the thing that has to be deleted on purpose."""\n    assert "input_bg" in IMAGE\n    assert IMAGE["input_bg"] != "#1a1a1a", (\n        "image mode now uses the dark input surface. That was outside the "\n        "2026-08-27 ruling -- if it is intended, delete this test and say so.")\n'
-
+GUARD_SOURCE = '"""\nThe APP register, mirrored -- and the ink move that made mirroring necessary.\n\nWHY THIS FILE EXISTS. Until 2026-08-28 this app carried #e0e0e0, #1a1a1a,\n#2a2a2a and #333333 as bare hex literals with no constant and no provenance.\nEvery one of them is a REGISTERED value in RNVizion/rnv-brand. A registered\nvalue could have moved upstream and this app would have kept the old one\nsilently -- the same failure #c4a458 had, one level down.\n\nIt nearly happened. `APP["text"]` moved from #e0e0e0 to #dddddd in\nrnv-brand@68d195e, and nothing here would have noticed.\n\nTHE INK GRID, published in the brand beside that move:\n\n    grey(n) = n * 0x11, n in 0..15.   TRUE_BLACK -> WHITE in fifteen steps.\n\nIt governs INKS AND EDGES and deliberately does not govern surfaces --\nBRAND_BLACK sits at n = 1.53 and APP_CARD at n = 2.47, and BRAND_BLACK is a\npermanent that will not move to fit a ladder.\n\nTWO GUARDS, NOT ONE. rnv-text-transformer\'s mirror test guards with\n`pytest.importorskip(\'engine.brand\')`, so where rnv-brand is not importable it\nreports clean and drift hides. Every register value here is therefore pinned\nLOCALLY as well as mirrored UPSTREAM: the pin catches drift when the brand is\nabsent, the mirror catches the brand moving. Neither alone is enough.\n"""\nfrom __future__ import annotations\n\nimport ast\nimport pathlib\n\nimport pytest\n\nfrom ui import colors\nfrom ui.colors import (DARK_THEME_COLORS as DARK, IMAGE_MODE_COLORS as IMAGE,\n                       LIGHT_THEME_COLORS as LIGHT)\n\nROOT = pathlib.Path(__file__).resolve().parents[1]\nSRC = ROOT / \'ui\' / \'colors.py\'\n\nGRID_STEP = 0x11\n\n#: What the brand register held on 2026-08-28, written down so this file still\n#: has an opinion when engine.brand cannot be imported.\nPINNED = {\n    \'TRUE_BLACK\': \'#000000\',\n    \'WHITE\': \'#ffffff\',\n    \'BRAND_BLACK\': \'#1a1a1a\',\n    \'APP_CARD\': \'#2a2a2a\',\n    \'APP_BORDER\': \'#333333\',\n    \'APP_TEXT\': \'#dddddd\',\n    \'APP_TEXT_DIM\': \'#aaaaaa\',\n}\n\n#: Dark-mode ink and edge. These carry APP_TEXT and must reference it by name.\nINK_KEYS = (\'text_primary\', \'button_text\', \'main_btn_text\',\n            \'main_btn_hover_text\', \'tooltip_text\')\n\n#: The other half of #e0e0e0\'s old double life: a LIGHT surface, which the\n#: grid does not govern and which did not move.\nLIGHT_SURFACE_KEYS = (\'pressed_bg\', \'tab_bg\', \'scrollbar_bg\')\n\n\ndef grey(n: int) -> str:\n    v = n * GRID_STEP\n    return \'#%02x%02x%02x\' % (v, v, v)\n\n\ndef _dict_node(name: str) -> ast.Dict:\n    tree = ast.parse(SRC.read_text(encoding=\'utf-8-sig\'))\n    for node in ast.walk(tree):\n        if isinstance(node, (ast.Assign, ast.AnnAssign)):\n            target = node.targets[0] if isinstance(node, ast.Assign) else node.target\n            if getattr(target, \'id\', None) == name and isinstance(node.value, ast.Dict):\n                return node.value\n    raise AssertionError(f\'{name} is not a dict literal in ui/colors.py\')\n\n\ndef _entry(node: ast.Dict, key: str) -> ast.AST | None:\n    for k, v in zip(node.keys, node.values):\n        if isinstance(k, ast.Constant) and k.value == key:\n            return v\n    return None\n\n\n# ------------------------------------------------------------- guard the guard\n\ndef test_the_keys_this_file_reads_still_exist():\n    """Every assertion below reads these. If a key is renamed, this fails\n    loudly instead of the rest quietly passing over nothing."""\n    for key in INK_KEYS:\n        assert key in DARK, f\'DARK has no {key}\'\n    for key in LIGHT_SURFACE_KEYS:\n        assert key in LIGHT, f\'LIGHT has no {key}\'\n    for name in PINNED:\n        assert hasattr(colors, name), f\'ui.colors has no {name}\'\n\n\n# ------------------------------------------------------------------- the value\n\ndef test_the_ink_is_a_step_on_the_grid():\n    assert colors.APP_TEXT == grey(13) == \'#dddddd\', (\n        f\'APP_TEXT is {colors.APP_TEXT}, not grey(13). The ink grid admits no \'\n        f\'exceptions -- see rnv-brand engine/brand.py APP.\')\n\n\ndef test_every_pinned_neutral_is_what_the_register_held():\n    """The local half of the mirror. Runs everywhere, including where\n    engine.brand is not importable."""\n    drift = {n: getattr(colors, n) for n, v in PINNED.items()\n             if getattr(colors, n) != v}\n    assert not drift, (\n        f\'these constants no longer hold their registered values: {drift}\\n\'\n        f\'If the brand moved, update PINNED here in the same commit that \'\n        f\'updates ui/colors.py -- never one without the other.\')\n\n\ndef test_register_values_match_rnv_brand():\n    """The upstream half. Skips where rnv-brand is not importable, which is\n    exactly why the pin above is not optional."""\n    brand = pytest.importorskip(\n        \'engine.brand\',\n        reason=\'rnv-brand not importable here; the local pin is doing the work\')\n    drift = []\n    for name in PINNED:\n        if name.startswith(\'APP_\'):\n            theirs = brand.APP[name[4:].lower().replace(\'_\', \'-\')]\n        else:\n            theirs = getattr(brand, name)\n        mine = getattr(colors, name)\n        if mine.lower() != theirs.lower():\n            drift.append(f\'{name}: ours {mine}, theirs {theirs}\')\n    assert not drift, \'drift from rnv-brand:\\n  \' + \'\\n  \'.join(drift)\n\n\n# --------------------------------------------------- the ink references the name\n\ndef test_every_dark_ink_reads_the_constant_not_a_literal():\n    """A literal cannot follow its base. This is the whole point of the pass:\n    if APP_TEXT moves again, these move with it or this test fails."""\n    node = _dict_node(\'DARK_THEME_COLORS\')\n    literals = []\n    for key in INK_KEYS:\n        value = _entry(node, key)\n        if not (isinstance(value, ast.Name) and value.id == \'APP_TEXT\'):\n            literals.append(f\'{key} = {ast.unparse(value) if value else "missing"}\')\n    assert not literals, (\n        \'dark ink entries still written as literals:\\n  \' + \'\\n  \'.join(literals))\n\n\ndef test_the_resolved_ink_is_the_constant():\n    """The AST check above proves the spelling; this proves the value."""\n    for key in INK_KEYS:\n        assert DARK[key] == colors.APP_TEXT, f\'DARK[{key!r}] is {DARK[key]}\'\n\n\ndef test_image_mode_inherits_the_dark_ink():\n    """IMAGE_MODE_COLORS spreads DARK_THEME_COLORS, so the move carries. Stated\n    rather than assumed: if that spread is ever replaced by a literal block,\n    this is what says so."""\n    for key in INK_KEYS:\n        assert IMAGE[key] == colors.APP_TEXT, (\n            f\'IMAGE[{key!r}] is {IMAGE[key]}, not the dark ink -- image mode \'\n            f\'has stopped inheriting from DARK_THEME_COLORS\')\n\n\n# ------------------------------------------------------------- what did NOT move\n\ndef test_the_light_surfaces_did_not_follow_the_ink():\n    """#e0e0e0 was one hex doing two jobs. Only the ink half moved; the light\n    half is a SURFACE, and the grid does not govern surfaces."""\n    for key in LIGHT_SURFACE_KEYS:\n        assert LIGHT[key] == \'#e0e0e0\', (\n            f\'LIGHT[{key!r}] is {LIGHT[key]}. That is a light surface, not ink \'\n            f\'-- it was deliberately left behind when the ink moved to grey(13).\')\n\n\ndef test_the_light_ink_is_true_black():\n    """Primary text is one role with two mode values: dark is a grey on the\n    grid, light is TRUE_BLACK."""\n    assert LIGHT[\'text_primary\'] == colors.TRUE_BLACK == \'#000000\'\n\n\n# ---------------------------------------------------------------- what it costs\n\ndef _luminance(value: str) -> float:\n    channels = [int(value.lstrip(\'#\')[i:i + 2], 16) / 255 for i in (0, 2, 4)]\n    channels = [c / 12.92 if c <= 0.03928 else ((c + 0.055) / 1.055) ** 2.4\n                for c in channels]\n    return 0.2126 * channels[0] + 0.7152 * channels[1] + 0.0722 * channels[2]\n\n\ndef _contrast(a: str, b: str) -> float:\n    high, low = sorted((_luminance(a), _luminance(b)), reverse=True)\n    return (high + 0.05) / (low + 0.05)\n\n\ndef test_the_ink_clears_the_text_floor_on_every_dark_ground_it_touches():\n    """Measured, not assumed. The darkest ground the ink is drawn on is the\n    pressed plate; everything else has more room."""\n    grounds = (\'#000000\', \'#1a1a1a\', \'#2a2a2a\', \'#333333\', \'#3a3a3a\', \'#444444\')\n    worst = min((_contrast(colors.APP_TEXT, g), g) for g in grounds)\n    assert worst[0] >= 4.5, (\n        f\'the ink falls to {worst[0]:.2f}:1 on {worst[1]}, under the 4.5 floor\')\n'
 
 
 # ------------------------------------------------------------------ plumbing
