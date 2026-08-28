@@ -188,8 +188,11 @@ ACCEPTED: dict[tuple[str, str], str] = {
         "BRAND_GOLD as a list-item fill with white text. BRAND_GOLD is a "
         "registered value and is not in scope for the dark-gold alignment. "
         "Recorded here so it stays visible rather than forgotten.",
-    ("#aaaaaa", "#ffffff"):
-        "disabled control text. WCAG 1.4.3 exempts disabled controls.",
+    ("#aaaaaa", "#f5f5f5"):
+        "disabled control text. WCAG 1.4.3 exempts disabled controls. Re-keyed "
+        "from #ffffff on 2026-08-27 when the light panel moved to #f5f5f5 to "
+        "match the other four apps -- the same text on the same control, one "
+        "step of ground away.",
     ("#555555", "#1a1a1a"):
         "disabled control text, dark theme. Same exemption.",
     ("#666666", "#e0e0e0"):

@@ -77,7 +77,7 @@ DARK_THEME_COLORS: Final[dict[str, str]] = {
     'window_bg': '#000000',
     'panel_bg': '#1a1a1a',
     'card_bg': '#2a2a2a',
-    'input_bg': '#2a2a2a',
+    'input_bg': '#1a1a1a',
     'hover_bg': '#3a3a3a',
     'pressed_bg': '#333333',
     'selected_bg': BRAND_GOLD,
@@ -189,7 +189,7 @@ DARK_THEME_COLORS: Final[dict[str, str]] = {
 LIGHT_THEME_COLORS: Final[dict[str, str]] = {
     # Base colors
     'window_bg': '#f5f5f5',
-    'panel_bg': '#ffffff',
+    'panel_bg': '#f5f5f5',
     'card_bg': '#ffffff',
     'input_bg': '#ffffff',
     'hover_bg': '#eeeeee',
