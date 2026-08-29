@@ -65,6 +65,71 @@ BRAND_DARK_GOLD_RGB: Final[tuple[int, int, int]] = _to_rgb(BRAND_DARK_GOLD)
 """Brand dark gold as an RGB tuple, derived from the hex above."""
 
 
+# ==================== APP Neutrals ====================
+#
+# MIRRORED FROM RNVizion/rnv-brand engine/brand.py APP. Until 2026-08-28 these
+# were bare hex literals in the palettes below -- no constant, no provenance --
+# and every one of them is a REGISTERED brand value. A registered value could
+# move upstream and this app would keep the old one silently, which is the
+# failure #c4a458 had, one level down. It nearly happened: APP["text"] moved
+# from #e0e0e0 to #dddddd in rnv-brand@68d195e.
+#
+# THE INK GRID, published in the brand beside that move:
+#
+#     grey(n) = n * 0x11, n in 0..15.   TRUE_BLACK -> WHITE in fifteen steps.
+#
+# IT GOVERNS INKS AND EDGES AND DELIBERATELY DOES NOT GOVERN SURFACES.
+# BRAND_BLACK sits at n = 1.53 and APP_CARD at n = 2.47; BRAND_BLACK is a
+# permanent and will not move to fit a ladder. The scope is part of the rule.
+#
+# THIS PASS WIRES THE INK ONLY. The other five constants are defined and
+# mirrored here so drift is caught, but the palettes below still spell them as
+# literals; rewiring those is the grey-ramp derivation pass, and doing it here
+# would have mixed a mechanical substitution into a value change.
+
+TRUE_BLACK: Final[str] = "#000000"
+"""engine/brand.py TRUE_BLACK, and APP["window"]. Primary text in light mode,
+and the label on a pressed control in dark. grey(0)."""
+
+WHITE: Final[str] = "#ffffff"
+"""engine/brand.py WHITE. Control surface in light mode. grey(15)."""
+
+BRAND_BLACK: Final[str] = "#1a1a1a"
+"""engine/brand.py BRAND_BLACK, and APP["panel"]. Charcoal; a permanent.
+Not on the ink grid (n = 1.53) and not required to be -- it is a surface."""
+
+APP_CARD: Final[str] = "#2a2a2a"
+"""engine/brand.py APP["card"]. A surface, not on the grid (n = 2.47)."""
+
+APP_BORDER: Final[str] = "#333333"
+"""engine/brand.py APP["border"]. grey(3). An edge, so the grid governs it."""
+
+APP_TEXT: Final[str] = "#dddddd"
+"""engine/brand.py APP["text"]. grey(13). Primary ink in dark and image mode.
+
+MOVED FROM #e0e0e0 ON 2026-08-28, with the brand rather than after it.
+#e0e0e0 was one hex doing two unrelated jobs -- ink in dark mode, and a light
+SURFACE in the light palette below. It refused to sit on the grid because the
+grid governs inks and half its uses were not ink. Only the ink half moved.
+Contrast falls 0.21 to 0.45 and the floor afterwards is 7.17:1 on the pressed
+plate #444444, the darkest ground it is ever drawn on.
+"""
+
+APP_TEXT_DIM: Final[str] = "#aaaaaa"
+"""engine/brand.py APP["text-dim"]. grey(10)."""
+
+APP_PROVENANCE: Final[dict[str, str]] = {
+    "TRUE_BLACK": "register",
+    "WHITE": "register",
+    "BRAND_BLACK": "register",
+    "APP_CARD": "register",
+    "APP_BORDER": "register",
+    "APP_TEXT": "register",
+    "APP_TEXT_DIM": "register",
+}
+"""Declarative, and read by tests/test_app_mirror.py. A classification that
+lives only in a test drifts from the thing it classifies."""
+
 # ==================== Dark Theme Colors ====================
 
 # DERIVED. The dark-mode hover gold, published in rnv-brand engine/brand.py.
@@ -83,7 +148,7 @@ DARK_THEME_COLORS: Final[dict[str, str]] = {
     'selected_bg': BRAND_GOLD,
     
     # Text colors
-    'text_primary': '#e0e0e0',
+    'text_primary': APP_TEXT,
     'text_secondary': '#888888',
     'text_muted': '#888888',
     'text_disabled': '#555555',
@@ -102,7 +167,7 @@ DARK_THEME_COLORS: Final[dict[str, str]] = {
     'button_bg': '#2a2a2a',
     'button_hover_bg': '#3a3a3a',
     'button_pressed_bg': BRAND_GOLD,
-    'button_text': '#e0e0e0',
+    'button_text': APP_TEXT,
     'button_hover_text': BRAND_GOLD,
     'button_pressed_text': '#000000',
     'button_border': '#333333',
@@ -111,10 +176,10 @@ DARK_THEME_COLORS: Final[dict[str, str]] = {
     # Main window buttons - color inverse system (no brand gold)
     # Dark: rest=#1a1a1a bg / hover=#333333 bg / pressed=#444444 bg
     'main_btn_bg': '#1a1a1a',
-    'main_btn_text': '#e0e0e0',
+    'main_btn_text': APP_TEXT,
     'main_btn_border': '#333333',
     'main_btn_hover_bg': '#333333',
-    'main_btn_hover_text': '#e0e0e0',
+    'main_btn_hover_text': APP_TEXT,
     'main_btn_pressed_bg': '#444444',
     'main_btn_pressed_text': '#000000',
 
@@ -177,7 +242,7 @@ DARK_THEME_COLORS: Final[dict[str, str]] = {
     # Tooltip
     'tooltip_bg': '#2a2a2a',
     'tooltip_border': BRAND_GOLD,
-    'tooltip_text': '#e0e0e0',
+    'tooltip_text': APP_TEXT,
     
     # Success/Warning/Error
     'success': '#28a745',
