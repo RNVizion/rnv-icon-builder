@@ -139,12 +139,12 @@ BRAND_GOLD_HOVER: Final[str] = lighten(BRAND_GOLD, 13)   # -> #dfc9a0
 
 DARK_THEME_COLORS: Final[dict[str, str]] = {
     # Base colors
-    'window_bg': '#000000',
-    'panel_bg': '#1a1a1a',
-    'card_bg': '#2a2a2a',
-    'input_bg': '#1a1a1a',
+    'window_bg': TRUE_BLACK,
+    'panel_bg': BRAND_BLACK,
+    'card_bg': APP_CARD,
+    'input_bg': BRAND_BLACK,
     'hover_bg': '#3a3a3a',
-    'pressed_bg': '#333333',
+    'pressed_bg': APP_BORDER,
     'selected_bg': BRAND_GOLD,
     
     # Text colors
@@ -154,93 +154,93 @@ DARK_THEME_COLORS: Final[dict[str, str]] = {
     'text_disabled': '#555555',
     'accent_hover': BRAND_GOLD_HOVER,
     'text_accent': BRAND_GOLD,
-    'text_on_accent': '#000000',
+    'text_on_accent': TRUE_BLACK,
     
     # Border colors
-    'border_default': '#333333',
+    'border_default': APP_BORDER,
     'border_focus': BRAND_GOLD,
     'border_hover': '#444444',
     'border_accent': BRAND_GOLD,
-    'input_border': '#333333',
+    'input_border': APP_BORDER,
     
     # Button colors (dialog buttons - gold accent system)
-    'button_bg': '#2a2a2a',
+    'button_bg': APP_CARD,
     'button_hover_bg': '#3a3a3a',
     'button_pressed_bg': BRAND_GOLD,
     'button_text': APP_TEXT,
     'button_hover_text': BRAND_GOLD,
-    'button_pressed_text': '#000000',
-    'button_border': '#333333',
+    'button_pressed_text': TRUE_BLACK,
+    'button_border': APP_BORDER,
     'button_hover_border': BRAND_GOLD,
 
     # Main window buttons - color inverse system (no brand gold)
     # Dark: rest=#1a1a1a bg / hover=#333333 bg / pressed=#444444 bg
-    'main_btn_bg': '#1a1a1a',
+    'main_btn_bg': BRAND_BLACK,
     'main_btn_text': APP_TEXT,
-    'main_btn_border': '#333333',
-    'main_btn_hover_bg': '#333333',
+    'main_btn_border': APP_BORDER,
+    'main_btn_hover_bg': APP_BORDER,
     'main_btn_hover_text': APP_TEXT,
     'main_btn_pressed_bg': '#444444',
-    'main_btn_pressed_text': '#000000',
+    'main_btn_pressed_text': TRUE_BLACK,
 
     # Accent button (gold border)
-    'accent_button_bg': '#2a2a2a',
+    'accent_button_bg': APP_CARD,
     'accent_button_text': BRAND_GOLD,
     'accent_button_border': BRAND_GOLD,
-    'accent_button_hover_bg': '#333333',
+    'accent_button_hover_bg': APP_BORDER,
     'accent_button_pressed_bg': BRAND_GOLD,
-    'accent_button_pressed_text': '#000000',
+    'accent_button_pressed_text': TRUE_BLACK,
     
     # Platform button
     'platform_btn_bg': '#252525',
-    'platform_btn_hover_bg': '#333333',
+    'platform_btn_hover_bg': APP_BORDER,
     
     # Clear/subtle button
-    'clear_btn_bg': '#2a2a2a',
+    'clear_btn_bg': APP_CARD,
     
     # Checkbox
-    'checkbox_bg': '#2a2a2a',
+    'checkbox_bg': APP_CARD,
     'checkbox_border': '#555555',
     'checkbox_checked_bg': BRAND_GOLD,
     'checkbox_checked_border': BRAND_GOLD,
     'checkbox_hover_border': BRAND_GOLD,
     
     # Tab widget
-    'tab_bg': '#2a2a2a',
-    'tab_selected_bg': '#333333',
-    'tab_hover_bg': '#333333',
-    'tab_border': '#333333',
+    'tab_bg': APP_CARD,
+    'tab_selected_bg': APP_BORDER,
+    'tab_hover_bg': APP_BORDER,
+    'tab_border': APP_BORDER,
     'tab_indicator': BRAND_GOLD,
     
     # Scrollbar
     'scrollbar_bg': '#252525',
     'scrollbar_handle': '#444444',
     'scrollbar_handle_hover': BRAND_GOLD,
-    'scrollbar_border': '#333333',
+    'scrollbar_border': APP_BORDER,
     
     # List/Table
-    'list_bg': '#1a1a1a',
+    'list_bg': BRAND_BLACK,
     'list_alt_bg': '#252525',
     'list_selected_bg': BRAND_GOLD,
     'list_hover_bg': '#3a3a3a',
-    'list_header_bg': '#2a2a2a',
-    'list_grid': '#333333',
+    'list_header_bg': APP_CARD,
+    'list_grid': APP_BORDER,
     
     # Dialog
-    'dialog_bg': '#1a1a1a',
-    'dialog_border': '#333333',
+    'dialog_bg': BRAND_BLACK,
+    'dialog_border': APP_BORDER,
     
     # Status bar
-    'statusbar_bg': '#1a1a1a',
-    'statusbar_border': '#333333',
+    'statusbar_bg': BRAND_BLACK,
+    'statusbar_border': APP_BORDER,
     
     # Drop zone
-    'dropzone_bg': '#1a1a1a',
-    'dropzone_border': '#333333',
+    'dropzone_bg': BRAND_BLACK,
+    'dropzone_border': APP_BORDER,
     'dropzone_active_bg': 'rgba(210, 188, 147, 0.2)',
     
     # Tooltip
-    'tooltip_bg': '#2a2a2a',
+    'tooltip_bg': APP_CARD,
     'tooltip_border': BRAND_GOLD,
     'tooltip_text': APP_TEXT,
     
@@ -406,16 +406,16 @@ OS_SIM_COLORS: Final[dict[str, str]] = {
     # Windows Taskbar
     'taskbar_dark_bg':           '#202020',
     'taskbar_light_bg':          '#f0f0f0',
-    'taskbar_border':            '#333333',
+    'taskbar_border':            APP_BORDER,
     'taskbar_text_dark':         '#ffffff',
-    'taskbar_text_light':        '#000000',
+    'taskbar_text_light':        TRUE_BLACK,
     'taskbar_text_muted_dark':   '#aaaaaa',
     'taskbar_text_muted_light':  '#666666',
 
     # Windows Explorer
     'explorer_bg':               '#ffffff',
     'explorer_border':           '#dddddd',
-    'explorer_text':             '#000000',
+    'explorer_text':             TRUE_BLACK,
 
     # macOS Dock
     'dock_gradient_start':       'rgba(255,255,255,0.3)',
@@ -425,20 +425,20 @@ OS_SIM_COLORS: Final[dict[str, str]] = {
     # macOS Finder
     'finder_bg':                 '#f5f5f5',
     'finder_border':             '#dddddd',
-    'finder_text':               '#333333',
+    'finder_text':               APP_BORDER,
 
     # Chrome Browser Tab Bar
     'chrome_tabbar_bg':          '#dee1e6',
     'chrome_active_tab_bg':      '#ffffff',
     'chrome_inactive_tab_bg':    '#cccfd4',
-    'chrome_tab_title':          '#333333',
+    'chrome_tab_title':          APP_BORDER,
     'chrome_tab_close':          '#666666',
     'chrome_inactive_tab_text':  '#555555',
 
     # Browser Bookmarks Bar
     'bookmarks_bg':              '#f8f9fa',
     'bookmarks_border':          '#dddddd',
-    'bookmarks_text':            '#333333',
+    'bookmarks_text':            APP_BORDER,
 
     # Windows Desktop
     'desktop_gradient_start':    '#1e90ff',
