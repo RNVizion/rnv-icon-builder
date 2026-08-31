@@ -118,6 +118,37 @@ plate #444444, the darkest ground it is ever drawn on.
 APP_TEXT_DIM: Final[str] = "#aaaaaa"
 """engine/brand.py APP["text-dim"]. grey(10)."""
 
+APP_PANEL_HOVER: Final[str] = "#3a3a3a"
+"""engine/brand.py APP["panel-hover"]. The dark interaction plate.
+
+REGISTERED 2026-08-29 in rnv-brand rev 22, and app-owned here until then. The
+register had called the dark ladder "two-thirds specified" because APP_BORDER
+#333333 is not #3a3a3a and so looked like a missing rung. It is not a rung at
+all: #333333 is grey(3) on the INK grid, which governs inks and EDGES, and a
+border is an edge. The ladder was complete when the question was first asked.
+
+    BRAND_BLACK + n * 0x10,  n in -1..+2
+    #0a0a0a canvas   #1a1a1a panel   #2a2a2a card   #3a3a3a panel-hover
+
+This app holds three of the four; it has no canvas surface.
+"""
+
+APP_HOVER_LIGHT: Final[str] = "#eeeeee"
+"""engine/brand.py APP["hover-light"]. grey(14). The light interaction plate.
+
+REGISTERED 2026-08-29 as #e8e8e8 and MOVED to #eeeeee on 2026-08-30 in rev 23,
+before any app had been wired to it. Nothing here changes value -- the five
+entries below already held #eeeeee.
+
+#e8e8e8 is the ground BRAND_DARK_GOLD_DEEP is calibrated against: -14 per
+channel is the smallest uniform step that clears it, and -13 gives 4.4675 and
+fails. Registering it as the hover would have put every hover in the app on the
+one value the gold cannot afford to lose, clearing the 4.5 floor by 0.0334. A
+boundary is not a plate. This value is a grid step inside it and reads 4.7875.
+
+#e8e8e8 keeps everything else -- registered, the published gold-as-text
+boundary, the binding ground. It is simply not the hover.
+"""
 APP_PROVENANCE: Final[dict[str, str]] = {
     "TRUE_BLACK": "register",
     "WHITE": "register",
@@ -126,6 +157,8 @@ APP_PROVENANCE: Final[dict[str, str]] = {
     "APP_BORDER": "register",
     "APP_TEXT": "register",
     "APP_TEXT_DIM": "register",
+    "APP_PANEL_HOVER": "register",
+    "APP_HOVER_LIGHT": "register",
 }
 """Declarative, and read by tests/test_app_mirror.py. A classification that
 lives only in a test drifts from the thing it classifies."""
@@ -143,7 +176,7 @@ DARK_THEME_COLORS: Final[dict[str, str]] = {
     'panel_bg': BRAND_BLACK,
     'card_bg': APP_CARD,
     'input_bg': BRAND_BLACK,
-    'hover_bg': '#3a3a3a',
+    'hover_bg': APP_PANEL_HOVER,
     'pressed_bg': APP_BORDER,
     'selected_bg': BRAND_GOLD,
     
@@ -165,7 +198,7 @@ DARK_THEME_COLORS: Final[dict[str, str]] = {
     
     # Button colors (dialog buttons - gold accent system)
     'button_bg': APP_CARD,
-    'button_hover_bg': '#3a3a3a',
+    'button_hover_bg': APP_PANEL_HOVER,
     'button_pressed_bg': BRAND_GOLD,
     'button_text': APP_TEXT,
     'button_hover_text': BRAND_GOLD,
@@ -222,7 +255,7 @@ DARK_THEME_COLORS: Final[dict[str, str]] = {
     'list_bg': BRAND_BLACK,
     'list_alt_bg': '#252525',
     'list_selected_bg': BRAND_GOLD,
-    'list_hover_bg': '#3a3a3a',
+    'list_hover_bg': APP_PANEL_HOVER,
     'list_header_bg': APP_CARD,
     'list_grid': APP_BORDER,
     
@@ -257,7 +290,7 @@ LIGHT_THEME_COLORS: Final[dict[str, str]] = {
     'panel_bg': '#f5f5f5',
     'card_bg': '#ffffff',
     'input_bg': '#ffffff',
-    'hover_bg': '#eeeeee',
+    'hover_bg': APP_HOVER_LIGHT,
     'pressed_bg': '#e0e0e0',
     'selected_bg': BRAND_DARK_GOLD,
     
@@ -279,7 +312,7 @@ LIGHT_THEME_COLORS: Final[dict[str, str]] = {
     
     # Button colors (dialog buttons - gold accent system)
     'button_bg': '#ffffff',
-    'button_hover_bg': '#eeeeee',
+    'button_hover_bg': APP_HOVER_LIGHT,
     'button_pressed_bg': BRAND_DARK_GOLD,
     'button_text': '#000000',
     'button_hover_text': BRAND_DARK_GOLD_DEEP,
@@ -301,7 +334,7 @@ LIGHT_THEME_COLORS: Final[dict[str, str]] = {
     'accent_button_bg': '#ffffff',
     'accent_button_text': BRAND_DARK_GOLD_DEEP,
     'accent_button_border': BRAND_DARK_GOLD,
-    'accent_button_hover_bg': '#eeeeee',
+    'accent_button_hover_bg': APP_HOVER_LIGHT,
     'accent_button_pressed_bg': BRAND_DARK_GOLD,
     'accent_button_pressed_text': '#ffffff',
     
@@ -322,7 +355,7 @@ LIGHT_THEME_COLORS: Final[dict[str, str]] = {
     # Tab widget
     'tab_bg': '#e0e0e0',
     'tab_selected_bg': '#ffffff',
-    'tab_hover_bg': '#eeeeee',
+    'tab_hover_bg': APP_HOVER_LIGHT,
     'tab_border': '#cccccc',
     'tab_indicator': BRAND_DARK_GOLD,
     
@@ -336,7 +369,7 @@ LIGHT_THEME_COLORS: Final[dict[str, str]] = {
     'list_bg': '#ffffff',
     'list_alt_bg': '#f8f8f8',
     'list_selected_bg': BRAND_DARK_GOLD,
-    'list_hover_bg': '#eeeeee',
+    'list_hover_bg': APP_HOVER_LIGHT,
     'list_header_bg': '#f0f0f0',
     'list_grid': '#dddddd',
     
