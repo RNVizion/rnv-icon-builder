@@ -1,75 +1,89 @@
 #!/usr/bin/env python3
 """
-RNV-GOLD-ALIGNMENT-TOOL-DO-NOT-SWEEP
+RNV-BUTTON-NAMING-TOOL-DO-NOT-SWEEP
 
-Arm the other half of the gold rule in rnv-icon-builder.
+Rename the two dialog button families, and delete the alias that made one key
+name mean two different schemes inside this one application.
 
     python up.py             # apply, then verify
     python up.py --check     # rehearse every edit in memory, write nothing
     python up.py --verify    # run the suites only, change nothing
     python up.py --finish    # delete this file
 
-NO APPLICATION CODE CHANGES. One test file is replaced with a longer version
-of itself. Nothing fails the new check today, in this app or in any of the
-other four -- which is the reason to add it now rather than the reason not to.
+NOT ONE PIXEL MOVES. This is a rename and a deletion of indirection.
 
-THE RULE IS BIDIRECTIONAL AND THE GUARD WAS NOT
+THE ALIAS
 
-rnv-brand rev 25 published it in both directions:
+ui/theme_manager.py built the main window's theme dict like this:
 
-    On a light ground, gold as TEXT is BRAND_DARK_GOLD_DEEP.
-    Gold as a FILL or an EDGE is BRAND_DARK_GOLD.
+    # Main window buttons use inverse system -- see colors.py main_btn_* keys
+    'button_bg': DARK_THEME_COLORS['main_btn_bg'],
+    'button_text': DARK_THEME_COLORS['main_btn_text'],
+    ...
 
-The second sentence is not a stylistic preference, and the arithmetic is not
-symmetric:
+So `theme['button_bg']` was the MAIN scheme and
+`get_theme_colors()['button_bg']` was the GOLD DIALOG scheme -- the same key
+name, two schemes, separated only by which function handed you the dict. The
+comment existed because the names could not carry the distinction.
 
-    text on #f5f5f5    BRAND_DARK_GOLD 4.1670 FAIL   DEEP 5.0949 pass
-    text on #eeeeee    BRAND_DARK_GOLD 3.9156 FAIL   DEEP 4.7875 pass
-    fill, black on it  BRAND_DARK_GOLD 4.6226 pass   DEEP 3.7806 FAIL
+That block is not a design decision. It is a bridge between two naming
+conventions, and with both sides named properly it has nothing left to do:
+the six entries fold into the passthrough comprehension directly above them,
+under the names they already have.
 
-BRAND_DARK_GOLD carries text on pure white and on nothing else these apps use
-as a surface. BRAND_DARK_GOLD_DEEP carries text everywhere and cannot be sat
-on. A sweep that read the rule as "prefer DEEP" and replaced every
-BRAND_DARK_GOLD would have fixed the text sites and broken the fills -- six of
-the sites corrected across these repositories this week are fills and edges.
+WHAT MOVES
 
-WHAT WAS ALREADY CHECKED, BY HAND
+    button_*          ->  dialog_btn_*          8 keys
+    accent_button_*   ->  dialog_btn_accent_*   6 keys
+    the alias block   ->  six passthrough names in the comprehension above it
 
-Every gold fill in all five apps, with the label drawn on it:
+164 quoted dialog occurrences and 61 accent ones across fourteen files, plus
+twelve alias lines that stop existing and twelve reads in RNV_Icon_Builder.py
+that now name the main family directly.
 
-    rnv-text-transformer        4 sites   #ffffff throughout       5.5547
-    rnv-color-picker            4 sites   inherited white          5.5547
-    rnv-icon-builder            1 site    checkbox indicator, no text
-    rnv-color-mixer             1 site    checkbox indicator, no text
-    rnv-color-palette-manager   0 sites
+main_btn_* in ui/colors.py does not move. platform_btn_* and clear_btn_bg do
+not move either: they are component keys inside the settings dialog, not a
+scheme, and folding them into dialog_btn_* would claim a generality they do
+not have.
 
-Ten sites, zero failures. In this app: 1 site — a checkbox indicator, no text of its own.
+THE TEST MODULE IS SPLIT BY HAND, NOT SWEPT
 
-WHY ADD A GUARD THAT PASSES
+test_rnv_icon_builder.py names both families. One key list belongs to the
+75-key palettes in ui/colors.py and becomes the dialog family; another belongs
+to the ThemeManager themes and becomes the main one; six assertions read
+tm.DARK_THEME / tm.LIGHT_THEME directly and are main. A blanket substitution
+over that file would put six main-window assertions onto the dialog family and
+still pass, because before this pass both names resolved. Each is anchored
+individually and counted.
 
-Because this is the only moment it is cheap. A guard proposed against a live
-defect writes itself; a guard proposed against a clean sweep has to be argued
-for, and the argument gets weaker every month the sweep stays clean. The
-text direction was clean-looking too until somebody resolved the declarations
-through the palettes, and then it was seven defects in three applications.
+THE SNAPSHOT IS REGENERATED, NOT SUBSTITUTED
 
-READING A FILL IS HARDER THAN READING TEXT, AND THE GUARD SAYS SO
+tests/snapshots.json records each palette as a sorted key list. Fourteen names
+per list move, and dialog_btn_* does not sort where button_* and
+accent_button_* sorted. The file is reloaded, renamed, re-sorted and written
+back with the same json.dumps(indent=2) the repository's own regeneration
+helper uses, so the formatting is identical by construction rather than by
+hand.
 
-Six of those ten sites declare no colour of their own -- a
-`QPushButton:hover` that sets only a background takes its label from the base
-`QPushButton` rule. The new sweep reads that enclosing rule rather than
-guessing, and skips a site where it can find no label at all rather than
-assuming one. A rule with no text (a checkbox indicator, a progress chunk)
-is counted as unresolved, not as a pass.
+DOCUMENTATION IS NOT TOUCHED, ON PURPOSE
 
-And it carries a companion: test_the_fill_sweep_still_finds_things. A sweep
-over a clean codebase and a sweep that resolves nothing file the same report,
-and that assertion is the only thing that distinguishes them.
+The docs pass runs once, after alignment settles. The guard sweeps code and
+snapshots, not prose.
+
+WHAT THE GUARD ASSERTS
+
+tests/test_button_key_names.py fails if an old name comes back anywhere, if a
+palette loses a key, if any of the twenty-four dialog values or eighteen accent
+values or fourteen main values moved, if the theme dict republishes a button_*
+name, if a snapshot list stops being sorted, or if the two schemes converge.
+It reads the palettes by importing them: two of these values are derived
+through lighten(), and a static resolver returns None for those and then
+compares None with None and passes.
 """
 from __future__ import annotations
 
 import argparse
-import ast
+import json
 import os
 import re
 import subprocess
@@ -78,117 +92,432 @@ import tempfile
 from pathlib import Path
 
 REPO = "rnv-icon-builder"
-DESCRIPTION = "arm the fill direction of the gold rule"
-SENTINEL_FILE = "tests/test_gold_as_text.py"
-SENTINEL = "test_no_gold_fill_carries_a_label_below_the_floor"
-GUARD = SENTINEL_FILE
+DESCRIPTION = "rename the dialog button families and delete the theme alias"
+SENTINEL_FILE = "ui/colors.py"
+SENTINEL = "'dialog_btn_bg'"
+GUARD = "tests/test_button_key_names.py"
 SHADOWS = {"colors.py", "config.py", "conftest.py", "run_tests.py"}
 
-#: This script EXTENDS a file an earlier script created, so "the sentinel file
-#: is missing" almost always means the prerequisite has not been run -- not
-#: that you are in the wrong directory. The default message says the second,
-#: which is the more confusing of the two possibilities to be told when you
-#: are standing in the right place.
-MISSING_HELP = (
-    f"{SENTINEL_FILE} is not here, so there is nothing to extend."
-    f"\n\nThis script arms the FILL half of the gold rule in a guard that "
-    f"the gold-text script installs. Run that one first:"
-    f"\n\n    up-for-rnv-icon-builder-gold-text.py"
-    f"\n\nthen this one. If you have already run it and the file is still "
-    f"missing, you are not at the root of a rnv-icon-builder checkout -- this "
-    f"expects to run from the directory that contains tests/."
-)
-
 SUITES = [
-    ('pytest tests/ (about 5 minutes)',
+    ('pytest tests/',
      [sys.executable, "-m", "pytest", "tests/", "-q", "-p", "no:cacheprovider"]),
     ('unittest suite',
-     [sys.executable, "-m", "unittest", "test_rnv_icon_builder"])
+     [sys.executable, "-m", "unittest", "test_rnv_icon_builder"]),
 ]
 
-#: The tests the existing file already carries. This pass EXTENDS it; a
-#: replacement that quietly dropped one would be a regression wearing the
-#: shape of an upgrade.
-EXISTING = (
-    "test_the_sweep_still_finds_things",
-    "test_the_gold_family_is_not_empty",
-    "test_the_two_golds_actually_differ_in_light",
-    "test_no_gold_is_drawn_as_text_below_the_floor",
-    "test_no_exemption_has_outlived_its_reason",
-)
+DIALOG_KEYS = ("button_bg", "button_text", "button_hover_bg", "button_hover_text",
+               "button_pressed_bg", "button_pressed_text", "button_border",
+               "button_hover_border")
+ACCENT_KEYS = ("accent_button_bg", "accent_button_text", "accent_button_border",
+               "accent_button_hover_bg", "accent_button_pressed_bg",
+               "accent_button_pressed_text")
+MAIN_KEYS = ("button_bg", "button_text", "button_hover_bg", "button_hover_text",
+             "button_pressed_bg", "button_pressed_text")
 
-NEW = (
-    "test_no_gold_fill_carries_a_label_below_the_floor",
-    "test_the_fill_sweep_still_finds_things",
-)
+RENAME_DIALOG = {k: "dialog_btn_" + k[len("button_"):] for k in DIALOG_KEYS}
+RENAME_ACCENT = {k: "dialog_btn_accent_" + k[len("accent_button_"):]
+                 for k in ACCENT_KEYS}
+RENAME_MAIN = {k: "main_" + k.replace("button_", "btn_") for k in MAIN_KEYS}
+
+#: file -> (dialog count, accent count). Written down so the script refuses to
+#: run against a tree that has moved under it.
+DIALOG_FILES = {
+    "ui/colors.py": (16, 12),
+    "ui/settings_dialog.py": (25, 20),
+    "ui/preview_utils.py": (14, 0),
+    "utils/dialog_helper.py": (14, 0),
+    "ui/ico_analyzer.py": (7, 8),
+    "ui/about_dialog.py": (7, 0),
+    "ui/context_preview.py": (6, 0),
+    "ui/base_dialog.py": (5, 0),
+    "tests/test_brand_contrast.py": (2, 2),
+    "tests/test_ladder_and_plate.py": (2, 1),
+    "tests/test_app_mirror.py": (1, 0),
+}
+
+#: The main window reads its theme dict, and every button key in this file is
+#: one of those reads.
+MAIN_FILES = {"RNV_Icon_Builder.py": 12}
+
+#: The alias, folded into the comprehension above it. One per palette.
+ALIAS_OLD = """        )},
+        # Main window buttons use inverse system — see colors.py main_btn_* keys
+        'button_bg': {P}['main_btn_bg'],
+        'button_text': {P}['main_btn_text'],
+        'button_hover_bg': {P}['main_btn_hover_bg'],
+        'button_hover_text': {P}['main_btn_hover_text'],
+        'button_pressed_bg': {P}['main_btn_pressed_bg'],
+        'button_pressed_text': {P}['main_btn_pressed_text'],
+"""
+ALIAS_NEW = """            # The main window's buttons, passed through under the names
+            # they already have. Until 2026-09-01 these six were republished
+            # as button_* -- which is how one key name came to mean the main
+            # scheme here and the gold dialog scheme in get_theme_colors().
+            'main_btn_bg', 'main_btn_text', 'main_btn_hover_bg',
+            'main_btn_hover_text', 'main_btn_pressed_bg',
+            'main_btn_pressed_text',
+        )},
+"""
+
+#: test_rnv_icon_builder.py names both families; each site is anchored.
+TEST_ANCHORS = [
+    # the 75-key palettes in ui/colors.py -> dialog
+    ("        'button_bg', 'button_text', 'button_hover_bg', 'button_pressed_bg',\n"
+     "        'button_pressed_text', 'button_border',",
+     "        'dialog_btn_bg', 'dialog_btn_text', 'dialog_btn_hover_bg',\n"
+     "        'dialog_btn_pressed_bg', 'dialog_btn_pressed_text',\n"
+     "        'dialog_btn_border',", 1),
+    # the ThemeManager themes -> main
+    ("                      'button_bg', 'button_text', 'button_hover_bg',\n"
+     "                      'button_pressed_bg', 'button_pressed_text']",
+     "                      'main_btn_bg', 'main_btn_text', 'main_btn_hover_bg',\n"
+     "                      'main_btn_pressed_bg', 'main_btn_pressed_text']", 1),
+    ("DARK_THEME.get('button_hover_bg', '')",
+     "DARK_THEME.get('main_btn_hover_bg', '')", 3),
+    ("LIGHT_THEME.get('button_hover_bg', '')",
+     "LIGHT_THEME.get('main_btn_hover_bg', '')", 1),
+    ("DARK_THEME['button_pressed_text']", "DARK_THEME['main_btn_pressed_text']", 1),
+    ("LIGHT_THEME['button_pressed_text']", "LIGHT_THEME['main_btn_pressed_text']", 1),
+]
+
+_D_RE = re.compile(r"(?<!accent_)(['\"])("
+                   + "|".join(sorted(DIALOG_KEYS, key=len, reverse=True)) + r")\1")
+_A_RE = re.compile(r"(['\"])("
+                   + "|".join(sorted(ACCENT_KEYS, key=len, reverse=True)) + r")\1")
+_M_RE = re.compile(r"(?<!accent_)(['\"])("
+                   + "|".join(sorted(MAIN_KEYS, key=len, reverse=True)) + r")\1")
+
+
+def _sub(pattern, mapping, text):
+    hits = 0
+
+    def swap(m):
+        nonlocal hits
+        hits += 1
+        return f"{m.group(1)}{mapping[m.group(2)]}{m.group(1)}"
+
+    return pattern.sub(swap, text), hits
+
+
+def _rename_snapshot(text: str) -> str:
+    """Rename inside the JSON and re-sort, then write it the way the repo's own
+    regeneration helper writes it."""
+    data = json.loads(text)
+    both = {**RENAME_DIALOG, **RENAME_ACCENT}
+    for name, value in data.items():
+        if name.endswith("_keys") and isinstance(value, list):
+            data[name] = sorted(both.get(k, k) for k in value)
+    return json.dumps(data, indent=2) + "\n"
 
 
 def edits(tree) -> None:
-    """Nothing here. apply() writes GUARD_SOURCE to GUARD, and GUARD is the
-    file this pass replaces -- so the whole edit is the new test file."""
-    print("  replacing the gold guard with the bidirectional version")
+    dialog = accent = 0
+    for rel, (want_d, want_a) in DIALOG_FILES.items():
+        src = tree.read(rel)
+        src, got_a = _sub(_A_RE, RENAME_ACCENT, src)
+        src, got_d = _sub(_D_RE, RENAME_DIALOG, src)
+        if (got_d, got_a) != (want_d, want_a):
+            raise SystemExit(f"{rel}: expected {want_d} dialog and {want_a} "
+                             f"accent key(s), found {got_d} and {got_a}. The "
+                             f"file moved; re-derive this edit.")
+        tree.write(rel, src)
+        dialog += got_d
+        accent += got_a
+
+    for rel, want in MAIN_FILES.items():
+        src, got = _sub(_M_RE, RENAME_MAIN, tree.read(rel))
+        if got != want:
+            raise SystemExit(f"{rel}: expected {want} main key(s), found {got}")
+        tree.write(rel, src)
+
+    for palette in ("DARK_THEME_COLORS", "LIGHT_THEME_COLORS"):
+        tree.sub("ui/theme_manager.py",
+                 ALIAS_OLD.replace("{P}", palette),
+                 ALIAS_NEW, 1)
+
+    for old, new, times in TEST_ANCHORS:
+        tree.sub("test_rnv_icon_builder.py", old, new, times)
+
+    tree.write("tests/snapshots.json",
+               _rename_snapshot(tree.read("tests/snapshots.json")))
+
+    print(f"  renamed {dialog} dialog and {accent} accent keys, "
+          f"{sum(MAIN_FILES.values())} main reads, folded 2 alias blocks, "
+          f"regenerated the snapshot")
 
 
 def checks(tree) -> None:
-    before = (Path.cwd() / SENTINEL_FILE).read_text(encoding="utf-8-sig")
-    after = tree.read(SENTINEL_FILE)
+    old_names = set(DIALOG_KEYS) | set(ACCENT_KEYS)
+    for rel in list(DIALOG_FILES) + list(MAIN_FILES) + \
+            ["ui/theme_manager.py", "test_rnv_icon_builder.py",
+             "tests/snapshots.json"]:
+        text = tree.read(rel)
+        for old in old_names:
+            if re.search(r"(['\"])" + old + r"\1", text):
+                raise SystemExit(f"{rel}: {old!r} survived the rename")
 
-    # Every test that was there is still there. Named individually rather
-    # than counted, because a count cannot tell you WHICH one went.
-    lost = [name for name in EXISTING if f"def {name}(" not in after]
-    if lost:
-        raise SystemExit(
-            "the replacement drops tests that existed before it:\n  "
-            + "\n  ".join(lost)
-            + "\n\nThis pass extends the guard. Removing a check while "
-              "adding one is a regression in the shape of an upgrade.")
-    for name in NEW:
-        if f"def {name}(" not in after:
-            raise SystemExit(f"the new file does not define {name}")
-        if f"def {name}(" in before:
-            raise SystemExit(
-                f"{name} is already present. This has been applied.")
+    manager = tree.read("ui/theme_manager.py")
+    if "main_btn_* keys" in manager:
+        raise SystemExit("the alias comment survived; the block it explained "
+                         "is gone and the comment would outlive its reason")
+    if manager.count("'main_btn_bg', 'main_btn_text', 'main_btn_hover_bg',") != 2:
+        raise SystemExit("expected the folded passthrough in both palettes")
 
-    # The replacement must be strictly longer. It adds two tests and two
-    # helpers and removes nothing.
-    if after.count("\n") <= before.count("\n"):
-        raise SystemExit(
-            f"the new guard is not longer than the old one "
-            f"({before.count(chr(10))} -> {after.count(chr(10))} lines), "
-            f"which an extension has to be.")
+    data = json.loads(tree.read("tests/snapshots.json"))
+    for name, value in data.items():
+        if name.endswith("_keys") and isinstance(value, list):
+            if value != sorted(value):
+                raise SystemExit(f"{name} is not sorted after regeneration")
+    for name in ("dark_theme_keys", "light_theme_keys", "image_mode_keys"):
+        entries = [k for k in data[name] if "dialog_btn_" in k]
+        if len(entries) != 14:
+            raise SystemExit(f"{name} carries {len(entries)} dialog keys, "
+                             f"expected 14")
 
-    if SENTINEL not in after:
-        raise SystemExit(f"expected {SENTINEL!r} in the new guard")
+    original = json.loads((Path.cwd() / "tests" / "snapshots.json")
+                          .read_text(encoding="utf-8"))
+    for name, value in original.items():
+        if not (name.endswith("_keys") and isinstance(value, list)):
+            continue
+        if len(data[name]) != len(value):
+            raise SystemExit(f"{name} changed length: {len(value)} -> "
+                             f"{len(data[name])}. A rename adds and removes "
+                             f"nothing.")
 
-    # The arithmetic the docstring claims, checked against the register's
-    # values rather than trusted from the prose above.
-    sys.path.insert(0, str(Path.cwd()))
-
-    def luminance(value):
-        channels = [int(value.lstrip("#")[i:i + 2], 16) / 255 for i in (0, 2, 4)]
-        channels = [c / 12.92 if c <= 0.03928 else ((c + 0.055) / 1.055) ** 2.4
-                    for c in channels]
-        return 0.2126 * channels[0] + 0.7152 * channels[1] + 0.0722 * channels[2]
-
-    def contrast(a, b):
-        high, low = sorted((luminance(a), luminance(b)), reverse=True)
-        return (high + 0.05) / (low + 0.05)
-
-    black_on_deep = contrast("#000000", "#7e6529")
-    black_on_gold = contrast("#000000", "#8c7337")
-    if abs(black_on_deep - 3.7806) > 0.0002 or abs(black_on_gold - 4.6226) > 0.0002:
-        raise SystemExit(
-            f"the fill arithmetic has moved: black on the deep gold is "
-            f"{black_on_deep:.4f} and on the accent {black_on_gold:.4f}; this "
-            f"script says 3.7806 and 4.6226. Re-derive before trusting it.")
-    if black_on_deep >= 4.5:
-        raise SystemExit(
-            "black now clears the floor on BRAND_DARK_GOLD_DEEP, so the rule "
-            "this guard enforces has stopped being true. Read the register "
-            "before applying this.")
+    main_window = tree.read("RNV_Icon_Builder.py")
+    if "theme['main_btn_bg']" not in main_window:
+        raise SystemExit("the main window no longer names the main family")
+    print("  guards: no old name survives, the alias is folded away, the "
+          "snapshot is sorted and the same length")
 
 
-GUARD_SOURCE = '"""Gold drawn as TEXT must clear the text floor on the ground it is drawn on.\n\nWHY THIS EXISTS. The gold family has two members that look interchangeable and\nare not. BRAND_DARK_GOLD #8c7337 fills and bounds correctly on light surfaces\nand FAILS as text on them; BRAND_DARK_GOLD_DEEP #7e6529 is the derivative that\nexists for text, and the palettes name it `accent_ink` -- "Accent when it\ncarries text". In DARK MODE THE TWO ARE THE SAME VALUE, so every check written\nwhere they coincide is blind to the case where they diverge, and that is\nexactly what happened: gold-as-text sites shipped in light mode at 3.71 and\n4.17 against a 4.5 floor, in more than one application, for as long as the\ndialogs have existed.\n\nWHAT IT DOES. Reads every f-string in the source, pulls `color:` and\n`background-color:` out of each QSS rule, resolves the placeholders through\nthis app\'s own palettes, and measures. A declaration whose foreground is a\ngold-family value and whose contrast falls below the floor fails.\n\nWHAT IT CANNOT SEE, stated because a sweep that reports only what it found\nlooks identical to one that found nothing:\n\n  - a placeholder that is not a palette lookup, a module constant or a local\n    bound to one is UNRESOLVED and skipped\n  - a rule with no background-color of its own INHERITS, and the ground is\n    taken from the palette\'s window or panel value, which is a guess\n\nBoth counts are asserted rather than printed: if the resolved count collapses,\nthe sweep has gone blind and says so instead of passing.\n\nREADING THE MODE. A block written inside `if self._is_dark:` and bound with\n`_d = ThemeManager.DARK_THEME` is dark-only, and scoring it against the light\npalette invents a pairing that never renders. Declarations are restricted to\nthe mode their variable came from. The first version of this sweep, without\nthat, reported five impossible failures including gold on #333333 at 2.78.\n"""\nfrom __future__ import annotations\n\nimport ast\nimport pathlib\nimport re\n\nimport pytest\n\nfrom ui import colors\nfrom ui.colors import (DARK_THEME_COLORS as DARK,\n                       IMAGE_MODE_COLORS as IMAGE,\n                       LIGHT_THEME_COLORS as LIGHT)\n\nROOT = pathlib.Path(__file__).resolve().parents[1]\n\nTEXT_FLOOR = 4.5\nHEX = re.compile(r\'^#[0-9a-fA-F]{6}$\')\nBLOCK = re.compile(r\'([^{}\\n][^{}]*?)\\{\\{(.*?)\\}\\}\', re.S)\nDECL = re.compile(r\'(?<!-)\\bcolor\\s*:\\s*([^;\\n]+)\')\nBGDECL = re.compile(r\'background-color\\s*:\\s*([^;\\n]+)\')\nLOOKUP = re.compile(r"^\\{\\s*([A-Za-z_][A-Za-z_0-9]*)\\s*\\[\\s*[\'\\"]([a-z_0-9]+)[\'\\"]\\s*\\]\\s*\\}$")\n#: `{t.get(\'tab_selected_bg\', bg)}` is a lookup wearing a fallback. Reading it\n#: as unresolvable made the sweep guess the ground from the palette and score\n#: rnv-color-mixer\'s selected tab at 4.1670 when it actually sits on #ffffff\n#: and clears at 4.5429 -- a failure that does not exist.\nGETLOOKUP = re.compile(\n    r"^\\{\\s*([A-Za-z_][A-Za-z_0-9]*)\\s*\\.get\\(\\s*[\'\\"]([a-z_0-9]+)[\'\\"]\\s*(?:,.*)?\\)\\s*\\}$",\n    re.S)\nBARE = re.compile(r\'^\\{\\s*([A-Za-z_][A-Za-z_0-9]*)\\s*\\}$\')\n\nMODE_MARKERS = ((\'DARK\', (\'DARK_THEME\', \'.DARK\', \'DARK_THEME_COLORS\')),\n                (\'LIGHT\', (\'LIGHT_THEME\', \'.LIGHT\', \'LIGHT_THEME_COLORS\')),\n                (\'IMAGE\', (\'IMAGE_THEME\', \'.IMAGE\', \'IMAGE_MODE_COLORS\')))\n\n#: mode -> the live palette.\nPALETTES = {\'DARK\': DARK, \'LIGHT\': LIGHT, \'IMAGE\': IMAGE}\n\n#: Keys tried, in order, when a rule inherits its ground.\nGROUND_KEYS = (\'panel_bg\', \'window_bg\', \'card_bg\')\n\n#: Declarations that are below the floor and are CORRECT ANYWAY, keyed by the\n#: declaration text rather than by line number -- an edit above a site shifts\n#: its line and would silently un-review it, while the declaration itself is\n#: stable. Same form as REVIEWED in tests/test_brand_contrast.py.\n#:\n#: An entry here is an exemption, so it has to earn its place twice: the\n#: reason must be true, and test_no_exemption_has_outlived_its_reason below\n#: fails when the site it names has stopped failing, so a fix cannot leave a\n#: licence standing behind it.\nACCEPTED: dict[str, str] = {}\n\n#: Below this, the sweep has stopped finding things and is passing for the\n#: wrong reason.\nMIN_RESOLVED = 20\n\n\ndef _luminance(value: str) -> float:\n    channels = [int(value.lstrip(\'#\')[i:i + 2], 16) / 255 for i in (0, 2, 4)]\n    channels = [c / 12.92 if c <= 0.03928 else ((c + 0.055) / 1.055) ** 2.4\n                for c in channels]\n    return 0.2126 * channels[0] + 0.7152 * channels[1] + 0.0722 * channels[2]\n\n\ndef _contrast(a: str, b: str) -> float:\n    high, low = sorted((_luminance(a), _luminance(b)), reverse=True)\n    return (high + 0.05) / (low + 0.05)\n\n\n#: Names that contain GOLD and are not a gold. GOLD_TEXT_GROUND_FLOOR is the\n#: light GROUND the gold family is calibrated against -- #e8e8e8 -- and a\n#: name-based sweep swept it into the family, after which every disabled\n#: control drawn on it was reported as gold-on-gold at 1.8960. Those pairs are\n#: real and already exempt as WCAG-exempt disabled text; they are not gold.\n#: Match what the name CLAIMS, not the substring it contains.\nNOT_A_GOLD = (\'GROUND\', \'FLOOR\', \'RGB\')\n\n\ndef _golds() -> set:\n    """Every gold-family value this app holds, by name rather than by list."""\n    out = set()\n    for name in dir(colors):\n        if \'GOLD\' not in name or any(w in name for w in NOT_A_GOLD):\n            continue\n        value = getattr(colors, name)\n        if isinstance(value, str) and HEX.match(value):\n            out.add(value.lower())\n    return out\n\n\ndef _fstrings(source: str):\n    """(lineno, text, local bindings) for every f-string mentioning a colour.\n\n    Read through ast.JoinedStr, NOT the token stream. Python 3.12 splits an\n    f-string into FSTRING_START/MIDDLE/END tokens (PEP 701) rather than one\n    STRING token, so a tokenising version finds every f-string on 3.11 and none\n    on 3.12 -- reporting zero sites, which reads as clean and is blind.\n    """\n    try:\n        tree = ast.parse(source)\n    except SyntaxError:\n        return []\n    out, seen = [], set()\n    scopes = [n for n in ast.walk(tree)\n              if isinstance(n, (ast.Module, ast.FunctionDef, ast.AsyncFunctionDef))]\n    for scope in scopes:\n        binds = {}\n        for node in ast.walk(scope):\n            if (isinstance(node, ast.Assign) and len(node.targets) == 1\n                    and isinstance(node.targets[0], ast.Name)):\n                try:\n                    binds[node.targets[0].id] = ast.unparse(node.value)\n                except Exception:\n                    continue\n        for node in ast.walk(scope):\n            if not isinstance(node, ast.JoinedStr):\n                continue\n            segment = ast.get_source_segment(source, node)\n            if not segment or \'color\' not in segment:\n                continue\n            key = (node.lineno, segment[:80])\n            if key in seen:\n                continue\n            seen.add(key)\n            out.append((node.lineno, segment, dict(binds)))\n    return out\n\n\ndef _resolve(expr: str, palette: dict, binds: dict):\n    expr = expr.strip()\n    match = BARE.match(expr)\n    if match and match.group(1) in binds:\n        expr = \'{\' + binds[match.group(1)] + \'}\'\n    if HEX.match(expr):\n        return expr.lower()\n    match = LOOKUP.match(expr) or GETLOOKUP.match(expr)\n    if match:\n        value = palette.get(match.group(2))\n        return value.lower() if isinstance(value, str) and HEX.match(value) else None\n    match = BARE.match(expr)\n    if match:\n        value = getattr(colors, match.group(1), None)\n        return value.lower() if isinstance(value, str) and HEX.match(value) else None\n    return None\n\n\ndef _modes_for(expr: str, binds: dict):\n    expr = expr.strip()\n    match = LOOKUP.match(expr) or GETLOOKUP.match(expr)\n    if not match:\n        return list(PALETTES)\n    bound = binds.get(match.group(1), \'\')\n    for mode, markers in MODE_MARKERS:\n        if any(marker in bound for marker in markers):\n            return [mode] if mode in PALETTES else []\n    return list(PALETTES)\n\n\n#: Rules whose background is what an unstyled child sits on.\nCONTAINER_SELECTORS = (\'body\', \'*\', \'QDialog\', \'QWidget\', \'QFrame\', \'QMainWindow\')\n\n\ndef _enclosing_ground(text: str, palette: dict, binds: dict):\n    """The ground an inheriting rule actually sits on: the background painted\n    by the container rule in the same stylesheet."""\n    for selector, body in BLOCK.findall(text):\n        name = \' \'.join(selector.split())\n        if not any(name == c or name.startswith(c + \' \') or name.startswith(c + \',\')\n                   for c in CONTAINER_SELECTORS):\n            continue\n        decl = BGDECL.search(body)\n        if decl:\n            resolved = _resolve(decl.group(1), palette, binds)\n            if resolved:\n                return resolved\n    return None\n\n\n#: Qt sub-controls that PAINT rather than draw text. A scrollbar handle, a\n#: progress-bar chunk and a checkbox indicator carry no label, so inheriting a\n#: foreground onto them invents a pairing that never renders.\n#:\n#: The first version of this sweep did exactly that and reported eleven\n#: failures in rnv-text-transformer -- APP_TEXT on the brand gold at 1.3616,\n#: on scrollbar handles and progress chunks. Every one impossible.\n#:\n#: Not every sub-control is textless: ::item, ::tab, ::section and ::title all\n#: draw labels, which is why this is a list and not a rule about `::`. The\n#: form and the first seven entries are taken from\n#: tests/test_contrast_pairs.py, which already had to make this distinction.\nTEXTLESS = (\'add-line\', \'add-page\', \'down-arrow\', \'down-button\', \'drop-down\', \'groove\', \'handle\', \'indicator\', \'scroller\', \'sub-line\', \'sub-page\', \'up-button\')\n\n\ndef _is_textless(selector: str) -> bool:\n    if \'::\' not in selector:\n        return False\n    part = selector.split(\'::\', 1)[1]\n    name = re.split(r\'[:\\[ ,]\', part)[0].strip()\n    return name in TEXTLESS\n\n\ndef _enclosing_label(text: str, palette: dict, binds: dict):\n    """The label an inheriting rule actually draws: the `color:` declared by\n    the container rule in the same stylesheet.\n\n    A fill rule often sets only a background -- `QPushButton:hover { background\n    -color: ... }` -- and the label comes from the base `QPushButton` rule.\n    Reading it is what makes the fill direction checkable at all: six of the\n    ten gold fills across these apps declare no colour of their own.\n    """\n    for selector, body in BLOCK.findall(text):\n        name = \' \'.join(selector.split())\n        if \':\' in name or \'::\' in name:\n            continue          # a state rule, not the base it inherits from\n        decl = DECL.search(body)\n        if decl:\n            resolved = _resolve(decl.group(1), palette, binds)\n            if resolved:\n                return resolved\n    return None\n\n\ndef _fill_sweep():\n    """(key, mode, label, fill, ratio, where) for every rule whose BACKGROUND\n    is a gold-family value, with the label drawn on it."""\n    rows, unresolved = [], 0\n    golds = _golds()\n    for path in sorted(ROOT.rglob(\'*.py\')):\n        if any(part in {\'.git\', \'tests\', \'build\'} for part in path.parts):\n            continue\n        if path.name == \'up.py\':\n            continue\n        source = path.read_text(encoding=\'utf-8-sig\', errors=\'replace\')\n        if \'background-color\' not in source:\n            continue\n        for lineno, text, binds in _fstrings(source):\n            for selector, body in BLOCK.findall(text):\n                bg_decl = BGDECL.search(body)\n                if not bg_decl:\n                    continue\n                fg_decl = DECL.search(body)\n                key = f\'{path.relative_to(ROOT)} :: {" ".join(bg_decl.group(0).split())}\'\n                modes = _modes_for(bg_decl.group(1), binds)\n                if fg_decl is not None:\n                    modes = [m for m in modes\n                             if m in _modes_for(fg_decl.group(1), binds)]\n                for mode in modes:\n                    palette = PALETTES[mode]\n                    fill = _resolve(bg_decl.group(1), palette, binds)\n                    if fill is None:\n                        unresolved += 1\n                        continue\n                    if fill not in golds:\n                        continue\n                    label = (_resolve(fg_decl.group(1), palette, binds)\n                             if fg_decl is not None else None)\n                    if label is None:\n                        if _is_textless(selector):\n                            # A painted sub-control. It has no label to\n                            # inherit, and giving it one manufactures a\n                            # failure that cannot render.\n                            continue\n                        label = _enclosing_label(text, palette, binds)\n                    if label is None:\n                        # No text is drawn here that this reader can find --\n                        # a checkbox indicator or a progress chunk. Counted,\n                        # not guessed at.\n                        unresolved += 1\n                        continue\n                    rows.append((key, mode, label, fill, _contrast(label, fill),\n                                 f\'{path.relative_to(ROOT)}:{lineno} \'\n                                 f\'{" ".join(selector.split())}\'))\n    return rows, unresolved\n\n\ndef _sweep():\n    """(key, mode, fg, bg, ratio, where) for every resolved gold-as-text pair,\n    plus the count of declarations that could not be resolved."""\n    rows, unresolved = [], 0\n    golds = _golds()\n    for path in sorted(ROOT.rglob(\'*.py\')):\n        if any(part in {\'.git\', \'tests\', \'build\'} for part in path.parts):\n            continue\n        if path.name == \'up.py\':\n            continue\n        source = path.read_text(encoding=\'utf-8-sig\', errors=\'replace\')\n        if \'color:\' not in source:\n            continue\n        for lineno, text, binds in _fstrings(source):\n            for selector, body in BLOCK.findall(text):\n                fg_decl = DECL.search(body)\n                if not fg_decl:\n                    continue\n                bg_decl = BGDECL.search(body)\n                key = f\'{path.relative_to(ROOT)} :: {" ".join(fg_decl.group(0).split())}\'\n                modes = _modes_for(fg_decl.group(1), binds)\n                if bg_decl is not None:\n                    modes = [m for m in modes\n                             if m in _modes_for(bg_decl.group(1), binds)]\n                for mode in modes:\n                    palette = PALETTES[mode]\n                    fg = _resolve(fg_decl.group(1), palette, binds)\n                    if fg is None:\n                        unresolved += 1\n                        continue\n                    if fg not in golds:\n                        continue\n                    bg = (_resolve(bg_decl.group(1), palette, binds)\n                          if bg_decl is not None else None)\n                    if bg is None:\n                        # INHERITANCE, in three steps, most specific first.\n                        # A rule with no ground of its own sits on whatever the\n                        # enclosing rule painted -- usually `body` or the\n                        # top-level widget in the SAME stylesheet. Reading that\n                        # is the difference between measuring what renders and\n                        # measuring a guess: rnv-text-transformer\'s exported\n                        # h1 inherits #ffffff from `body` and clears at 4.5429,\n                        # and a palette guess of #f5f5f5 scored it 4.1670 and\n                        # called it a failure.\n                        bg = _enclosing_ground(text, palette, binds)\n                    if bg is None:\n                        for candidate in GROUND_KEYS:\n                            value = palette.get(candidate)\n                            if isinstance(value, str) and HEX.match(value):\n                                bg = value.lower()\n                                break\n                    if bg is None:\n                        unresolved += 1\n                        continue\n                    rows.append((key, mode, fg, bg, _contrast(fg, bg),\n                                 f\'{path.relative_to(ROOT)}:{lineno} {" ".join(selector.split())}\'))\n    return rows, unresolved\n\n\n# ------------------------------------------------------------- guard the guard\n\ndef test_the_sweep_still_finds_things():\n    """Every assertion below reads this sweep. One that resolves nothing\n    reports no failures and passes -- which is what a blind check looks like\n    from the outside."""\n    rows, _ = _sweep()\n    assert len(rows) >= MIN_RESOLVED, (\n        f\'only {len(rows)} gold-as-text pairs resolved, expected at least \'\n        f\'{MIN_RESOLVED}. Either the QSS moved out of f-strings or the \'\n        f\'resolver stopped following it. A sweep that finds nothing is not a \'\n        f\'clean sweep.\')\n\n\ndef test_the_gold_family_is_not_empty():\n    """The sweep filters on this set. Empty, it matches nothing."""\n    golds = _golds()\n    assert len(golds) >= 3, f\'only {sorted(golds)} found as gold values\'\n\n\ndef test_the_two_golds_actually_differ_in_light():\n    """The premise of this whole file. If accent and accent_ink ever hold the\n    same value in light mode, the distinction it enforces has gone and the\n    tests below would pass without meaning anything."""\n    light = PALETTES.get(\'LIGHT\')\n    if light is None or \'accent\' not in light or \'accent_ink\' not in light:\n        pytest.skip(\'this app does not name accent and accent_ink\')\n    assert light[\'accent\'] != light[\'accent_ink\'], (\n        \'accent and accent_ink are the same value in light mode. In dark they \'\n        \'legitimately are; in light the whole point is that they are not.\')\n\n\n# ------------------------------------------------------------------- the floor\n\ndef test_no_gold_is_drawn_as_text_below_the_floor():\n    rows, _unresolved = _sweep()\n    failures = []\n    for key, mode, fg, bg, ratio, where in rows:\n        if ratio >= TEXT_FLOOR or key in ACCEPTED:\n            continue\n        failures.append(f\'{ratio:.4f}  {mode}  {fg} on {bg}  {where}\')\n    assert not failures, (\n        \'gold drawn as text below the 4.5 floor:\\n  \' + \'\\n  \'.join(sorted(failures))\n        + \'\\n\\nThe palette names a derivative for this: accent_ink. In dark it \'\n          \'is the same value as accent, which is why the difference only shows \'\n          \'in light.\')\n\n\ndef test_no_exemption_has_outlived_its_reason():\n    """An exemption whose site has stopped failing is a licence with no\n    subject -- it would let a future regression at the same declaration pass\n    unseen. Fixing a site means deleting its entry in the same commit."""\n    rows, _unresolved = _sweep()\n    failing = {key for key, _m, _f, _b, ratio, _w in rows if ratio < TEXT_FLOOR}\n    stale = sorted(set(ACCEPTED) - failing)\n    assert not stale, (\n        \'these ACCEPTED entries no longer describe a failing site:\\n  \'\n        + \'\\n  \'.join(stale)\n        + \'\\n\\nDelete the entry in the commit that fixed it.\')\n\n\n# ------------------------------------------------------- the other direction\n\ndef test_no_gold_fill_carries_a_label_below_the_floor():\n    """THE OTHER HALF OF THE RULE, and it is not symmetric.\n\n    rnv-brand rev 25 publishes it bidirectionally:\n\n        On a light ground, gold as TEXT is BRAND_DARK_GOLD_DEEP.\n        Gold as a FILL or an EDGE is BRAND_DARK_GOLD.\n\n    The second sentence is not politeness. BRAND_DARK_GOLD_DEEP is derived for\n    text and FAILS the fill job -- black on it reads 3.7806 against a 4.5\n    floor, where BRAND_DARK_GOLD reads 4.6226. So a sweep that replaced every\n    BRAND_DARK_GOLD with the derivative, reading the rule as "prefer DEEP",\n    would fix the text sites and break the fills.\n\n    Nothing fails this today, in any of the five applications. That is the\n    reason to arm it now: a guard proposed against a live defect writes\n    itself, and a guard proposed against a clean sweep gets harder to justify\n    every month the sweep stays clean.\n    """\n    rows, _unresolved = _fill_sweep()\n    failures = []\n    for key, mode, label, fill, ratio, where in rows:\n        if ratio >= TEXT_FLOOR or key in ACCEPTED:\n            continue\n        failures.append(f\'{ratio:.4f}  {mode}  {label} on {fill}  {where}\')\n    assert not failures, (\n        \'a label falls below the floor on a gold fill:\\n  \'\n        + \'\\n  \'.join(sorted(failures))\n        + \'\\n\\nA FILL takes BRAND_DARK_GOLD, not the text derivative. Black \'\n          \'on the derivative is 3.7806.\')\n\n\ndef test_the_fill_sweep_still_finds_things():\n    """Guard the guard, on the half with no failures. A sweep over a clean\n    codebase and a sweep that resolves nothing produce the same report, and\n    this is the only thing that tells them apart."""\n    rows, _unresolved = _fill_sweep()\n    assert rows, (\n        \'no gold fills resolved at all. Either this app draws none -- in \'\n        \'which case delete this test rather than leave it passing over \'\n        \'nothing -- or the resolver has stopped following the expressions \'\n        \'that reach them.\')\n\n\ndef test_every_textless_entry_is_a_real_sub_control():\n    """TEXTLESS is an exclusion list, so it is an exemption: an entry that\n    names nothing excludes nothing, and one that names a sub-control which\n    actually draws text excludes a site that should be checked.\n\n    Only the first half can be asserted -- that every entry appears as a\n    `::name` somewhere in this app\'s stylesheets. Whether a sub-control draws\n    text is a fact about Qt, not about this repository, and it lives in the\n    comment beside the list.\n    """\n    seen = set()\n    for path in ROOT.rglob(\'*.py\'):\n        if any(part in {\'.git\', \'build\'} for part in path.parts):\n            continue\n        source = path.read_text(encoding=\'utf-8-sig\', errors=\'replace\')\n        for match in re.finditer(r\'::([a-z][a-z-]*)\', source):\n            seen.add(match.group(1))\n    stale = [name for name in TEXTLESS if name not in seen]\n    assert not stale, (\n        f\'TEXTLESS names sub-controls this app never styles: {stale}. An \'\n        f\'exclusion that excludes nothing is a licence with no subject -- \'\n        f\'delete it, or find out why the sub-control went away.\')\n'
+GUARD_SOURCE = r'''"""The button keys say where the button lives.
+
+RNV-BUTTON-NAMING-GUARD
+
+main_btn_* is the main window at launch. dialog_btn_* is anything that opens
+later. This application had both schemes and both names -- and then bridged
+them with an alias, so that `theme['button_bg']` meant the MAIN scheme while
+`get_theme_colors()['button_bg']` meant the GOLD DIALOG one. Same key, two
+schemes, separated only by which function handed you the dict.
+
+The alias is gone. These tests are what stop it coming back.
+"""
+from __future__ import annotations
+
+import json
+import re
+from pathlib import Path
+
+ROOT = Path(__file__).resolve().parent.parent
+
+OLD_DIALOG = ("button_bg", "button_text", "button_hover_bg", "button_hover_text",
+              "button_pressed_bg", "button_pressed_text", "button_border",
+              "button_hover_border")
+OLD_ACCENT = ("accent_button_bg", "accent_button_text", "accent_button_border",
+              "accent_button_hover_bg", "accent_button_pressed_bg",
+              "accent_button_pressed_text")
+OLD = OLD_DIALOG + OLD_ACCENT
+NEW_DIALOG = tuple("dialog_btn_" + n[len("button_"):] for n in OLD_DIALOG)
+NEW_ACCENT = tuple("dialog_btn_accent_" + n[len("accent_button_"):]
+                   for n in OLD_ACCENT)
+
+PINNED_DIALOG = {
+    "dark": {"dialog_btn_bg": "#2a2a2a", "dialog_btn_text": "#dddddd",
+             "dialog_btn_hover_bg": "#3a3a3a", "dialog_btn_hover_text": "#d2bc93",
+             "dialog_btn_pressed_bg": "#d2bc93", "dialog_btn_pressed_text": "#000000",
+             "dialog_btn_border": "#333333", "dialog_btn_hover_border": "#d2bc93"},
+    "light": {"dialog_btn_bg": "#ffffff", "dialog_btn_text": "#000000",
+              "dialog_btn_hover_bg": "#eeeeee", "dialog_btn_hover_text": "#7e6529",
+              "dialog_btn_pressed_bg": "#8c7337", "dialog_btn_pressed_text": "#ffffff",
+              "dialog_btn_border": "#cccccc", "dialog_btn_hover_border": "#8c7337"},
+    "image": {"dialog_btn_bg": "#2a2a2a", "dialog_btn_text": "#dddddd",
+              "dialog_btn_hover_bg": "#3a3a3a", "dialog_btn_hover_text": "#d2bc93",
+              "dialog_btn_pressed_bg": "#d2bc93", "dialog_btn_pressed_text": "#000000",
+              "dialog_btn_border": "#333333", "dialog_btn_hover_border": "#d2bc93"},
+}
+
+PINNED_ACCENT = {
+    "dark": {"dialog_btn_accent_bg": "#2a2a2a", "dialog_btn_accent_text": "#d2bc93",
+             "dialog_btn_accent_border": "#d2bc93",
+             "dialog_btn_accent_hover_bg": "#333333",
+             "dialog_btn_accent_pressed_bg": "#d2bc93",
+             "dialog_btn_accent_pressed_text": "#000000"},
+    "light": {"dialog_btn_accent_bg": "#ffffff", "dialog_btn_accent_text": "#7e6529",
+              "dialog_btn_accent_border": "#8c7337",
+              "dialog_btn_accent_hover_bg": "#eeeeee",
+              "dialog_btn_accent_pressed_bg": "#8c7337",
+              "dialog_btn_accent_pressed_text": "#ffffff"},
+    "image": {"dialog_btn_accent_bg": "#2a2a2a", "dialog_btn_accent_text": "#d2bc93",
+              "dialog_btn_accent_border": "#d2bc93",
+              "dialog_btn_accent_hover_bg": "#333333",
+              "dialog_btn_accent_pressed_bg": "#d2bc93",
+              "dialog_btn_accent_pressed_text": "#000000"},
+}
+
+PINNED_MAIN = {
+    "dark": {"main_btn_bg": "#1a1a1a", "main_btn_text": "#dddddd",
+             "main_btn_border": "#333333", "main_btn_hover_bg": "#333333",
+             "main_btn_hover_text": "#dddddd", "main_btn_pressed_bg": "#444444",
+             "main_btn_pressed_text": "#000000"},
+    "light": {"main_btn_bg": "#ffffff", "main_btn_text": "#000000",
+              "main_btn_border": "#cccccc", "main_btn_hover_bg": "#333333",
+              "main_btn_hover_text": "#000000", "main_btn_pressed_bg": "#444444",
+              "main_btn_pressed_text": "#ffffff"},
+}
+
+SKIP = {".git", "build", "dist", ".venv", "__pycache__"}
+
+#: A sweep for a name cannot tell a USE from a MENTION. The two files certain
+#: to mention the old names are this guard -- which lists them in order to
+#: forbid them -- and the delivery script that performs the rename. Skipped by
+#: marker, not by filename: the script arrives under whatever name it is saved
+#: as.
+MARKERS = ("RNV-BUTTON-NAMING-GUARD", "RNV-BUTTON-NAMING-TOOL-DO-NOT-SWEEP")
+
+MAIN_WINDOW = "RNV_Icon_Builder.py"
+DIALOG_FILES = ("ui/settings_dialog.py", "ui/about_dialog.py",
+                "ui/base_dialog.py", "ui/context_preview.py",
+                "ui/ico_analyzer.py", "ui/preview_utils.py",
+                "utils/dialog_helper.py")
+
+
+def _palettes():
+    from ui.colors import (DARK_THEME_COLORS, LIGHT_THEME_COLORS,
+                           IMAGE_MODE_COLORS)
+    return {"dark": DARK_THEME_COLORS, "light": LIGHT_THEME_COLORS,
+            "image": IMAGE_MODE_COLORS}
+
+
+def _themes():
+    from ui.theme_manager import ThemeManager
+    return {"dark": ThemeManager.DARK_THEME, "light": ThemeManager.LIGHT_THEME}
+
+
+def _sources():
+    for path in sorted(ROOT.rglob("*")):
+        # Prose is not swept: documentation is updated in one pass after
+        # alignment settles, so it names the old keys until then.
+        if path.is_dir() or path.suffix not in (".py", ".json"):
+            continue
+        if any(part in SKIP for part in path.parts):
+            continue
+        text = path.read_text(encoding="utf-8-sig", errors="replace")
+        if any(marker in text for marker in MARKERS):
+            continue
+        yield path, text
+
+
+def test_no_old_button_key_name_survives():
+    offenders = []
+    for path, text in _sources():
+        for old in OLD:
+            if re.search(r"(['\"])" + old + r"\1", text):
+                offenders.append(f"{path.relative_to(ROOT)}: {old}")
+    assert not offenders, (
+        "these keys must say where the button lives:\n  " + "\n  ".join(offenders))
+
+
+def test_the_marker_exemption_covers_only_the_two_tools():
+    marked = []
+    for path in sorted(ROOT.rglob("*.py")):
+        if any(part in SKIP for part in path.parts):
+            continue
+        text = path.read_text(encoding="utf-8-sig", errors="replace")
+        if any(marker in text for marker in MARKERS):
+            marked.append(path.relative_to(ROOT))
+    assert len(marked) <= 2, f"unexpected marked file(s): {marked}"
+    assert Path(__file__).relative_to(ROOT) in marked
+
+
+def test_all_three_palettes_carry_both_dialog_families():
+    for mode, palette in _palettes().items():
+        missing = [n for n in NEW_DIALOG + NEW_ACCENT if n not in palette]
+        assert not missing, f"{mode} palette missing {missing}"
+
+
+def test_the_rename_moved_no_dialog_value():
+    for mode, pins in PINNED_DIALOG.items():
+        actual = {k: _palettes()[mode].get(k) for k in pins}
+        assert actual == pins, (
+            f"the {mode} dialog button values changed.\n"
+            f"  wanted {pins}\n  found  {actual}\n"
+            "A rename that changes a value is not a rename.")
+
+
+def test_the_rename_moved_no_accent_value():
+    for mode, pins in PINNED_ACCENT.items():
+        actual = {k: _palettes()[mode].get(k) for k in pins}
+        assert actual == pins, (
+            f"the {mode} accent button values changed.\n"
+            f"  wanted {pins}\n  found  {actual}")
+
+
+def test_the_main_family_is_untouched():
+    for mode, pins in PINNED_MAIN.items():
+        actual = {k: _palettes()[mode].get(k) for k in pins}
+        assert actual == pins, (
+            f"the {mode} main button values changed. This pass renames the "
+            f"DIALOG families and must not reach the main window.\n"
+            f"  wanted {pins}\n  found  {actual}")
+
+
+def test_the_theme_dict_no_longer_renames_the_main_family():
+    """The alias is the defect this pass exists to remove.
+
+    ThemeManager used to publish the main button values under button_* names,
+    which is how one key name came to mean two schemes inside one application.
+    The theme dict now passes them through under the names they already have.
+    """
+    for mode, theme in _themes().items():
+        for key in PINNED_MAIN[mode]:
+            if key == "main_btn_border":
+                continue  # published as border_color, a separate legacy alias
+            assert key in theme, f"{mode} theme lost {key}"
+            assert theme[key] == PINNED_MAIN[mode][key], (
+                f"{mode} theme's {key} is {theme[key]}, not "
+                f"{PINNED_MAIN[mode][key]}")
+        for old in OLD_DIALOG:
+            assert old not in theme, (
+                f"{mode} theme republished {old}. That alias is what made one "
+                f"key name mean the main scheme here and the gold dialog "
+                f"scheme in get_theme_colors().")
+
+
+def test_the_main_window_reads_the_main_family():
+    src = (ROOT / MAIN_WINDOW).read_text(encoding="utf-8-sig")
+    assert "theme['main_btn_bg']" in src, (
+        f"{MAIN_WINDOW} no longer reads the main family from its theme dict")
+
+
+def test_dialogs_read_a_dialog_family():
+    for rel in DIALOG_FILES:
+        src = (ROOT / rel).read_text(encoding="utf-8-sig")
+        assert "dialog_btn_" in src, f"{rel} no longer reads a dialog family"
+
+
+def test_the_snapshot_key_lists_are_still_sorted():
+    """The rename moves fourteen names in each list; leaving them where they
+    were would fail the next snapshot run with a diff that reads like a
+    regression."""
+    data = json.loads((ROOT / "tests" / "snapshots.json").read_text(encoding="utf-8"))
+    for name, value in data.items():
+        if not name.endswith("_keys") or not isinstance(value, list):
+            continue
+        assert value == sorted(value), f"{name} is no longer sorted"
+        for old in OLD:
+            assert old not in value, f"{name} still carries {old}"
+
+
+def test_the_two_schemes_are_still_different():
+    """The main button is black-and-white with an inverting transition; the
+    dialog button is gold. If they ever converge the naming carries nothing."""
+    for mode, palette in _palettes().items():
+        assert palette["main_btn_pressed_bg"] != palette["dialog_btn_pressed_bg"], (
+            f"{mode}: the main and dialog pressed plates now hold the same "
+            f"value ({palette['main_btn_pressed_bg']}). Two families holding "
+            f"one scheme is one family with extra steps.")
+'''
 
 
 # ------------------------------------------------------------------ plumbing
