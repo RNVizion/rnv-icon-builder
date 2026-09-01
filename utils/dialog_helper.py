@@ -112,21 +112,21 @@ class DialogHelper:
                 font-size: 12px;
             }}
             QPushButton {{
-                background-color: {c['button_bg']};
-                color: {c['button_text']};
-                border: 1px solid {c['button_border']};
+                background-color: {c['dialog_btn_bg']};
+                color: {c['dialog_btn_text']};
+                border: 1px solid {c['dialog_btn_border']};
                 padding: 6px 16px;
                 border-radius: 4px;
                 min-width: 60px;
             }}
             QPushButton:hover {{
-                background-color: {c['button_hover_bg']};
-                color: {c['button_hover_text']};
+                background-color: {c['dialog_btn_hover_bg']};
+                color: {c['dialog_btn_hover_text']};
                 border-color: {c['border_focus']};
             }}
             QPushButton:pressed {{
-                background-color: {c['button_pressed_bg']};
-                color: {c['button_pressed_text']};
+                background-color: {c['dialog_btn_pressed_bg']};
+                color: {c['dialog_btn_pressed_text']};
             }}
             QPushButton:default {{
                 border: 2px solid {c['border_focus']};
@@ -158,21 +158,21 @@ class DialogHelper:
                 font-size: 12px;
             }}
             QPushButton {{
-                background-color: {c['button_bg']};
-                color: {c['button_text']};
-                border: 1px solid {c['button_border']};
+                background-color: {c['dialog_btn_bg']};
+                color: {c['dialog_btn_text']};
+                border: 1px solid {c['dialog_btn_border']};
                 padding: 6px 16px;
                 border-radius: 4px;
                 min-width: 60px;
             }}
             QPushButton:hover {{
-                background-color: {c['button_hover_bg']};
-                color: {c['button_hover_text']};
+                background-color: {c['dialog_btn_hover_bg']};
+                color: {c['dialog_btn_hover_text']};
                 border-color: {c['border_focus']};
             }}
             QPushButton:pressed {{
-                background-color: {c['button_pressed_bg']};
-                color: {c['button_pressed_text']};
+                background-color: {c['dialog_btn_pressed_bg']};
+                color: {c['dialog_btn_pressed_text']};
             }}
             QPushButton:default {{
                 border: 2px solid {c['border_focus']};

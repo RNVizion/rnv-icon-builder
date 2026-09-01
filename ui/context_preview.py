@@ -727,20 +727,20 @@ class ContextPreviewDialog(BaseDialog):
                 color: {colors['text_primary']};
             }}
             QPushButton {{
-                background-color: {colors['button_bg']};
-                color: {colors['button_text']};
-                border: 1px solid {colors['button_border']};
+                background-color: {colors['dialog_btn_bg']};
+                color: {colors['dialog_btn_text']};
+                border: 1px solid {colors['dialog_btn_border']};
                 border-radius: 4px;
                 padding: 6px 15px;
             }}
             QPushButton:hover {{
-                background-color: {colors['button_hover_bg']};
-                color: {colors['button_hover_text']};
+                background-color: {colors['dialog_btn_hover_bg']};
+                color: {colors['dialog_btn_hover_text']};
                 border-color: {accent};
             }}
             QPushButton:pressed {{
                 background-color: {accent};
-                color: {colors['button_pressed_text']};
+                color: {colors['dialog_btn_pressed_text']};
             }}
             QTabWidget::pane {{
                 border: 1px solid {colors['border_default']};

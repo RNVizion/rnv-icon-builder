@@ -262,21 +262,21 @@ class ThemedDialog(BaseDialog):
                 color: {theme['text_primary']};
             }}
             QPushButton {{
-                background-color: {theme['button_bg']};
-                color: {theme['button_text']};
+                background-color: {theme['dialog_btn_bg']};
+                color: {theme['dialog_btn_text']};
                 border: 1px solid {theme['border_default']};
                 padding: 6px 16px;
                 border-radius: 4px;
                 min-width: 60px;
             }}
             QPushButton:hover {{
-                background-color: {theme['button_hover_bg']};
-                color: {theme['button_hover_text']};
+                background-color: {theme['dialog_btn_hover_bg']};
+                color: {theme['dialog_btn_hover_text']};
                 border-color: {accent};
             }}
             QPushButton:pressed {{
                 background-color: {accent};
-                color: {theme['button_pressed_text']};
+                color: {theme['dialog_btn_pressed_text']};
             }}
             QGroupBox {{
                 color: {theme['text_primary']};

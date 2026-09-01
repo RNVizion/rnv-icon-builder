@@ -228,8 +228,9 @@ class TestColors(unittest.TestCase):
         'text_primary', 'text_secondary', 'text_muted', 'text_disabled',
         'text_accent', 'text_on_accent',
         'border_default', 'border_focus', 'border_hover',
-        'button_bg', 'button_text', 'button_hover_bg', 'button_pressed_bg',
-        'button_pressed_text', 'button_border',
+        'dialog_btn_bg', 'dialog_btn_text', 'dialog_btn_hover_bg',
+        'dialog_btn_pressed_bg', 'dialog_btn_pressed_text',
+        'dialog_btn_border',
         'main_btn_bg', 'main_btn_text', 'main_btn_border',
         'main_btn_hover_bg', 'main_btn_hover_text',
         'main_btn_pressed_bg', 'main_btn_pressed_text',
@@ -329,8 +330,8 @@ class TestThemeManager(unittest.TestCase):
         self.tm = ThemeManager()
 
     _REQUIRED_KEYS = ['name', 'window_bg', 'text_color', 'border_color',
-                      'button_bg', 'button_text', 'button_hover_bg',
-                      'button_pressed_bg', 'button_pressed_text']
+                      'main_btn_bg', 'main_btn_text', 'main_btn_hover_bg',
+                      'main_btn_pressed_bg', 'main_btn_pressed_text']
 
     def _assert_keys(self, theme, label):
         for k in self._REQUIRED_KEYS:
@@ -440,13 +441,13 @@ class TestThemeManager(unittest.TestCase):
 
     def test_main_btn_hover_bg_is_from_inverse_system(self):
         # ThemeManager should NOT expose brand gold as button hover bg
-        self.assertNotIn(BRAND_GOLD.lower(), self.tm.DARK_THEME.get('button_hover_bg', '').lower())
+        self.assertNotIn(BRAND_GOLD.lower(), self.tm.DARK_THEME.get('main_btn_hover_bg', '').lower())
 
     def test_dark_theme_main_btn_pressed_text_is_black(self):
-        self.assertEqual(self.tm.DARK_THEME['button_pressed_text'], '#000000')
+        self.assertEqual(self.tm.DARK_THEME['main_btn_pressed_text'], '#000000')
 
     def test_light_theme_main_btn_pressed_text_is_white(self):
-        self.assertEqual(self.tm.LIGHT_THEME['button_pressed_text'], '#ffffff')
+        self.assertEqual(self.tm.LIGHT_THEME['main_btn_pressed_text'], '#ffffff')
 
 
 # ══════════════════════════════════════════════════════════════════════════════
@@ -1644,7 +1645,7 @@ class TestEdgeCases(unittest.TestCase):
         """ThemeManager should expose inverse colors, not brand gold, for main buttons."""
         tm = ThemeManager()
         self.assertNotIn(BRAND_GOLD.lower(),
-                         tm.DARK_THEME.get('button_hover_bg', '').lower())
+                         tm.DARK_THEME.get('main_btn_hover_bg', '').lower())
 
     # ── Preview utils ──────────────────────────────────────────────────────────
     def test_checkerboard_two_pixel_colors_differ(self):
@@ -3126,9 +3127,9 @@ class TestFinalIntegration(unittest.TestCase):
     def test_colors_consistency_no_hardcoded_gold_in_theme_manager(self):
         """ThemeManager main button hover must use inverse system, not brand gold."""
         tm = ThemeManager()
-        dark_hover = tm.DARK_THEME.get('button_hover_bg', '')
+        dark_hover = tm.DARK_THEME.get('main_btn_hover_bg', '')
         self.assertNotEqual(dark_hover.lower(), BRAND_GOLD.lower())
-        light_hover = tm.LIGHT_THEME.get('button_hover_bg', '')
+        light_hover = tm.LIGHT_THEME.get('main_btn_hover_bg', '')
         self.assertNotEqual(light_hover.lower(), BRAND_DARK_GOLD.lower())
 
     def test_session_and_export_history_independent(self):

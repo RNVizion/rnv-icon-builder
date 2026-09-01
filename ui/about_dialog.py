@@ -586,21 +586,21 @@ Crafted pixel by pixel for developers and designers<br>
                 background-color: transparent;
             }}
             QPushButton {{
-                background-color: {c['button_bg']};
-                color: {c['button_text']};
-                border: 1px solid {c['button_border']};
+                background-color: {c['dialog_btn_bg']};
+                color: {c['dialog_btn_text']};
+                border: 1px solid {c['dialog_btn_border']};
                 border-radius: 4px;
                 padding: 8px 16px;
                 font-weight: bold;
             }}
             QPushButton:hover {{
-                background-color: {c['button_hover_bg']};
+                background-color: {c['dialog_btn_hover_bg']};
                 border-color: {c['border_focus']};
-                color: {c['button_hover_text']};
+                color: {c['dialog_btn_hover_text']};
             }}
             QPushButton:pressed {{
-                background-color: {c['button_pressed_bg']};
-                color: {c['button_pressed_text']};
+                background-color: {c['dialog_btn_pressed_bg']};
+                color: {c['dialog_btn_pressed_text']};
             }}
         """)
     

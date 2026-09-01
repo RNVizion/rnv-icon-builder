@@ -407,23 +407,23 @@ class IcoAnalyzerDialog(BaseDialog):
             }}
 
             QPushButton {{
-                background-color: {c['button_bg']};
-                color: {c['button_text']};
-                border: 1px solid {c['button_border']};
+                background-color: {c['dialog_btn_bg']};
+                color: {c['dialog_btn_text']};
+                border: 1px solid {c['dialog_btn_border']};
                 padding: 8px 16px;
                 border-radius: 4px;
                 font-weight: bold;
             }}
 
             QPushButton:hover {{
-                background-color: {c['button_hover_bg']};
-                color: {c['button_hover_text']};
+                background-color: {c['dialog_btn_hover_bg']};
+                color: {c['dialog_btn_hover_text']};
                 border-color: {c['border_focus']};
             }}
 
             QPushButton:pressed {{
-                background-color: {c['button_pressed_bg']};
-                color: {c['button_pressed_text']};
+                background-color: {c['dialog_btn_pressed_bg']};
+                color: {c['dialog_btn_pressed_text']};
             }}
 
             QPushButton:disabled {{
@@ -433,20 +433,20 @@ class IcoAnalyzerDialog(BaseDialog):
             }}
 
             QPushButton[objectName="extract_btn"] {{
-                background-color: {c['accent_button_bg']};
-                color: {c['accent_button_text']};
-                border: 1px solid {c['accent_button_border']};
+                background-color: {c['dialog_btn_accent_bg']};
+                color: {c['dialog_btn_accent_text']};
+                border: 1px solid {c['dialog_btn_accent_border']};
             }}
 
             QPushButton[objectName="extract_btn"]:hover {{
-                background-color: {c['accent_button_hover_bg']};
-                color: {c['accent_button_text']};
-                border-color: {c['accent_button_border']};
+                background-color: {c['dialog_btn_accent_hover_bg']};
+                color: {c['dialog_btn_accent_text']};
+                border-color: {c['dialog_btn_accent_border']};
             }}
 
             QPushButton[objectName="extract_btn"]:pressed {{
-                background-color: {c['accent_button_pressed_bg']};
-                color: {c['accent_button_pressed_text']};
+                background-color: {c['dialog_btn_accent_pressed_bg']};
+                color: {c['dialog_btn_accent_pressed_text']};
             }}
 
             QPushButton[objectName="extract_btn"]:disabled {{

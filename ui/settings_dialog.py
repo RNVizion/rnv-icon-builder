@@ -2066,33 +2066,33 @@ class SettingsDialog(BaseDialog):
             
             /* Buttons - Gold hover */
             QPushButton {{
-                background-color: {c['button_bg']};
-                color: {c['button_text']};
-                border: 1px solid {c['button_border']};
+                background-color: {c['dialog_btn_bg']};
+                color: {c['dialog_btn_text']};
+                border: 1px solid {c['dialog_btn_border']};
                 border-radius: 4px;
                 padding: 8px 16px;
                 font-weight: normal;
             }}
             
             QPushButton:hover {{
-                background-color: {c['button_hover_bg']};
-                border-color: {c['button_hover_border']};
-                color: {c['button_hover_text']};
+                background-color: {c['dialog_btn_hover_bg']};
+                border-color: {c['dialog_btn_hover_border']};
+                color: {c['dialog_btn_hover_text']};
             }}
             
             QPushButton:pressed {{
-                background-color: {c['button_pressed_bg']};
-                border-color: {c['button_pressed_bg']};
-                color: {c['button_pressed_text']};
+                background-color: {c['dialog_btn_pressed_bg']};
+                border-color: {c['dialog_btn_pressed_bg']};
+                color: {c['dialog_btn_pressed_text']};
             }}
             
             /* Accent buttons (Export PNG, Analyzer, ICNS Export) */
             QPushButton[objectName="export_png_btn"],
             QPushButton[objectName="analyzer_btn"],
             QPushButton[objectName="export_icns_btn"] {{
-                background-color: {c['accent_button_bg']};
-                color: {c['accent_button_text']};
-                border: 1px solid {c['accent_button_border']};
+                background-color: {c['dialog_btn_accent_bg']};
+                color: {c['dialog_btn_accent_text']};
+                border: 1px solid {c['dialog_btn_accent_border']};
                 padding: 10px 20px;
                 font-weight: bold;
             }}
@@ -2100,23 +2100,23 @@ class SettingsDialog(BaseDialog):
             QPushButton[objectName="export_png_btn"]:hover,
             QPushButton[objectName="analyzer_btn"]:hover,
             QPushButton[objectName="export_icns_btn"]:hover {{
-                background-color: {c['accent_button_hover_bg']};
-                color: {c['accent_button_text']};
-                border-color: {c['accent_button_border']};
+                background-color: {c['dialog_btn_accent_hover_bg']};
+                color: {c['dialog_btn_accent_text']};
+                border-color: {c['dialog_btn_accent_border']};
             }}
             
             QPushButton[objectName="export_png_btn"]:pressed,
             QPushButton[objectName="analyzer_btn"]:pressed,
             QPushButton[objectName="export_icns_btn"]:pressed {{
-                background-color: {c['accent_button_pressed_bg']};
-                color: {c['accent_button_pressed_text']};
+                background-color: {c['dialog_btn_accent_pressed_bg']};
+                color: {c['dialog_btn_accent_pressed_text']};
             }}
             
             /* Platform Export buttons */
             QPushButton[objectName="platform_btn"] {{
                 background-color: {c['platform_btn_bg']};
-                color: {c['accent_button_text']};
-                border: 1px solid {c['button_border']};
+                color: {c['dialog_btn_accent_text']};
+                border: 1px solid {c['dialog_btn_border']};
                 padding: 8px 16px;
                 font-weight: bold;
                 text-align: left;
@@ -2124,13 +2124,13 @@ class SettingsDialog(BaseDialog):
             
             QPushButton[objectName="platform_btn"]:hover {{
                 background-color: {c['platform_btn_hover_bg']};
-                color: {c['accent_button_text']};
-                border-color: {c['button_hover_border']};
+                color: {c['dialog_btn_accent_text']};
+                border-color: {c['dialog_btn_hover_border']};
             }}
             
             QPushButton[objectName="platform_btn"]:pressed {{
-                background-color: {c['button_pressed_bg']};
-                color: {c['accent_button_pressed_text']};
+                background-color: {c['dialog_btn_pressed_bg']};
+                color: {c['dialog_btn_accent_pressed_text']};
             }}
             
             /* File size estimate label */
@@ -2290,9 +2290,9 @@ class SettingsDialog(BaseDialog):
             
             /* Slider styling for Adjust tab */
             QSlider::groove:horizontal {{
-                border: 1px solid {c['button_border']};
+                border: 1px solid {c['dialog_btn_border']};
                 height: 6px;
-                background: {c['button_bg']};
+                background: {c['dialog_btn_bg']};
                 border-radius: 3px;
             }}
             
@@ -2305,7 +2305,7 @@ class SettingsDialog(BaseDialog):
             }}
             
             QSlider::handle:horizontal:hover {{
-                background: {c['accent_button_border']};
+                background: {c['dialog_btn_accent_border']};
             }}
             
             QSlider::sub-page:horizontal {{
@@ -2315,42 +2315,42 @@ class SettingsDialog(BaseDialog):
             
             /* Action buttons in Adjust tab */
             QPushButton[objectName="action_btn"] {{
-                background-color: {c['accent_button_bg']};
-                color: {c['accent_button_text']};
-                border: 1px solid {c['accent_button_border']};
+                background-color: {c['dialog_btn_accent_bg']};
+                color: {c['dialog_btn_accent_text']};
+                border: 1px solid {c['dialog_btn_accent_border']};
                 padding: 10px 20px;
                 font-weight: bold;
             }}
             
             QPushButton[objectName="action_btn"]:hover {{
-                background-color: {c['accent_button_hover_bg']};
-                color: {c['accent_button_text']};
-                border-color: {c['accent_button_border']};
+                background-color: {c['dialog_btn_accent_hover_bg']};
+                color: {c['dialog_btn_accent_text']};
+                border-color: {c['dialog_btn_accent_border']};
             }}
             
             QPushButton[objectName="action_btn"]:pressed {{
-                background-color: {c['accent_button_pressed_bg']};
-                color: {c['accent_button_pressed_text']};
+                background-color: {c['dialog_btn_accent_pressed_bg']};
+                color: {c['dialog_btn_accent_pressed_text']};
             }}
             
             /* Small buttons in Adjust tab */
             QPushButton[objectName="small_btn"] {{
-                background-color: {c['button_bg']};
-                color: {c['button_text']};
-                border: 1px solid {c['button_border']};
+                background-color: {c['dialog_btn_bg']};
+                color: {c['dialog_btn_text']};
+                border: 1px solid {c['dialog_btn_border']};
                 padding: 5px 12px;
                 border-radius: 3px;
                 font-size: 11px;
             }}
             
             QPushButton[objectName="small_btn"]:hover {{
-                background-color: {c['button_hover_bg']};
+                background-color: {c['dialog_btn_hover_bg']};
                 border-color: {c['border_focus']};
-                color: {c['button_hover_text']};
+                color: {c['dialog_btn_hover_text']};
             }}
             
             QPushButton[objectName="small_btn"]:pressed {{
-                background-color: {c['button_pressed_bg']};
+                background-color: {c['dialog_btn_pressed_bg']};
                 color: {c['text_on_accent']};
             }}
             
@@ -2387,22 +2387,22 @@ class SettingsDialog(BaseDialog):
             /* Clear history buttons */
             QPushButton[objectName="clear_btn"] {{
                 background-color: {c['clear_btn_bg']};
-                color: {c['button_text']};
+                color: {c['dialog_btn_text']};
                 border: 1px solid {c['input_border']};
                 padding: 6px 12px;
                 font-size: 11px;
             }}
             
             QPushButton[objectName="clear_btn"]:hover {{
-                background-color: {c['button_hover_bg']};
-                color: {c['button_hover_text']};
+                background-color: {c['dialog_btn_hover_bg']};
+                color: {c['dialog_btn_hover_text']};
                 border-color: {c['border_focus']};
             }}
             
             QPushButton[objectName="clear_btn"]:pressed {{
-                background-color: {c['button_pressed_bg']};
+                background-color: {c['dialog_btn_pressed_bg']};
                 color: {c['text_on_accent']};
-                border-color: {c['button_pressed_bg']};
+                border-color: {c['dialog_btn_pressed_bg']};
             }}
         """
 

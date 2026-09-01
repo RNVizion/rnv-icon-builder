@@ -3401,20 +3401,20 @@ class IconBuilderApp(QMainWindow):
                 color: {theme['text_color']};
             }}
             QPushButton {{
-                background-color: {theme['button_bg']};
-                color: {theme['button_text']};
+                background-color: {theme['main_btn_bg']};
+                color: {theme['main_btn_text']};
                 border: 1px solid {theme['border_color']};
                 padding: 8px 16px;
                 border-radius: 4px;
                 font-weight: bold;
             }}
             QPushButton:hover {{
-                background-color: {theme['button_hover_bg']};
-                color: {theme['button_hover_text']};
+                background-color: {theme['main_btn_hover_bg']};
+                color: {theme['main_btn_hover_text']};
             }}
             QPushButton:pressed {{
-                background-color: {theme['button_pressed_bg']};
-                color: {theme['button_pressed_text']};
+                background-color: {theme['main_btn_pressed_bg']};
+                color: {theme['main_btn_pressed_text']};
             }}
             QCheckBox {{
                 color: {theme['text_color']};
@@ -3488,20 +3488,20 @@ class IconBuilderApp(QMainWindow):
         """
         self.theme_button.setStyleSheet(f"""
             QPushButton {{
-                background-color: {theme['button_bg']};
-                color: {theme['button_text']};
+                background-color: {theme['main_btn_bg']};
+                color: {theme['main_btn_text']};
                 border: 1px solid {theme['border_color']};
                 padding: 6px 10px;
                 border-radius: 4px;
                 font-weight: bold;
             }}
             QPushButton:hover {{
-                background-color: {theme['button_hover_bg']};
-                color: {theme['button_hover_text']};
+                background-color: {theme['main_btn_hover_bg']};
+                color: {theme['main_btn_hover_text']};
             }}
             QPushButton:pressed {{
-                background-color: {theme['button_pressed_bg']};
-                color: {theme['button_pressed_text']};
+                background-color: {theme['main_btn_pressed_bg']};
+                color: {theme['main_btn_pressed_text']};
             }}
         """)
     

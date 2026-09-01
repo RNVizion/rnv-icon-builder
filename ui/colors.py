@@ -197,14 +197,14 @@ DARK_THEME_COLORS: Final[dict[str, str]] = {
     'input_border': APP_BORDER,
     
     # Button colors (dialog buttons - gold accent system)
-    'button_bg': APP_CARD,
-    'button_hover_bg': APP_PANEL_HOVER,
-    'button_pressed_bg': BRAND_GOLD,
-    'button_text': APP_TEXT,
-    'button_hover_text': BRAND_GOLD,
-    'button_pressed_text': TRUE_BLACK,
-    'button_border': APP_BORDER,
-    'button_hover_border': BRAND_GOLD,
+    'dialog_btn_bg': APP_CARD,
+    'dialog_btn_hover_bg': APP_PANEL_HOVER,
+    'dialog_btn_pressed_bg': BRAND_GOLD,
+    'dialog_btn_text': APP_TEXT,
+    'dialog_btn_hover_text': BRAND_GOLD,
+    'dialog_btn_pressed_text': TRUE_BLACK,
+    'dialog_btn_border': APP_BORDER,
+    'dialog_btn_hover_border': BRAND_GOLD,
 
     # Main window buttons - color inverse system (no brand gold)
     # Dark: rest=#1a1a1a bg / hover=#333333 bg / pressed=#444444 bg
@@ -217,12 +217,12 @@ DARK_THEME_COLORS: Final[dict[str, str]] = {
     'main_btn_pressed_text': TRUE_BLACK,
 
     # Accent button (gold border)
-    'accent_button_bg': APP_CARD,
-    'accent_button_text': BRAND_GOLD,
-    'accent_button_border': BRAND_GOLD,
-    'accent_button_hover_bg': APP_BORDER,
-    'accent_button_pressed_bg': BRAND_GOLD,
-    'accent_button_pressed_text': TRUE_BLACK,
+    'dialog_btn_accent_bg': APP_CARD,
+    'dialog_btn_accent_text': BRAND_GOLD,
+    'dialog_btn_accent_border': BRAND_GOLD,
+    'dialog_btn_accent_hover_bg': APP_BORDER,
+    'dialog_btn_accent_pressed_bg': BRAND_GOLD,
+    'dialog_btn_accent_pressed_text': TRUE_BLACK,
     
     # Platform button
     'platform_btn_bg': '#252525',
@@ -311,14 +311,14 @@ LIGHT_THEME_COLORS: Final[dict[str, str]] = {
     'input_border': '#cccccc',
     
     # Button colors (dialog buttons - gold accent system)
-    'button_bg': '#ffffff',
-    'button_hover_bg': APP_HOVER_LIGHT,
-    'button_pressed_bg': BRAND_DARK_GOLD,
-    'button_text': '#000000',
-    'button_hover_text': BRAND_DARK_GOLD_DEEP,
-    'button_pressed_text': '#ffffff',
-    'button_border': '#cccccc',
-    'button_hover_border': BRAND_DARK_GOLD,
+    'dialog_btn_bg': '#ffffff',
+    'dialog_btn_hover_bg': APP_HOVER_LIGHT,
+    'dialog_btn_pressed_bg': BRAND_DARK_GOLD,
+    'dialog_btn_text': '#000000',
+    'dialog_btn_hover_text': BRAND_DARK_GOLD_DEEP,
+    'dialog_btn_pressed_text': '#ffffff',
+    'dialog_btn_border': '#cccccc',
+    'dialog_btn_hover_border': BRAND_DARK_GOLD,
 
     # Main window buttons - color inverse system (no brand gold)
     # Light: rest=#ffffff bg / hover=#333333 bg / pressed=#444444 bg
@@ -331,12 +331,12 @@ LIGHT_THEME_COLORS: Final[dict[str, str]] = {
     'main_btn_pressed_text': '#ffffff',
 
     # Accent button (gold border)
-    'accent_button_bg': '#ffffff',
-    'accent_button_text': BRAND_DARK_GOLD_DEEP,
-    'accent_button_border': BRAND_DARK_GOLD,
-    'accent_button_hover_bg': APP_HOVER_LIGHT,
-    'accent_button_pressed_bg': BRAND_DARK_GOLD,
-    'accent_button_pressed_text': '#ffffff',
+    'dialog_btn_accent_bg': '#ffffff',
+    'dialog_btn_accent_text': BRAND_DARK_GOLD_DEEP,
+    'dialog_btn_accent_border': BRAND_DARK_GOLD,
+    'dialog_btn_accent_hover_bg': APP_HOVER_LIGHT,
+    'dialog_btn_accent_pressed_bg': BRAND_DARK_GOLD,
+    'dialog_btn_accent_pressed_text': '#ffffff',
     
     # Platform button
     'platform_btn_bg': '#fafafa',

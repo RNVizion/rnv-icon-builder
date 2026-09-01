@@ -65,14 +65,14 @@ class ThemeManager:
         **{k: DARK_THEME_COLORS[k] for k in (
             'window_bg', 'text_primary', 'border_default', 'hover_bg',
             'checkbox_bg', 'checkbox_border',
+            # The main window's buttons, passed through under the names
+            # they already have. Until 2026-09-01 these six were republished
+            # as button_* -- which is how one key name came to mean the main
+            # scheme here and the gold dialog scheme in get_theme_colors().
+            'main_btn_bg', 'main_btn_text', 'main_btn_hover_bg',
+            'main_btn_hover_text', 'main_btn_pressed_bg',
+            'main_btn_pressed_text',
         )},
-        # Main window buttons use inverse system — see colors.py main_btn_* keys
-        'button_bg': DARK_THEME_COLORS['main_btn_bg'],
-        'button_text': DARK_THEME_COLORS['main_btn_text'],
-        'button_hover_bg': DARK_THEME_COLORS['main_btn_hover_bg'],
-        'button_hover_text': DARK_THEME_COLORS['main_btn_hover_text'],
-        'button_pressed_bg': DARK_THEME_COLORS['main_btn_pressed_bg'],
-        'button_pressed_text': DARK_THEME_COLORS['main_btn_pressed_text'],
         # Legacy key aliases kept for backward-compatibility
         'text_color': DARK_THEME_COLORS['text_primary'],
         'border_color': DARK_THEME_COLORS['main_btn_border'],
@@ -84,14 +84,14 @@ class ThemeManager:
         **{k: LIGHT_THEME_COLORS[k] for k in (
             'window_bg', 'text_primary', 'border_default', 'hover_bg',
             'checkbox_bg', 'checkbox_border',
+            # The main window's buttons, passed through under the names
+            # they already have. Until 2026-09-01 these six were republished
+            # as button_* -- which is how one key name came to mean the main
+            # scheme here and the gold dialog scheme in get_theme_colors().
+            'main_btn_bg', 'main_btn_text', 'main_btn_hover_bg',
+            'main_btn_hover_text', 'main_btn_pressed_bg',
+            'main_btn_pressed_text',
         )},
-        # Main window buttons use inverse system — see colors.py main_btn_* keys
-        'button_bg': LIGHT_THEME_COLORS['main_btn_bg'],
-        'button_text': LIGHT_THEME_COLORS['main_btn_text'],
-        'button_hover_bg': LIGHT_THEME_COLORS['main_btn_hover_bg'],
-        'button_hover_text': LIGHT_THEME_COLORS['main_btn_hover_text'],
-        'button_pressed_bg': LIGHT_THEME_COLORS['main_btn_pressed_bg'],
-        'button_pressed_text': LIGHT_THEME_COLORS['main_btn_pressed_text'],
         # Legacy key aliases kept for backward-compatibility
         'text_color': LIGHT_THEME_COLORS['text_primary'],
         'border_color': LIGHT_THEME_COLORS['main_btn_border'],

@@ -1142,20 +1142,20 @@ class ZoomControlsWidget(QFrame):
         
         button_style = f"""
             QPushButton {{
-                background-color: {colors['button_bg']};
-                color: {colors['button_text']};
-                border: 1px solid {colors['button_border']};
+                background-color: {colors['dialog_btn_bg']};
+                color: {colors['dialog_btn_text']};
+                border: 1px solid {colors['dialog_btn_border']};
                 border-radius: 3px;
                 font-weight: bold;
             }}
             QPushButton:hover {{
-                background-color: {colors['button_hover_bg']};
-                color: {colors['button_hover_text']};
+                background-color: {colors['dialog_btn_hover_bg']};
+                color: {colors['dialog_btn_hover_text']};
                 border-color: {accent};
             }}
             QPushButton:pressed {{
                 background-color: {accent};
-                color: {colors['button_pressed_text']};
+                color: {colors['dialog_btn_pressed_text']};
             }}
         """
         for btn in [self.zoom_out_btn, self.zoom_in_btn, self.fit_btn, self.actual_btn]:
@@ -1165,9 +1165,9 @@ class ZoomControlsWidget(QFrame):
         
         self.zoom_slider.setStyleSheet(f"""
             QSlider::groove:horizontal {{
-                border: 1px solid {colors['button_border']};
+                border: 1px solid {colors['dialog_btn_border']};
                 height: 6px;
-                background: {colors['button_bg']};
+                background: {colors['dialog_btn_bg']};
                 border-radius: 3px;
             }}
             QSlider::handle:horizontal {{
@@ -1297,9 +1297,9 @@ class BackgroundSelectorWidget(QFrame):
         
         self.bg_combo.setStyleSheet(f"""
             QComboBox {{
-                background-color: {colors['button_bg']};
-                color: {colors['button_text']};
-                border: 1px solid {colors['button_border']};
+                background-color: {colors['dialog_btn_bg']};
+                color: {colors['dialog_btn_text']};
+                border: 1px solid {colors['dialog_btn_border']};
                 border-radius: 3px;
                 padding: 3px 8px;
                 min-width: 100px;
@@ -1318,11 +1318,11 @@ class BackgroundSelectorWidget(QFrame):
                 border-top: 6px solid {colors['text_primary']};
             }}
             QComboBox QAbstractItemView {{
-                background-color: {colors['button_bg']};
-                color: {colors['button_text']};
+                background-color: {colors['dialog_btn_bg']};
+                color: {colors['dialog_btn_text']};
                 selection-background-color: {accent_dark};
                 selection-color: {colors['text_on_accent']};
-                border: 1px solid {colors['button_border']};
+                border: 1px solid {colors['dialog_btn_border']};
                 outline: none;
             }}
             QComboBox QAbstractItemView::item {{

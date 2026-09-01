@@ -51,10 +51,10 @@ NEW = {'APP_PANEL_HOVER': ('panel-hover', '#3a3a3a'),
 
 #: palette dict name -> the keys in it that must now name the constant.
 WIRED = {
-    'DARK_THEME_COLORS': ('hover_bg', 'button_hover_bg',
+    'DARK_THEME_COLORS': ('hover_bg', 'dialog_btn_hover_bg',
                           'list_hover_bg'),
-    'LIGHT_THEME_COLORS': ('hover_bg', 'button_hover_bg',
-                           'accent_button_hover_bg',
+    'LIGHT_THEME_COLORS': ('hover_bg', 'dialog_btn_hover_bg',
+                           'dialog_btn_accent_hover_bg',
                            'tab_hover_bg', 'list_hover_bg'),
 }
 
