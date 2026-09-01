@@ -582,18 +582,18 @@ REVIEWED = {
     # Each of these was read. A bypass renders the same gold in BOTH modes, so
     # it is only correct where the mode has already been chosen, or where the
     # ground is not a themed surface at all.
-    "RNV_Icon_Builder.py :: QLabel:hover {{ color: {BRAND_DARK_GOLD}; }}":
-        "correct: inside the light branch of an explicit theme check",
-    "RNV_Icon_Builder.py :: QLabel:hover {{ color: {BRAND_GOLD}; }}":
-        "correct: the dark branch of that same check",
     "RNV_Icon_Builder.py :: background-color: {BRAND_GOLD};":
         "correct: image-mode stylesheet block, and image mode is dark-based",
-    "ui/metadata_panel.py :: color: {BRAND_GOLD};":
-        "correct: mode-guarded by the caller",
     "ui/preview_utils.py :: border: 2px solid {BRAND_GOLD};":
-        "correct: mode-guarded by the caller",
+        "correct: a hover border drawn over an arbitrary user colour swatch, "
+        "so the ground is the swatch and not a themed surface -- the same "
+        "reason as the settings_dialog entry below. NOTE the reason here used "
+        "to read 'mode-guarded by the caller', which was not true of this site "
+        "and was copied to three entries. One of the three, metadata_panel, "
+        "had no caller at all.",
     "ui/preview_utils.py :: border-color: {BRAND_GOLD};":
-        "correct: mode-guarded by the caller",
+        "correct: the same swatch case, on the colour button rather than the "
+        "swatch frame",
     "ui/settings_dialog.py :: border-color: {BRAND_GOLD};":
         "correct: hover border drawn over an arbitrary user colour swatch, so "
         "it is deliberately mode-independent -- the ground is the swatch, not "
@@ -620,9 +620,29 @@ def test_no_reviewed_entry_is_stale():
         + "; ".join(stale) + " -- delete them.")
 
 
+#: Bypasses that are correct and PERMANENT: a hover border drawn over a colour
+#: the user chose can never read the palette, because the ground is the user's
+#: colour. They are the anchor for the scan, since a bare count goes stale the
+#: moment a real bypass is fixed -- which is what happened on 2026-08-30, when
+#: three were fixed and the count fell below the threshold that was supposed to
+#: prove the scan still worked.
+PERMANENT_BYPASSES = (
+    "ui/settings_dialog.py :: border-color: {BRAND_GOLD};",
+    "ui/preview_utils.py :: border-color: {BRAND_GOLD};",
+    "ui/preview_utils.py :: border: 2px solid {BRAND_GOLD};",
+)
+
+
 def test_the_bypass_scan_is_still_looking():
-    sites = list(_bypass_sites())
-    assert len(sites) >= 5, f"the bypass scan found only {len(sites)} sites"
+    """A scan that finds nothing reports no unreviewed sites and passes, which
+    is indistinguishable from a clean repo. Anchored on sites that cannot stop
+    being bypasses rather than on how many there happen to be."""
+    sites = set(_bypass_sites())
+    missing = [s for s in PERMANENT_BYPASSES if s not in sites]
+    assert not missing, (
+        "the bypass scan no longer finds sites that cannot have been fixed: "
+        + "; ".join(missing) + " -- the scan has stopped looking, or the "
+        "declaration text moved and every REVIEWED key with it.")
 
 
 def test_the_checkbox_hover_reads_the_palette():

@@ -2332,12 +2332,12 @@ class IconBuilderApp(QMainWindow):
         if theme and theme['name'] == 'Light':
             text_label.setStyleSheet(f"""
                 QLabel {{ color: {LIGHT_THEME_COLORS['text_secondary']}; font-size: 11px; }}
-                QLabel:hover {{ color: {BRAND_DARK_GOLD}; }}
+                QLabel:hover {{ color: {LIGHT_THEME_COLORS['text_accent']}; }}
             """)
         else:
             text_label.setStyleSheet(f"""
                 QLabel {{ color: {DARK_THEME_COLORS['text_primary']}; font-size: 11px; }}
-                QLabel:hover {{ color: {BRAND_GOLD}; }}
+                QLabel:hover {{ color: {DARK_THEME_COLORS['text_accent']}; }}
             """)
         thumb_layout.addWidget(text_label)
         

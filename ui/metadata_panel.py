@@ -26,7 +26,7 @@ from PyQt6.QtGui import QFont
 
 from PIL import Image
 
-from ui.colors import BRAND_GOLD, get_theme_colors
+from ui.colors import get_theme_colors
 from utils.logger import Logger, get_logger_instance
 
 # Setup logger for this module
@@ -392,7 +392,7 @@ class MetadataPanel(QFrame):
             }}
             
             QLabel#panel_title {{
-                color: {BRAND_GOLD};
+                color: {c['text_accent']};
                 font-size: 13px;
                 font-weight: bold;
                 padding: 5px;
