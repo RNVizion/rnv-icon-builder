@@ -2,88 +2,48 @@
 """
 RNV-BUTTON-NAMING-TOOL-DO-NOT-SWEEP
 
-Rename the two dialog button families, and delete the alias that made one key
-name mean two different schemes inside this one application.
+Replace tests/test_button_key_names.py. One test in it was wrong.
 
-    python up.py             # apply, then verify
-    python up.py --check     # rehearse every edit in memory, write nothing
+    python up.py             # replace the guard, then verify
+    python up.py --check     # rehearse, write nothing
     python up.py --verify    # run the suites only, change nothing
     python up.py --finish    # delete this file
 
-NOT ONE PIXEL MOVES. This is a rename and a deletion of indirection.
+THE RENAME IS FINE. THE GUARD WAS NOT.
 
-THE ALIAS
+test_the_marker_exemption_covers_only_the_two_tools counted the files carrying
+a DO-NOT-SWEEP marker and allowed two: the guard itself, and the delivery
+script. A working tree holding a second copy of that script -- an old up.py
+kept around, a renamed spare, the file saved twice -- puts a third marked file
+in the repository and the count fails. Nothing about the application is wrong
+when that happens, and a guard that fails on the state of somebody's checkout
+is failing on the wrong thing. It did exactly that in rnv-text-transformer.
 
-ui/theme_manager.py built the main window's theme dict like this:
+WHAT IT SHOULD HAVE ASSERTED
 
-    # Main window buttons use inverse system -- see colors.py main_btn_* keys
-    'button_bg': DARK_THEME_COLORS['main_btn_bg'],
-    'button_text': DARK_THEME_COLORS['main_btn_text'],
-    ...
+Not how many files are exempt, but WHICH. The sweep skips marked files so a
+guard that lists the old names in order to forbid them does not report itself.
+The risk that creates is an application file gaining a marker and going quiet.
+So the test now checks that every marked file other than the guard is a
+delivery script, identified by the tool marker in its own header. Any number
+of those may be lying in the tree; none of them is application source.
 
-So `theme['button_bg']` was the MAIN scheme and
-`get_theme_colors()['button_bg']` was the GOLD DIALOG scheme -- the same key
-name, two schemes, separated only by which function handed you the dict. The
-comment existed because the names could not carry the distinction.
+Verified in both directions before shipping: with three tool copies present it
+passes, and with a marker planted in an application file it still fails.
 
-That block is not a design decision. It is a bridge between two naming
-conventions, and with both sides named properly it has nothing left to do:
-the six entries fold into the passthrough comprehension directly above them,
-under the names they already have.
+This is the ninth use-versus-mention failure this programme has recorded, and
+the first where the fix was to stop counting and start naming.
 
-WHAT MOVES
+WHAT THIS SCRIPT DOES
 
-    button_*          ->  dialog_btn_*          8 keys
-    accent_button_*   ->  dialog_btn_accent_*   6 keys
-    the alias block   ->  six passthrough names in the comprehension above it
-
-164 quoted dialog occurrences and 61 accent ones across fourteen files, plus
-twelve alias lines that stop existing and twelve reads in RNV_Icon_Builder.py
-that now name the main family directly.
-
-main_btn_* in ui/colors.py does not move. platform_btn_* and clear_btn_bg do
-not move either: they are component keys inside the settings dialog, not a
-scheme, and folding them into dialog_btn_* would claim a generality they do
-not have.
-
-THE TEST MODULE IS SPLIT BY HAND, NOT SWEPT
-
-test_rnv_icon_builder.py names both families. One key list belongs to the
-75-key palettes in ui/colors.py and becomes the dialog family; another belongs
-to the ThemeManager themes and becomes the main one; six assertions read
-tm.DARK_THEME / tm.LIGHT_THEME directly and are main. A blanket substitution
-over that file would put six main-window assertions onto the dialog family and
-still pass, because before this pass both names resolved. Each is anchored
-individually and counted.
-
-THE SNAPSHOT IS REGENERATED, NOT SUBSTITUTED
-
-tests/snapshots.json records each palette as a sorted key list. Fourteen names
-per list move, and dialog_btn_* does not sort where button_* and
-accent_button_* sorted. The file is reloaded, renamed, re-sorted and written
-back with the same json.dumps(indent=2) the repository's own regeneration
-helper uses, so the formatting is identical by construction rather than by
-hand.
-
-DOCUMENTATION IS NOT TOUCHED, ON PURPOSE
-
-The docs pass runs once, after alignment settles. The guard sweeps code and
-snapshots, not prose.
-
-WHAT THE GUARD ASSERTS
-
-tests/test_button_key_names.py fails if an old name comes back anywhere, if a
-palette loses a key, if any of the twenty-four dialog values or eighteen accent
-values or fourteen main values moved, if the theme dict republishes a button_*
-name, if a snapshot list stops being sorted, or if the two schemes converge.
-It reads the palettes by importing them: two of these values are derived
-through lighten(), and a static resolver returns None for those and then
-compares None with None and passes.
+Rewrites tests/test_button_key_names.py and nothing else. It refuses to run
+unless the rename already landed, so it cannot be mistaken for the pass itself.
+If your guard is currently passing, this still replaces it -- the old test
+passes by luck of what is in your working tree, not by being right.
 """
 from __future__ import annotations
 
 import argparse
-import json
 import os
 import re
 import subprocess
@@ -92,11 +52,23 @@ import tempfile
 from pathlib import Path
 
 REPO = "rnv-icon-builder"
-DESCRIPTION = "rename the dialog button families and delete the theme alias"
-SENTINEL_FILE = "ui/colors.py"
-SENTINEL = "'dialog_btn_bg'"
+DESCRIPTION = "replace the button-naming guard's exemption test"
 GUARD = "tests/test_button_key_names.py"
+SENTINEL_FILE = GUARD
+SENTINEL = "test_no_application_file_is_exempt_from_the_sweep"
 SHADOWS = {"colors.py", "config.py", "conftest.py", "run_tests.py"}
+
+PALETTE = "ui/colors.py"
+PROOF = "'dialog_btn_bg'"
+
+MISSING_HELP = """\
+tests/test_button_key_names.py is not here, so the button key rename has not
+run in this checkout yet.
+
+This script only replaces that guard. Run the rename script first -- the one
+whose header begins "Rename the two dialog button families, and delete the alias" -- and then run this one. There is no filename
+to look for: every script arrives as an attachment and is saved as up.py.
+"""
 
 SUITES = [
     ('pytest tests/',
@@ -105,190 +77,50 @@ SUITES = [
      [sys.executable, "-m", "unittest", "test_rnv_icon_builder"]),
 ]
 
-DIALOG_KEYS = ("button_bg", "button_text", "button_hover_bg", "button_hover_text",
-               "button_pressed_bg", "button_pressed_text", "button_border",
-               "button_hover_border")
-ACCENT_KEYS = ("accent_button_bg", "accent_button_text", "accent_button_border",
-               "accent_button_hover_bg", "accent_button_pressed_bg",
-               "accent_button_pressed_text")
-MAIN_KEYS = ("button_bg", "button_text", "button_hover_bg", "button_hover_text",
-             "button_pressed_bg", "button_pressed_text")
-
-RENAME_DIALOG = {k: "dialog_btn_" + k[len("button_"):] for k in DIALOG_KEYS}
-RENAME_ACCENT = {k: "dialog_btn_accent_" + k[len("accent_button_"):]
-                 for k in ACCENT_KEYS}
-RENAME_MAIN = {k: "main_" + k.replace("button_", "btn_") for k in MAIN_KEYS}
-
-#: file -> (dialog count, accent count). Written down so the script refuses to
-#: run against a tree that has moved under it.
-DIALOG_FILES = {
-    "ui/colors.py": (16, 12),
-    "ui/settings_dialog.py": (25, 20),
-    "ui/preview_utils.py": (14, 0),
-    "utils/dialog_helper.py": (14, 0),
-    "ui/ico_analyzer.py": (7, 8),
-    "ui/about_dialog.py": (7, 0),
-    "ui/context_preview.py": (6, 0),
-    "ui/base_dialog.py": (5, 0),
-    "tests/test_brand_contrast.py": (2, 2),
-    "tests/test_ladder_and_plate.py": (2, 1),
-    "tests/test_app_mirror.py": (1, 0),
-}
-
-#: The main window reads its theme dict, and every button key in this file is
-#: one of those reads.
-MAIN_FILES = {"RNV_Icon_Builder.py": 12}
-
-#: The alias, folded into the comprehension above it. One per palette.
-ALIAS_OLD = """        )},
-        # Main window buttons use inverse system — see colors.py main_btn_* keys
-        'button_bg': {P}['main_btn_bg'],
-        'button_text': {P}['main_btn_text'],
-        'button_hover_bg': {P}['main_btn_hover_bg'],
-        'button_hover_text': {P}['main_btn_hover_text'],
-        'button_pressed_bg': {P}['main_btn_pressed_bg'],
-        'button_pressed_text': {P}['main_btn_pressed_text'],
-"""
-ALIAS_NEW = """            # The main window's buttons, passed through under the names
-            # they already have. Until 2026-09-01 these six were republished
-            # as button_* -- which is how one key name came to mean the main
-            # scheme here and the gold dialog scheme in get_theme_colors().
-            'main_btn_bg', 'main_btn_text', 'main_btn_hover_bg',
-            'main_btn_hover_text', 'main_btn_pressed_bg',
-            'main_btn_pressed_text',
-        )},
-"""
-
-#: test_rnv_icon_builder.py names both families; each site is anchored.
-TEST_ANCHORS = [
-    # the 75-key palettes in ui/colors.py -> dialog
-    ("        'button_bg', 'button_text', 'button_hover_bg', 'button_pressed_bg',\n"
-     "        'button_pressed_text', 'button_border',",
-     "        'dialog_btn_bg', 'dialog_btn_text', 'dialog_btn_hover_bg',\n"
-     "        'dialog_btn_pressed_bg', 'dialog_btn_pressed_text',\n"
-     "        'dialog_btn_border',", 1),
-    # the ThemeManager themes -> main
-    ("                      'button_bg', 'button_text', 'button_hover_bg',\n"
-     "                      'button_pressed_bg', 'button_pressed_text']",
-     "                      'main_btn_bg', 'main_btn_text', 'main_btn_hover_bg',\n"
-     "                      'main_btn_pressed_bg', 'main_btn_pressed_text']", 1),
-    ("DARK_THEME.get('button_hover_bg', '')",
-     "DARK_THEME.get('main_btn_hover_bg', '')", 3),
-    ("LIGHT_THEME.get('button_hover_bg', '')",
-     "LIGHT_THEME.get('main_btn_hover_bg', '')", 1),
-    ("DARK_THEME['button_pressed_text']", "DARK_THEME['main_btn_pressed_text']", 1),
-    ("LIGHT_THEME['button_pressed_text']", "LIGHT_THEME['main_btn_pressed_text']", 1),
-]
-
-_D_RE = re.compile(r"(?<!accent_)(['\"])("
-                   + "|".join(sorted(DIALOG_KEYS, key=len, reverse=True)) + r")\1")
-_A_RE = re.compile(r"(['\"])("
-                   + "|".join(sorted(ACCENT_KEYS, key=len, reverse=True)) + r")\1")
-_M_RE = re.compile(r"(?<!accent_)(['\"])("
-                   + "|".join(sorted(MAIN_KEYS, key=len, reverse=True)) + r")\1")
-
-
-def _sub(pattern, mapping, text):
-    hits = 0
-
-    def swap(m):
-        nonlocal hits
-        hits += 1
-        return f"{m.group(1)}{mapping[m.group(2)]}{m.group(1)}"
-
-    return pattern.sub(swap, text), hits
-
-
-def _rename_snapshot(text: str) -> str:
-    """Rename inside the JSON and re-sort, then write it the way the repo's own
-    regeneration helper writes it."""
-    data = json.loads(text)
-    both = {**RENAME_DIALOG, **RENAME_ACCENT}
-    for name, value in data.items():
-        if name.endswith("_keys") and isinstance(value, list):
-            data[name] = sorted(both.get(k, k) for k in value)
-    return json.dumps(data, indent=2) + "\n"
+#: The tests the shipped guard already carries. This pass replaces ONE of them;
+#: a replacement that quietly dropped the others would be a regression wearing
+#: the shape of a fix.
+KEEP = (
+    'test_no_old_button_key_name_survives',
+    'test_all_three_palettes_carry_both_dialog_families',
+    'test_the_rename_moved_no_dialog_value',
+    'test_the_rename_moved_no_accent_value',
+    'test_the_main_family_is_untouched',
+    'test_the_theme_dict_no_longer_renames_the_main_family',
+    'test_the_main_window_reads_the_main_family',
+    'test_dialogs_read_a_dialog_family',
+    'test_the_snapshot_key_lists_are_still_sorted',
+    'test_the_two_schemes_are_still_different',
+)
 
 
 def edits(tree) -> None:
-    dialog = accent = 0
-    for rel, (want_d, want_a) in DIALOG_FILES.items():
-        src = tree.read(rel)
-        src, got_a = _sub(_A_RE, RENAME_ACCENT, src)
-        src, got_d = _sub(_D_RE, RENAME_DIALOG, src)
-        if (got_d, got_a) != (want_d, want_a):
-            raise SystemExit(f"{rel}: expected {want_d} dialog and {want_a} "
-                             f"accent key(s), found {got_d} and {got_a}. The "
-                             f"file moved; re-derive this edit.")
-        tree.write(rel, src)
-        dialog += got_d
-        accent += got_a
-
-    for rel, want in MAIN_FILES.items():
-        src, got = _sub(_M_RE, RENAME_MAIN, tree.read(rel))
-        if got != want:
-            raise SystemExit(f"{rel}: expected {want} main key(s), found {got}")
-        tree.write(rel, src)
-
-    for palette in ("DARK_THEME_COLORS", "LIGHT_THEME_COLORS"):
-        tree.sub("ui/theme_manager.py",
-                 ALIAS_OLD.replace("{P}", palette),
-                 ALIAS_NEW, 1)
-
-    for old, new, times in TEST_ANCHORS:
-        tree.sub("test_rnv_icon_builder.py", old, new, times)
-
-    tree.write("tests/snapshots.json",
-               _rename_snapshot(tree.read("tests/snapshots.json")))
-
-    print(f"  renamed {dialog} dialog and {accent} accent keys, "
-          f"{sum(MAIN_FILES.values())} main reads, folded 2 alias blocks, "
-          f"regenerated the snapshot")
+    if PROOF not in tree.read(PALETTE):
+        raise SystemExit(
+            f"{PALETTE} does not carry {PROOF}, so the rename has not "
+            f"landed. This script replaces the guard only; run the rename "
+            f"first.")
+    if "test_the_marker_exemption_covers_only_the_two_tools" not in tree.read(GUARD):
+        raise SystemExit(
+            "the guard in this checkout is not the one this script fixes -- it "
+            "does not contain test_the_marker_exemption_covers_only_the_two_"
+            "tools. Nothing was written.")
+    print("  rename confirmed present; replacing the guard")
 
 
 def checks(tree) -> None:
-    old_names = set(DIALOG_KEYS) | set(ACCENT_KEYS)
-    for rel in list(DIALOG_FILES) + list(MAIN_FILES) + \
-            ["ui/theme_manager.py", "test_rnv_icon_builder.py",
-             "tests/snapshots.json"]:
-        text = tree.read(rel)
-        for old in old_names:
-            if re.search(r"(['\"])" + old + r"\1", text):
-                raise SystemExit(f"{rel}: {old!r} survived the rename")
-
-    manager = tree.read("ui/theme_manager.py")
-    if "main_btn_* keys" in manager:
-        raise SystemExit("the alias comment survived; the block it explained "
-                         "is gone and the comment would outlive its reason")
-    if manager.count("'main_btn_bg', 'main_btn_text', 'main_btn_hover_bg',") != 2:
-        raise SystemExit("expected the folded passthrough in both palettes")
-
-    data = json.loads(tree.read("tests/snapshots.json"))
-    for name, value in data.items():
-        if name.endswith("_keys") and isinstance(value, list):
-            if value != sorted(value):
-                raise SystemExit(f"{name} is not sorted after regeneration")
-    for name in ("dark_theme_keys", "light_theme_keys", "image_mode_keys"):
-        entries = [k for k in data[name] if "dialog_btn_" in k]
-        if len(entries) != 14:
-            raise SystemExit(f"{name} carries {len(entries)} dialog keys, "
-                             f"expected 14")
-
-    original = json.loads((Path.cwd() / "tests" / "snapshots.json")
-                          .read_text(encoding="utf-8"))
-    for name, value in original.items():
-        if not (name.endswith("_keys") and isinstance(value, list)):
-            continue
-        if len(data[name]) != len(value):
-            raise SystemExit(f"{name} changed length: {len(value)} -> "
-                             f"{len(data[name])}. A rename adds and removes "
-                             f"nothing.")
-
-    main_window = tree.read("RNV_Icon_Builder.py")
-    if "theme['main_btn_bg']" not in main_window:
-        raise SystemExit("the main window no longer names the main family")
-    print("  guards: no old name survives, the alias is folded away, the "
-          "snapshot is sorted and the same length")
+    new = tree.read(GUARD)
+    if "test_the_marker_exemption_covers_only_the_two_tools" in new:
+        raise SystemExit("the old exemption test survived the replacement")
+    if SENTINEL not in new:
+        raise SystemExit("the replacement guard is missing its new test")
+    missing = [name for name in KEEP if name not in new]
+    if missing:
+        raise SystemExit(
+            f"these tests are gone from the replacement: {missing}. This "
+            f"pass replaces one test and keeps the rest.")
+    print(f"  guards: the {len(KEEP)} passing tests are still there, the "
+          f"failing one is replaced")
 
 
 GUARD_SOURCE = r'''"""The button keys say where the button lives.
@@ -418,16 +250,39 @@ def test_no_old_button_key_name_survives():
         "these keys must say where the button lives:\n  " + "\n  ".join(offenders))
 
 
-def test_the_marker_exemption_covers_only_the_two_tools():
-    marked = []
+TOOL_MARKER = "RNV-BUTTON-NAMING-TOOL-DO-NOT-SWEEP"
+
+
+def test_no_application_file_is_exempt_from_the_sweep():
+    """The exemption is by marker, and the marker is how a file could hide.
+
+    An earlier version of this counted marked files and allowed two. That
+    failed in a working tree holding a second copy of the delivery script --
+    a guard failing on the state of somebody's checkout rather than on a
+    defect in the application, which is the wrong thing to fail on.
+
+    What actually matters is that no APPLICATION file is exempt. This guard
+    may carry a marker; it lists the old names in order to forbid them.
+    Everything else must be a delivery script, identified by the tool marker
+    in its own header -- those arrive under whatever name they are saved as,
+    there can be several of them lying around, and none is application source.
+    """
+    here = Path(__file__).resolve()
+    strays = []
     for path in sorted(ROOT.rglob("*.py")):
         if any(part in SKIP for part in path.parts):
             continue
         text = path.read_text(encoding="utf-8-sig", errors="replace")
-        if any(marker in text for marker in MARKERS):
-            marked.append(path.relative_to(ROOT))
-    assert len(marked) <= 2, f"unexpected marked file(s): {marked}"
-    assert Path(__file__).relative_to(ROOT) in marked
+        if not any(marker in text for marker in MARKERS):
+            continue
+        if path.resolve() == here or TOOL_MARKER in text:
+            continue
+        strays.append(str(path.relative_to(ROOT)))
+    assert not strays, (
+        "these files are skipped by the name sweep but are not a delivery "
+        f"script: {strays}")
+    assert MARKERS[0] in here.read_text(encoding="utf-8-sig"), (
+        "this guard lost its own marker and is now sweeping itself")
 
 
 def test_all_three_palettes_carry_both_dialog_families():
