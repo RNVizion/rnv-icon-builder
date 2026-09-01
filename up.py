@@ -2,55 +2,69 @@
 """
 RNV-GOLD-ALIGNMENT-TOOL-DO-NOT-SWEEP
 
-Adopt APP["panel-hover"] and APP["hover-light"] in rnv-icon-builder.
+Arm the other half of the gold rule in rnv-icon-builder.
 
     python up.py             # apply, then verify
     python up.py --check     # rehearse every edit in memory, write nothing
     python up.py --verify    # run the suites only, change nothing
     python up.py --finish    # delete this file
 
-WHAT MOVES: NOTHING. Not one rendered pixel.
+NO APPLICATION CODE CHANGES. One test file is replaced with a longer version
+of itself. Nothing fails the new check today, in this app or in any of the
+other four -- which is the reason to add it now rather than the reason not to.
 
-#3a3a3a and #eeeeee were already the values in these eight entries. rnv-brand
-registered them -- #3a3a3a as APP["panel-hover"] in rev 22, #eeeeee as
-APP["hover-light"] in rev 23 -- so what changes is provenance and spelling:
-each becomes a named constant this app mirrors and pins.
+THE RULE IS BIDIRECTIONAL AND THE GUARD WAS NOT
 
-    dark   hover_bg, button_hover_bg, list_hover_bg          -> APP_PANEL_HOVER
-    light  hover_bg, button_hover_bg, accent_button_hover_bg,
-           tab_hover_bg, list_hover_bg                       -> APP_HOVER_LIGHT
+rnv-brand rev 25 published it in both directions:
 
-The script proves nothing moved rather than asserting it: checks() resolves
-every entry of every palette from the ORIGINAL file and the EDITED one and
-refuses to write unless all four palettes are equal entry for entry.
+    On a light ground, gold as TEXT is BRAND_DARK_GOLD_DEEP.
+    Gold as a FILL or an EDGE is BRAND_DARK_GOLD.
 
-THIS PASS WIRES A LIGHT VALUE, WHICH THE LAST ONE PROMISED NOT TO
+The second sentence is not a stylistic preference, and the arithmetic is not
+symmetric:
 
-tests/test_register_wiring.py carries test_the_light_palettes_were_left_alone,
-written so that widening scope into light would have to be a deliberate act.
-This is that deliberate act, and the test is rewritten here in the open.
+    text on #f5f5f5    BRAND_DARK_GOLD 4.1670 FAIL   DEEP 5.0949 pass
+    text on #eeeeee    BRAND_DARK_GOLD 3.9156 FAIL   DEEP 4.7875 pass
+    fill, black on it  BRAND_DARK_GOLD 4.6226 pass   DEEP 3.7806 FAIL
 
-It is worth knowing that the old test WOULD NOT HAVE FIRED. It flagged light
-entries naming something in its REGISTERED map, and that map was a four-value
-snapshot -- TRUE_BLACK, BRAND_BLACK, APP_CARD, APP_BORDER -- which never
-contained APP_HOVER_LIGHT. Light could have been wired underneath it silently.
-A guard whose reach is narrower than the change it guards against reports clean
-because it cannot see, which is the third time that shape has appeared in this
-programme. REGISTERED is widened here in the same edit, and the rewritten test
-is an allowlist with a companion that requires the allowed value to actually be
-used, so an entry cannot outlive its reason.
+BRAND_DARK_GOLD carries text on pure white and on nothing else these apps use
+as a surface. BRAND_DARK_GOLD_DEEP carries text everywhere and cannot be sat
+on. A sweep that read the rule as "prefer DEEP" and replaced every
+BRAND_DARK_GOLD would have fixed the text sites and broken the fills -- six of
+the sites corrected across these repositories this week are fills and edges.
 
-WHY #eeeeee AND NOT #e8e8e8
+WHAT WAS ALREADY CHECKED, BY HAND
 
-The register first ruled #e8e8e8, on the argument that within the passing band
-it keeps the most separation from the white base. It withdrew that on
-2026-08-30. #e8e8e8 is the ground BRAND_DARK_GOLD_DEEP is calibrated against --
-the smallest uniform step that clears it is -14, and -13 gives 4.4675 and fails
--- so registering it as the hover would have pinned every hover in every app to
-the one value the gold cannot afford to lose, with 0.0334 of margin. #eeeeee is
-grey(14), one step inside, and gold reads 4.7875 on it.
+Every gold fill in all five apps, with the label drawn on it:
 
-Eleven hover keys across four apps already held #eeeeee. Zero held #e8e8e8.
+    rnv-text-transformer        4 sites   #ffffff throughout       5.5547
+    rnv-color-picker            4 sites   inherited white          5.5547
+    rnv-icon-builder            1 site    checkbox indicator, no text
+    rnv-color-mixer             1 site    checkbox indicator, no text
+    rnv-color-palette-manager   0 sites
+
+Ten sites, zero failures. In this app: 1 site — a checkbox indicator, no text of its own.
+
+WHY ADD A GUARD THAT PASSES
+
+Because this is the only moment it is cheap. A guard proposed against a live
+defect writes itself; a guard proposed against a clean sweep has to be argued
+for, and the argument gets weaker every month the sweep stays clean. The
+text direction was clean-looking too until somebody resolved the declarations
+through the palettes, and then it was seven defects in three applications.
+
+READING A FILL IS HARDER THAN READING TEXT, AND THE GUARD SAYS SO
+
+Six of those ten sites declare no colour of their own -- a
+`QPushButton:hover` that sets only a background takes its label from the base
+`QPushButton` rule. The new sweep reads that enclosing rule rather than
+guessing, and skips a site where it can find no label at all rather than
+assuming one. A rule with no text (a checkbox indicator, a progress chunk)
+is counted as unresolved, not as a pass.
+
+And it carries a companion: test_the_fill_sweep_still_finds_things. A sweep
+over a clean codebase and a sweep that resolves nothing file the same report,
+and that assertion is the only thing that distinguishes them.
 """
 from __future__ import annotations
 
@@ -64,212 +78,106 @@ import tempfile
 from pathlib import Path
 
 REPO = "rnv-icon-builder"
-DESCRIPTION = "adopt APP[panel-hover] and APP[hover-light]"
-SENTINEL_FILE = "ui/colors.py"
-SENTINEL = "APP_HOVER_LIGHT,"
-MIRROR = "tests/test_app_mirror.py"
-WIRING = "tests/test_register_wiring.py"
-GUARD = "tests/test_ladder_and_plate.py"
+DESCRIPTION = "arm the fill direction of the gold rule"
+SENTINEL_FILE = "tests/test_gold_as_text.py"
+SENTINEL = "test_no_gold_fill_carries_a_label_below_the_floor"
+GUARD = SENTINEL_FILE
 SHADOWS = {"colors.py", "config.py", "conftest.py", "run_tests.py"}
 
 SUITES = [
     ('pytest tests/ (about 5 minutes)',
      [sys.executable, "-m", "pytest", "tests/", "-q", "-p", "no:cacheprovider"]),
     ('unittest suite',
-     [sys.executable, "-m", "unittest", "test_rnv_icon_builder"]),
+     [sys.executable, "-m", "unittest", "test_rnv_icon_builder"])
 ]
 
-#: value -> constant name. An ALLOWLIST, not a sweep: a value-keyed
-#: substitution with no allowlist can install a name whose meaning is wrong for
-#: the palette it lands in, which has happened once in this programme.
-SUBSTITUTE = {
-    "DARK_THEME_COLORS": {"#3a3a3a": "APP_PANEL_HOVER"},
-    "LIGHT_THEME_COLORS": {"#eeeeee": "APP_HOVER_LIGHT"},
-}
+#: The tests the existing file already carries. This pass EXTENDS it; a
+#: replacement that quietly dropped one would be a regression wearing the
+#: shape of an upgrade.
+EXISTING = (
+    "test_the_sweep_still_finds_things",
+    "test_the_gold_family_is_not_empty",
+    "test_the_two_golds_actually_differ_in_light",
+    "test_no_gold_is_drawn_as_text_below_the_floor",
+    "test_no_exemption_has_outlived_its_reason",
+)
 
-ALL_DICTS = ("DARK_THEME_COLORS", "LIGHT_THEME_COLORS", "IMAGE_MODE_COLORS",
-             "OS_SIM_COLORS")
-
-CONSTANTS = '\nAPP_PANEL_HOVER: Final[str] = "#3a3a3a"\n"""engine/brand.py APP["panel-hover"]. The dark interaction plate.\n\nREGISTERED 2026-08-29 in rnv-brand rev 22, and app-owned here until then. The\nregister had called the dark ladder "two-thirds specified" because APP_BORDER\n#333333 is not #3a3a3a and so looked like a missing rung. It is not a rung at\nall: #333333 is grey(3) on the INK grid, which governs inks and EDGES, and a\nborder is an edge. The ladder was complete when the question was first asked.\n\n    BRAND_BLACK + n * 0x10,  n in -1..+2\n    #0a0a0a canvas   #1a1a1a panel   #2a2a2a card   #3a3a3a panel-hover\n\nThis app holds three of the four; it has no canvas surface.\n"""\n\nAPP_HOVER_LIGHT: Final[str] = "#eeeeee"\n"""engine/brand.py APP["hover-light"]. grey(14). The light interaction plate.\n\nREGISTERED 2026-08-29 as #e8e8e8 and MOVED to #eeeeee on 2026-08-30 in rev 23,\nbefore any app had been wired to it. Nothing here changes value -- the five\nentries below already held #eeeeee.\n\n#e8e8e8 is the ground BRAND_DARK_GOLD_DEEP is calibrated against: -14 per\nchannel is the smallest uniform step that clears it, and -13 gives 4.4675 and\nfails. Registering it as the hover would have put every hover in the app on the\none value the gold cannot afford to lose, clearing the 4.5 floor by 0.0334. A\nboundary is not a plate. This value is a grid step inside it and reads 4.7875.\n\n#e8e8e8 keeps everything else -- registered, the published gold-as-text\nboundary, the binding ground. It is simply not the hover.\n"""\n'
-PROVENANCE = '    "APP_PANEL_HOVER": "register",\n    "APP_HOVER_LIGHT": "register",\n'
-PINNED = "    'APP_PANEL_HOVER': '#3a3a3a',\n    'APP_HOVER_LIGHT': '#eeeeee',\n"
-OLD_LIGHT_TEST = 'def test_the_light_palettes_were_left_alone():\n    """This pass is the DARK half, on the register\'s stated order. The light\n    ladder is unruled -- nine surfaces inside three grid steps, and which of\n    them are real distinctions is a judgement the register has not made. If a\n    later pass wires light, this test is the thing that has to be deleted on\n    purpose."""\n    named = []\n    for dict_name, node in _dicts(LIGHT_DICTS).items():\n        for key, value in zip(node.keys, node.values):\n            if isinstance(value, ast.Name) and value.id in REGISTERED:\n                named.append(f\'{dict_name}[{key.value!r}] -> {value.id}\')\n    assert not named, (\n        \'the light palettes now reference the register:\\n  \' + \'\\n  \'.join(named)\n        + \'\\n\\nThat is the light half, and it is not ruled yet.\')'
-NEW_LIGHT_TEST = '#: The light half is ruled one value at a time. This is the allowlist, and it\n#: is what a later pass has to extend ON PURPOSE.\nLIGHT_RULED = (\'APP_HOVER_LIGHT\',)\n\n\ndef test_the_light_palettes_reference_only_what_the_register_has_ruled():\n    """This began life as "the light palettes were left alone", which was true\n    while the light half was entirely unruled. rnv-brand rev 23 ruled one value\n    of it -- APP["hover-light"] -- so the test becomes an allowlist rather than\n    a prohibition. The light LADDER is still unruled: nine surfaces inside three\n    grid steps, and which of them are real distinctions is a judgement the\n    register has not made.\n\n    THE EARLIER FORM COULD NOT HAVE CAUGHT THIS PASS. It flagged names found in\n    REGISTERED, and REGISTERED was a four-value snapshot that did not contain\n    the value being wired -- so light could have been wired underneath it and it\n    would have reported clean. That is the opposite of what a delete-on-purpose\n    guard is for. REGISTERED is widened in the same commit as the wiring."""\n    named = []\n    for dict_name, node in _dicts(LIGHT_DICTS).items():\n        for key, value in zip(node.keys, node.values):\n            if (isinstance(value, ast.Name) and value.id in REGISTERED\n                    and value.id not in LIGHT_RULED):\n                named.append(f\'{dict_name}[{key.value!r}] -> {value.id}\')\n    assert not named, (\n        \'the light palettes reference register values that are not ruled \'\n        \'yet:\\n  \' + \'\\n  \'.join(named)\n        + \'\\n\\nAdd the name to LIGHT_RULED in the same commit that wires it, \'\n          \'or do not wire it.\')\n\n\ndef test_the_ruled_light_value_is_actually_wired():\n    """The allowlist permits; this requires. An allowlist entry nothing uses is\n    a licence with no subject -- the same shape as a dead exemption."""\n    used = set()\n    for node in _dicts(LIGHT_DICTS).values():\n        for value in node.values:\n            if isinstance(value, ast.Name) and value.id in LIGHT_RULED:\n                used.add(value.id)\n    assert used == set(LIGHT_RULED), (\n        f\'LIGHT_RULED lists {sorted(LIGHT_RULED)} but the light palettes use \'\n        f\'{sorted(used)}\')'
-OLD_REG = "REGISTERED = {'TRUE_BLACK': '#000000', 'BRAND_BLACK': '#1a1a1a', 'APP_CARD': '#2a2a2a', 'APP_BORDER': '#333333'}"
-NEW_REG = "REGISTERED = {'TRUE_BLACK': '#000000', 'BRAND_BLACK': '#1a1a1a', 'APP_CARD': '#2a2a2a', 'APP_BORDER': '#333333',\n              'APP_PANEL_HOVER': '#3a3a3a', 'APP_HOVER_LIGHT': '#eeeeee'}"
-
-#: Every line this pass adds, counted from the text that adds it. checks()
-#: compares the real delta against this: a substitution that eats or adds a
-#: line ending leaves every value identical and every test green while the file
-#: is quietly reflowed, and only a shape check sees it.
-EXPECTED_ADDED = {
-    # CONSTANTS supplies its own leading newline and the anchor it replaces
-    # gave one up, hence the -1.
-    SENTINEL_FILE: CONSTANTS.count("\n") - 1 + PROVENANCE.count("\n"),
-    MIRROR: PINNED.count("\n"),
-    WIRING: (NEW_LIGHT_TEST.count("\n") - OLD_LIGHT_TEST.count("\n")
-             + NEW_REG.count("\n") - OLD_REG.count("\n")),
-}
-
-
-def _resolve(source: str) -> dict:
-    """Every palette, resolved to plain values, whether an entry is written as
-    a literal or as a name. This is what makes "nothing moved" checkable rather
-    than asserted."""
-    tree = ast.parse(source.lstrip("\ufeff"))
-    consts = {}
-    for node in tree.body:
-        if isinstance(node, (ast.Assign, ast.AnnAssign)):
-            target = node.targets[0] if isinstance(node, ast.Assign) else node.target
-            if isinstance(target, ast.Name) and isinstance(node.value, ast.Constant):
-                consts[target.id] = node.value.value
-    out = {}
-    for node in ast.walk(tree):
-        if isinstance(node, (ast.Assign, ast.AnnAssign)):
-            target = node.targets[0] if isinstance(node, ast.Assign) else node.target
-            name = getattr(target, "id", None)
-            if name in ALL_DICTS and isinstance(node.value, ast.Dict):
-                palette = {}
-                for key, value in zip(node.value.keys, node.value.values):
-                    if not isinstance(key, ast.Constant):
-                        continue
-                    if isinstance(value, ast.Constant):
-                        palette[key.value] = value.value
-                    elif isinstance(value, ast.Name):
-                        palette[key.value] = consts.get(value.id, f"<{value.id}>")
-                    else:
-                        palette[key.value] = ast.unparse(value)
-                out[name] = palette
-    return out
-
-
-def _bounds(lines):
-    """The palettes carry identically-spelled key lines, so a plain string
-    replace cannot tell dark from light. Every edit is scoped to its own."""
-    starts = {}
-    pattern = re.compile(r"^(" + "|".join(ALL_DICTS) + r")\s*[:=]")
-    for i, line in enumerate(lines):
-        m = pattern.match(line)
-        if m:
-            starts[m.group(1)] = i
-    if len(starts) != len(ALL_DICTS):
-        raise SystemExit(f"expected {len(ALL_DICTS)} palettes, found {sorted(starts)}")
-    order = sorted(starts.items(), key=lambda kv: kv[1])
-    return {n: (st, order[i + 1][1] if i + 1 < len(order) else len(lines))
-            for i, (n, st) in enumerate(order)}
+NEW = (
+    "test_no_gold_fill_carries_a_label_below_the_floor",
+    "test_the_fill_sweep_still_finds_things",
+)
 
 
 def edits(tree) -> None:
-    # 1. the two constants, with their provenance in prose beside the value
-    tree.sub(SENTINEL_FILE,
-             '\nAPP_PROVENANCE: Final[dict[str, str]] = {',
-             CONSTANTS + 'APP_PROVENANCE: Final[dict[str, str]] = {')
-
-    # 2. the declarative classification the tests read
-    tree.sub(SENTINEL_FILE, '    "APP_TEXT_DIM": "register",\n',
-             '    "APP_TEXT_DIM": "register",\n' + PROVENANCE)
-
-    # 3. the substitutions, scoped per palette
-    source = tree.read(SENTINEL_FILE)
-    lines = source.splitlines(keepends=True)
-    bounds = _bounds(lines)
-    swapped = 0
-    for dict_name, table in SUBSTITUTE.items():
-        start, end = bounds[dict_name]
-        for i in range(start, end):
-            line = lines[i]
-            # Match the line WITHOUT its ending and put the ending back
-            # verbatim. Python's `$` also matches just before a trailing
-            # newline, so a pattern ending in `(,.*)$` silently drops it -- and
-            # the result is still valid Python, so every test passes while the
-            # palette is reflowed onto one line.
-            body = line.rstrip("\r\n")
-            ending = line[len(body):]
-            # Only a whole quoted value with a key in front of it, so a hex
-            # inside a comment or an rgba string is never touched.
-            m = re.match(r"^(\s*'[a-z_0-9]+':\s*)'(#[0-9a-fA-F]{6})'(,.*)$", body)
-            if not m:
-                continue
-            const = table.get(m.group(2).lower())
-            if const:
-                lines[i] = f"{m.group(1)}{const}{m.group(3)}{ending}"
-                swapped += 1
-    if swapped != 8:
-        raise SystemExit(f"expected 8 substitutions, made {swapped}. The "
-                         f"palettes have already been wired, or their shape "
-                         f"changed -- re-derive before trusting this script.")
-    tree.write(SENTINEL_FILE, "".join(lines))
-    print(f"  substituted {swapped} literals for their register names")
-
-    # 4. pin both locally, so drift is caught where rnv-brand is not importable
-    tree.sub(MIRROR, "    'APP_TEXT_DIM': '#aaaaaa',\n",
-             "    'APP_TEXT_DIM': '#aaaaaa',\n" + PINNED)
-
-    # 5. widen the wiring guard's register map, then rewrite the light test it
-    #    is the reach of. Both, in one edit: widening alone turns the light test
-    #    red, and rewriting alone leaves it unable to see.
-    tree.sub(WIRING, OLD_REG, NEW_REG)
-    tree.sub(WIRING, OLD_LIGHT_TEST, NEW_LIGHT_TEST)
+    """Nothing here. apply() writes GUARD_SOURCE to GUARD, and GUARD is the
+    file this pass replaces -- so the whole edit is the new test file."""
+    if not (Path.cwd() / SENTINEL_FILE).exists():
+        raise SystemExit(
+            f"{SENTINEL_FILE} is missing. Run the gold-text script for this "
+            f"repository first; this one extends the guard it installs.")
+    print("  replacing the gold guard with the bidirectional version")
 
 
 def checks(tree) -> None:
-    # SHAPE FIRST, on every file this pass touches.
-    for rel, added in EXPECTED_ADDED.items():
-        before = (Path.cwd() / rel).read_text(encoding="utf-8-sig")
-        after = tree.read(rel)
-        delta = after.count("\n") - before.count("\n")
-        if delta != added:
+    before = (Path.cwd() / SENTINEL_FILE).read_text(encoding="utf-8-sig")
+    after = tree.read(SENTINEL_FILE)
+
+    # Every test that was there is still there. Named individually rather
+    # than counted, because a count cannot tell you WHICH one went.
+    lost = [name for name in EXISTING if f"def {name}(" not in after]
+    if lost:
+        raise SystemExit(
+            "the replacement drops tests that existed before it:\n  "
+            + "\n  ".join(lost)
+            + "\n\nThis pass extends the guard. Removing a check while "
+              "adding one is a regression in the shape of an upgrade.")
+    for name in NEW:
+        if f"def {name}(" not in after:
+            raise SystemExit(f"the new file does not define {name}")
+        if f"def {name}(" in before:
             raise SystemExit(
-                f"{rel} changed shape by {delta} lines; this pass adds exactly "
-                f"{added}. A substitution that eats or adds a line ending "
-                f"leaves every value identical and every test green.")
+                f"{name} is already present. This has been applied.")
 
-    original = (Path.cwd() / SENTINEL_FILE).read_text(encoding="utf-8-sig")
-    edited = tree.read(SENTINEL_FILE)
+    # The replacement must be strictly longer. It adds two tests and two
+    # helpers and removes nothing.
+    if after.count("\n") <= before.count("\n"):
+        raise SystemExit(
+            f"the new guard is not longer than the old one "
+            f"({before.count(chr(10))} -> {after.count(chr(10))} lines), "
+            f"which an extension has to be.")
 
-    before, after = _resolve(original), _resolve(edited)
-    if set(before) != set(after):
-        raise SystemExit(f"a palette appeared or vanished: {set(before) ^ set(after)}")
-    moved = []
-    for name in before:
-        for key in set(before[name]) | set(after[name]):
-            was, now = before[name].get(key), after[name].get(key)
-            if was != now:
-                moved.append(f"{name}[{key!r}]: {was} -> {now}")
-    if moved:
-        raise SystemExit("THIS PASS MUST NOT MOVE A VALUE, and it moved these:\n  "
-                         + "\n  ".join(moved))
+    if SENTINEL not in after:
+        raise SystemExit(f"expected {SENTINEL!r} in the new guard")
 
-    # Completeness: neither value may survive as a literal in ANY palette,
-    # including the two this pass does not substitute in.
-    values = {v for table in SUBSTITUTE.values() for v in table}
-    lines = edited.splitlines()
-    bounds = _bounds([l + "\n" for l in lines])
-    survivors = []
-    for name in ALL_DICTS:
-        start, end = bounds[name]
-        for i in range(start, end):
-            m = re.match(r"^\s*'([a-z_0-9]+)':\s*'(#[0-9a-fA-F]{6})',", lines[i])
-            if m and m.group(2).lower() in values:
-                survivors.append(f"{name}[{m.group(1)!r}] = {m.group(2)}")
-    if survivors:
-        raise SystemExit("a registered value is still spelled as a literal:\n  "
-                         + "\n  ".join(survivors))
+    # The arithmetic the docstring claims, checked against the register's
+    # values rather than trusted from the prose above.
+    sys.path.insert(0, str(Path.cwd()))
 
-    # The value the plate is NOT. If #e8e8e8 ever lands on a hover key here,
-    # the reason this pass exists has been undone.
-    for name, palette in after.items():
-        for key, value in palette.items():
-            if "hover" in key and isinstance(value, str) and value.lower() == "#e8e8e8":
-                raise SystemExit(
-                    f"{name}[{key!r}] is #e8e8e8 -- that is the ground the gold "
-                    f"is calibrated against, not an interaction plate.")
+    def luminance(value):
+        channels = [int(value.lstrip("#")[i:i + 2], 16) / 255 for i in (0, 2, 4)]
+        channels = [c / 12.92 if c <= 0.03928 else ((c + 0.055) / 1.055) ** 2.4
+                    for c in channels]
+        return 0.2126 * channels[0] + 0.7152 * channels[1] + 0.0722 * channels[2]
 
-    if SENTINEL not in edited:
-        raise SystemExit(f"expected {SENTINEL!r} in the edited palette")
+    def contrast(a, b):
+        high, low = sorted((luminance(a), luminance(b)), reverse=True)
+        return (high + 0.05) / (low + 0.05)
+
+    black_on_deep = contrast("#000000", "#7e6529")
+    black_on_gold = contrast("#000000", "#8c7337")
+    if abs(black_on_deep - 3.7806) > 0.0002 or abs(black_on_gold - 4.6226) > 0.0002:
+        raise SystemExit(
+            f"the fill arithmetic has moved: black on the deep gold is "
+            f"{black_on_deep:.4f} and on the accent {black_on_gold:.4f}; this "
+            f"script says 3.7806 and 4.6226. Re-derive before trusting it.")
+    if black_on_deep >= 4.5:
+        raise SystemExit(
+            "black now clears the floor on BRAND_DARK_GOLD_DEEP, so the rule "
+            "this guard enforces has stopped being true. Read the register "
+            "before applying this.")
 
 
-GUARD_SOURCE = '"""The dark ladder\'s top rung and the light plate, both now registered.\n\nWHAT THIS PASS DID. rnv-brand rev 22 registered the two ends of the dark\nsurface ladder -- APP["canvas"] #0a0a0a and APP["panel-hover"] #3a3a3a -- and\nrev 23 registered APP["hover-light"] #eeeeee. Both were app-owned here. This\napp holds panel-hover and hover-light; it has no canvas surface. Neither value\nchanged: the pass changes provenance and spelling, not pixels.\n\nWHY THE LADDER WAS NOT "TWO-THIRDS SPECIFIED". The register originally said it\nwas, because APP["border"] #333333 is not #3a3a3a and so looked like a missing\nrung. It is not a rung at all -- #333333 is grey(3) on the INK grid, which\ngoverns inks and EDGES, and a border is an edge. The ladder was complete when\nthe question was first asked; it was measured against the wrong family.\n\n    BRAND_BLACK + n * 0x10,  n in -1..+2\n    #0a0a0a canvas   #1a1a1a panel   #2a2a2a card   #3a3a3a panel-hover\n\nWHY THE PLATE IS #eeeeee AND NOT #e8e8e8. #e8e8e8 is the ground\nBRAND_DARK_GOLD_DEEP is calibrated against: the smallest uniform step that\nclears it is -14, and -13 gives 4.4675 and fails. Registering it as the hover\nwould have put every hover in the app on the one value the gold cannot afford\nto lose, with 0.0334 of margin. A boundary is not a plate. #eeeeee is grey(14),\none step inside, and gold reads 4.7875 on it. The margin is asserted below\nrather than described, because a comment cannot fail.\n\n#e8e8e8 keeps everything else it had -- registered, the published gold-as-text\nboundary, the binding ground. It is simply not the hover.\n"""\nfrom __future__ import annotations\n\nimport ast\nimport pathlib\n\nimport pytest\n\nfrom ui import colors\nfrom ui.colors import (DARK_THEME_COLORS as DARK,\n                       IMAGE_MODE_COLORS as IMAGE,\n                       LIGHT_THEME_COLORS as LIGHT)\n\nROOT = pathlib.Path(__file__).resolve().parents[1]\nSRC = ROOT / \'ui/colors.py\'\n\nGRID_STEP = 0x11\nLADDER_STEP = 0x10\nTEXT_FLOOR = 4.5\n\n#: Constant name -> the register key it mirrors, and the value both hold.\nNEW = {\'APP_PANEL_HOVER\': (\'panel-hover\', \'#3a3a3a\'),\n       \'APP_HOVER_LIGHT\': (\'hover-light\', \'#eeeeee\')}\n\n#: palette dict name -> the keys in it that must now name the constant.\nWIRED = {\n    \'DARK_THEME_COLORS\': (\'hover_bg\', \'button_hover_bg\',\n                          \'list_hover_bg\'),\n    \'LIGHT_THEME_COLORS\': (\'hover_bg\', \'button_hover_bg\',\n                           \'accent_button_hover_bg\',\n                           \'tab_hover_bg\', \'list_hover_bg\'),\n}\n\n#: dict NAME -> the live dict. Looking a key up in the wrong palette is how a\n#: per-mode difference gets checked against the other mode\'s value and passes.\nPALETTES = {\'DARK_THEME_COLORS\': DARK, \'IMAGE_MODE_COLORS\': IMAGE,\n             \'LIGHT_THEME_COLORS\': LIGHT}\n\n#: The value the plate is NOT, and the reason the distinction is worth a test.\nBOUNDARY = \'#e8e8e8\'\n\n\ndef grey(n: int) -> str:\n    v = n * GRID_STEP\n    return \'#%02x%02x%02x\' % (v, v, v)\n\n\ndef _luminance(value: str) -> float:\n    channels = [int(value.lstrip(\'#\')[i:i + 2], 16) / 255 for i in (0, 2, 4)]\n    channels = [c / 12.92 if c <= 0.03928 else ((c + 0.055) / 1.055) ** 2.4\n                for c in channels]\n    return 0.2126 * channels[0] + 0.7152 * channels[1] + 0.0722 * channels[2]\n\n\ndef _contrast(a: str, b: str) -> float:\n    high, low = sorted((_luminance(a), _luminance(b)), reverse=True)\n    return (high + 0.05) / (low + 0.05)\n\n\ndef _dict_node(name: str) -> ast.Dict:\n    tree = ast.parse(SRC.read_text(encoding=\'utf-8-sig\'))\n    for node in ast.walk(tree):\n        if isinstance(node, (ast.Assign, ast.AnnAssign)):\n            target = node.targets[0] if isinstance(node, ast.Assign) else node.target\n            if getattr(target, \'id\', None) == name and isinstance(node.value, ast.Dict):\n                return node.value\n    raise AssertionError(f\'{name} is not a dict literal in ui/colors.py\')\n\n\ndef _entry(node: ast.Dict, key: str):\n    for k, v in zip(node.keys, node.values):\n        if isinstance(k, ast.Constant) and k.value == key:\n            return v\n    return None\n\n\n# ------------------------------------------------------------- guard the guard\n\ndef test_everything_this_file_reads_still_exists():\n    """Every assertion below reads these. Renaming a key must fail loudly here\n    rather than let the rest pass quietly over nothing."""\n    for name in NEW:\n        assert hasattr(colors, name), f\'colors has no {name}\'\n    for dict_name, keys in WIRED.items():\n        assert dict_name in PALETTES, f\'{dict_name} is not in PALETTES\'\n        for key in keys:\n            assert key in PALETTES[dict_name], f\'{dict_name} has no {key!r}\'\n\n\ndef test_the_wiring_map_is_not_empty():\n    """Every sweep below iterates WIRED. An empty map passes all of them."""\n    assert WIRED and all(WIRED.values()), \'WIRED lists nothing to check\'\n    assert sum(len(v) for v in WIRED.values()) >= 3\n\n\n# ------------------------------------------------------------------- the values\n\ndef test_the_new_constants_hold_the_registered_values():\n    """The local half of the mirror. Runs everywhere, including where\n    engine.brand is not importable -- which is exactly why it is not optional."""\n    drift = {n: getattr(colors, n) for n, (_, v) in NEW.items()\n             if getattr(colors, n) != v}\n    assert not drift, (\n        f\'these constants no longer hold their registered values: {drift}\\n\'\n        f\'If the brand moved, update this file in the same commit that updates \'\n        f\'ui/colors.py -- never one without the other.\')\n\n\ndef test_the_new_constants_match_rnv_brand():\n    """The upstream half. Skips where rnv-brand is not importable."""\n    brand = pytest.importorskip(\n        \'engine.brand\',\n        reason=\'rnv-brand not importable here; the local pin is doing the work\')\n    drift = []\n    for name, (key, _) in NEW.items():\n        theirs, mine = brand.APP[key], getattr(colors, name)\n        if mine.lower() != theirs.lower():\n            drift.append(f\'{name}: ours {mine}, theirs APP[{key!r}] {theirs}\')\n    assert not drift, \'drift from rnv-brand:\\n  \' + \'\\n  \'.join(drift)\n\n\ndef test_both_are_declared_register_owned():\n    """A classification that lives only in a test drifts from the thing it\n    classifies, so it lives in the module and is read from there."""\n    for name in NEW:\n        assert colors.APP_PROVENANCE.get(name) == \'register\', (\n            f\'{name} is not declared register-owned in APP_PROVENANCE. It was \'\n            f\'app-owned until rnv-brand registered it; the provenance is the \'\n            f\'whole change.\')\n\n\n# ------------------------------------------------------------------ the ladder\n\ndef test_the_dark_rungs_are_exact_steps_on_the_ladder():\n    """BRAND_BLACK + n * 0x10. Two of these were app-owned on the argument that\n    the ladder might not be real. It is, and this is what says so."""\n    base = int(colors.BRAND_BLACK.lstrip(\'#\'), 16)\n    for n, name in ((0, \'BRAND_BLACK\'), (1, \'APP_CARD\'), (2, \'APP_PANEL_HOVER\')):\n        want = base + n * (LADDER_STEP * 0x010101)\n        assert int(getattr(colors, name).lstrip(\'#\'), 16) == want, (\n            f\'{name} is {getattr(colors, name)}, not rung n={n} of \'\n            f\'BRAND_BLACK + n*0x10\')\n\n\ndef test_the_border_is_an_edge_and_not_a_rung():\n    """The distinction that made the ladder look incomplete. #333333 is grey(3)\n    on the ink grid, which governs inks and edges; it was never a surface."""\n    assert colors.APP_BORDER == grey(3)\n    base = int(colors.BRAND_BLACK.lstrip(\'#\'), 16)\n    rungs = {base + n * (LADDER_STEP * 0x010101) for n in range(-1, 3)}\n    assert int(colors.APP_BORDER.lstrip(\'#\'), 16) not in rungs\n\n\n# ------------------------------------------------------------------- the plate\n\ndef test_the_plate_is_a_step_on_the_ink_grid():\n    assert colors.APP_HOVER_LIGHT == grey(14) == \'#eeeeee\'\n\n\ndef test_the_plate_carries_gold_with_room_to_spare():\n    """The reason the register moved the value. Both plates clear the floor;\n    only one clears it by enough to survive the gold moving."""\n    gold = colors.BRAND_DARK_GOLD_DEEP\n    here = _contrast(gold, colors.APP_HOVER_LIGHT)\n    edge = _contrast(gold, BOUNDARY)\n    assert here >= TEXT_FLOOR, f\'gold reads {here:.4f} on the plate\'\n    assert here - TEXT_FLOOR >= 0.2, (\n        f\'the plate clears the floor by only {here - TEXT_FLOOR:.4f}. The \'\n        f\'register moved APP["hover-light"] here to get margin, not to get a \'\n        f\'pass.\')\n    assert edge - TEXT_FLOOR < 0.05, (\n        f\'{BOUNDARY} now clears the floor by {edge - TEXT_FLOOR:.4f}, so it is \'\n        f\'no longer the knife-edge this ruling was about. Either the gold moved \'\n        f\'or the floor did; re-derive before trusting the value above.\')\n\n\ndef test_the_boundary_is_not_used_as_a_hover_anywhere():\n    """A negative check needs a companion proving it is still looking, or it\n    passes by finding nothing for the wrong reason."""\n    looked = 0\n    found = []\n    for dict_name, live in PALETTES.items():\n        for key, value in live.items():\n            if \'hover\' not in key:\n                continue\n            looked += 1\n            if value.lower() == BOUNDARY:\n                found.append(f\'{dict_name}[{key!r}]\')\n    assert looked >= 3, f\'only {looked} hover keys seen -- the sweep is blind\'\n    assert not found, (\n        f\'{BOUNDARY} is being used as a hover plate: {found}. It is the ground \'\n        f\'BRAND_DARK_GOLD_DEEP is calibrated against, not an interaction state.\')\n\n\n# ------------------------------------------------- the spelling, not the value\n\ndef test_every_wired_entry_names_the_constant_not_a_literal():\n    """A literal cannot follow its base. This is the point of the pass: if the\n    register moves either value again, these move with it or this fails."""\n    literals = []\n    for dict_name, keys in WIRED.items():\n        node = _dict_node(dict_name)\n        for key in keys:\n            value = _entry(node, key)\n            if not isinstance(value, ast.Name) or value.id not in NEW:\n                literals.append(\n                    f\'{dict_name}[{key!r}] = \'\n                    f\'{ast.unparse(value) if value else "missing"}\')\n    assert not literals, (\n        \'entries still written as literals:\\n  \' + \'\\n  \'.join(literals))\n\n\ndef test_the_resolved_values_are_the_constants():\n    """The AST check above proves the spelling; this proves the value. Both,\n    because a name can be spelled correctly and resolve to something else."""\n    for dict_name, keys in WIRED.items():\n        node = _dict_node(dict_name)\n        for key in keys:\n            name = _entry(node, key).id\n            assert PALETTES[dict_name][key] == getattr(colors, name), (\n                f\'{dict_name}[{key!r}] resolves to \'\n                f\'{PALETTES[dict_name][key]}, not {name}\')\n\n\ndef test_no_literal_of_either_value_survives_in_any_palette():\n    """Completeness. The two checks above prove the keys we listed are wired;\n    this proves we did not miss one."""\n    values = {v for _, v in NEW.values()}\n    survivors = []\n    for dict_name in PALETTES:\n        node = _dict_node(dict_name)\n        for k, v in zip(node.keys, node.values):\n            if (isinstance(v, ast.Constant) and isinstance(v.value, str)\n                    and v.value.lower() in values):\n                survivors.append(f\'{dict_name}[{k.value!r}] = {v.value}\')\n    assert not survivors, (\n        \'registered values still spelled as literals:\\n  \'\n        + \'\\n  \'.join(survivors))\n'
+GUARD_SOURCE = '"""Gold drawn as TEXT must clear the text floor on the ground it is drawn on.\n\nWHY THIS EXISTS. The gold family has two members that look interchangeable and\nare not. BRAND_DARK_GOLD #8c7337 fills and bounds correctly on light surfaces\nand FAILS as text on them; BRAND_DARK_GOLD_DEEP #7e6529 is the derivative that\nexists for text, and the palettes name it `accent_ink` -- "Accent when it\ncarries text". In DARK MODE THE TWO ARE THE SAME VALUE, so every check written\nwhere they coincide is blind to the case where they diverge, and that is\nexactly what happened: gold-as-text sites shipped in light mode at 3.71 and\n4.17 against a 4.5 floor, in more than one application, for as long as the\ndialogs have existed.\n\nWHAT IT DOES. Reads every f-string in the source, pulls `color:` and\n`background-color:` out of each QSS rule, resolves the placeholders through\nthis app\'s own palettes, and measures. A declaration whose foreground is a\ngold-family value and whose contrast falls below the floor fails.\n\nWHAT IT CANNOT SEE, stated because a sweep that reports only what it found\nlooks identical to one that found nothing:\n\n  - a placeholder that is not a palette lookup, a module constant or a local\n    bound to one is UNRESOLVED and skipped\n  - a rule with no background-color of its own INHERITS, and the ground is\n    taken from the palette\'s window or panel value, which is a guess\n\nBoth counts are asserted rather than printed: if the resolved count collapses,\nthe sweep has gone blind and says so instead of passing.\n\nREADING THE MODE. A block written inside `if self._is_dark:` and bound with\n`_d = ThemeManager.DARK_THEME` is dark-only, and scoring it against the light\npalette invents a pairing that never renders. Declarations are restricted to\nthe mode their variable came from. The first version of this sweep, without\nthat, reported five impossible failures including gold on #333333 at 2.78.\n"""\nfrom __future__ import annotations\n\nimport ast\nimport pathlib\nimport re\n\nimport pytest\n\nfrom ui import colors\nfrom ui.colors import (DARK_THEME_COLORS as DARK,\n                       IMAGE_MODE_COLORS as IMAGE,\n                       LIGHT_THEME_COLORS as LIGHT)\n\nROOT = pathlib.Path(__file__).resolve().parents[1]\n\nTEXT_FLOOR = 4.5\nHEX = re.compile(r\'^#[0-9a-fA-F]{6}$\')\nBLOCK = re.compile(r\'([^{}\\n][^{}]*?)\\{\\{(.*?)\\}\\}\', re.S)\nDECL = re.compile(r\'(?<!-)\\bcolor\\s*:\\s*([^;\\n]+)\')\nBGDECL = re.compile(r\'background-color\\s*:\\s*([^;\\n]+)\')\nLOOKUP = re.compile(r"^\\{\\s*([A-Za-z_][A-Za-z_0-9]*)\\s*\\[\\s*[\'\\"]([a-z_0-9]+)[\'\\"]\\s*\\]\\s*\\}$")\n#: `{t.get(\'tab_selected_bg\', bg)}` is a lookup wearing a fallback. Reading it\n#: as unresolvable made the sweep guess the ground from the palette and score\n#: rnv-color-mixer\'s selected tab at 4.1670 when it actually sits on #ffffff\n#: and clears at 4.5429 -- a failure that does not exist.\nGETLOOKUP = re.compile(\n    r"^\\{\\s*([A-Za-z_][A-Za-z_0-9]*)\\s*\\.get\\(\\s*[\'\\"]([a-z_0-9]+)[\'\\"]\\s*(?:,.*)?\\)\\s*\\}$",\n    re.S)\nBARE = re.compile(r\'^\\{\\s*([A-Za-z_][A-Za-z_0-9]*)\\s*\\}$\')\n\nMODE_MARKERS = ((\'DARK\', (\'DARK_THEME\', \'.DARK\', \'DARK_THEME_COLORS\')),\n                (\'LIGHT\', (\'LIGHT_THEME\', \'.LIGHT\', \'LIGHT_THEME_COLORS\')),\n                (\'IMAGE\', (\'IMAGE_THEME\', \'.IMAGE\', \'IMAGE_MODE_COLORS\')))\n\n#: mode -> the live palette.\nPALETTES = {\'DARK\': DARK, \'LIGHT\': LIGHT, \'IMAGE\': IMAGE}\n\n#: Keys tried, in order, when a rule inherits its ground.\nGROUND_KEYS = (\'panel_bg\', \'window_bg\', \'card_bg\')\n\n#: Declarations that are below the floor and are CORRECT ANYWAY, keyed by the\n#: declaration text rather than by line number -- an edit above a site shifts\n#: its line and would silently un-review it, while the declaration itself is\n#: stable. Same form as REVIEWED in tests/test_brand_contrast.py.\n#:\n#: An entry here is an exemption, so it has to earn its place twice: the\n#: reason must be true, and test_no_exemption_has_outlived_its_reason below\n#: fails when the site it names has stopped failing, so a fix cannot leave a\n#: licence standing behind it.\nACCEPTED: dict[str, str] = {}\n\n#: Below this, the sweep has stopped finding things and is passing for the\n#: wrong reason.\nMIN_RESOLVED = 20\n\n\ndef _luminance(value: str) -> float:\n    channels = [int(value.lstrip(\'#\')[i:i + 2], 16) / 255 for i in (0, 2, 4)]\n    channels = [c / 12.92 if c <= 0.03928 else ((c + 0.055) / 1.055) ** 2.4\n                for c in channels]\n    return 0.2126 * channels[0] + 0.7152 * channels[1] + 0.0722 * channels[2]\n\n\ndef _contrast(a: str, b: str) -> float:\n    high, low = sorted((_luminance(a), _luminance(b)), reverse=True)\n    return (high + 0.05) / (low + 0.05)\n\n\n#: Names that contain GOLD and are not a gold. GOLD_TEXT_GROUND_FLOOR is the\n#: light GROUND the gold family is calibrated against -- #e8e8e8 -- and a\n#: name-based sweep swept it into the family, after which every disabled\n#: control drawn on it was reported as gold-on-gold at 1.8960. Those pairs are\n#: real and already exempt as WCAG-exempt disabled text; they are not gold.\n#: Match what the name CLAIMS, not the substring it contains.\nNOT_A_GOLD = (\'GROUND\', \'FLOOR\', \'RGB\')\n\n\ndef _golds() -> set:\n    """Every gold-family value this app holds, by name rather than by list."""\n    out = set()\n    for name in dir(colors):\n        if \'GOLD\' not in name or any(w in name for w in NOT_A_GOLD):\n            continue\n        value = getattr(colors, name)\n        if isinstance(value, str) and HEX.match(value):\n            out.add(value.lower())\n    return out\n\n\ndef _fstrings(source: str):\n    """(lineno, text, local bindings) for every f-string mentioning a colour.\n\n    Read through ast.JoinedStr, NOT the token stream. Python 3.12 splits an\n    f-string into FSTRING_START/MIDDLE/END tokens (PEP 701) rather than one\n    STRING token, so a tokenising version finds every f-string on 3.11 and none\n    on 3.12 -- reporting zero sites, which reads as clean and is blind.\n    """\n    try:\n        tree = ast.parse(source)\n    except SyntaxError:\n        return []\n    out, seen = [], set()\n    scopes = [n for n in ast.walk(tree)\n              if isinstance(n, (ast.Module, ast.FunctionDef, ast.AsyncFunctionDef))]\n    for scope in scopes:\n        binds = {}\n        for node in ast.walk(scope):\n            if (isinstance(node, ast.Assign) and len(node.targets) == 1\n                    and isinstance(node.targets[0], ast.Name)):\n                try:\n                    binds[node.targets[0].id] = ast.unparse(node.value)\n                except Exception:\n                    continue\n        for node in ast.walk(scope):\n            if not isinstance(node, ast.JoinedStr):\n                continue\n            segment = ast.get_source_segment(source, node)\n            if not segment or \'color\' not in segment:\n                continue\n            key = (node.lineno, segment[:80])\n            if key in seen:\n                continue\n            seen.add(key)\n            out.append((node.lineno, segment, dict(binds)))\n    return out\n\n\ndef _resolve(expr: str, palette: dict, binds: dict):\n    expr = expr.strip()\n    match = BARE.match(expr)\n    if match and match.group(1) in binds:\n        expr = \'{\' + binds[match.group(1)] + \'}\'\n    if HEX.match(expr):\n        return expr.lower()\n    match = LOOKUP.match(expr) or GETLOOKUP.match(expr)\n    if match:\n        value = palette.get(match.group(2))\n        return value.lower() if isinstance(value, str) and HEX.match(value) else None\n    match = BARE.match(expr)\n    if match:\n        value = getattr(colors, match.group(1), None)\n        return value.lower() if isinstance(value, str) and HEX.match(value) else None\n    return None\n\n\ndef _modes_for(expr: str, binds: dict):\n    expr = expr.strip()\n    match = LOOKUP.match(expr) or GETLOOKUP.match(expr)\n    if not match:\n        return list(PALETTES)\n    bound = binds.get(match.group(1), \'\')\n    for mode, markers in MODE_MARKERS:\n        if any(marker in bound for marker in markers):\n            return [mode] if mode in PALETTES else []\n    return list(PALETTES)\n\n\n#: Rules whose background is what an unstyled child sits on.\nCONTAINER_SELECTORS = (\'body\', \'*\', \'QDialog\', \'QWidget\', \'QFrame\', \'QMainWindow\')\n\n\ndef _enclosing_ground(text: str, palette: dict, binds: dict):\n    """The ground an inheriting rule actually sits on: the background painted\n    by the container rule in the same stylesheet."""\n    for selector, body in BLOCK.findall(text):\n        name = \' \'.join(selector.split())\n        if not any(name == c or name.startswith(c + \' \') or name.startswith(c + \',\')\n                   for c in CONTAINER_SELECTORS):\n            continue\n        decl = BGDECL.search(body)\n        if decl:\n            resolved = _resolve(decl.group(1), palette, binds)\n            if resolved:\n                return resolved\n    return None\n\n\n#: Qt sub-controls that PAINT rather than draw text. A scrollbar handle, a\n#: progress-bar chunk and a checkbox indicator carry no label, so inheriting a\n#: foreground onto them invents a pairing that never renders.\n#:\n#: The first version of this sweep did exactly that and reported eleven\n#: failures in rnv-text-transformer -- APP_TEXT on the brand gold at 1.3616,\n#: on scrollbar handles and progress chunks. Every one impossible.\n#:\n#: Not every sub-control is textless: ::item, ::tab, ::section and ::title all\n#: draw labels, which is why this is a list and not a rule about `::`. The\n#: form and the first seven entries are taken from\n#: tests/test_contrast_pairs.py, which already had to make this distinction.\nTEXTLESS = (\'add-line\', \'add-page\', \'down-arrow\', \'down-button\', \'drop-down\', \'groove\', \'handle\', \'indicator\', \'scroller\', \'sub-line\', \'sub-page\', \'up-button\')\n\n\ndef _is_textless(selector: str) -> bool:\n    if \'::\' not in selector:\n        return False\n    part = selector.split(\'::\', 1)[1]\n    name = re.split(r\'[:\\[ ,]\', part)[0].strip()\n    return name in TEXTLESS\n\n\ndef _enclosing_label(text: str, palette: dict, binds: dict):\n    """The label an inheriting rule actually draws: the `color:` declared by\n    the container rule in the same stylesheet.\n\n    A fill rule often sets only a background -- `QPushButton:hover { background\n    -color: ... }` -- and the label comes from the base `QPushButton` rule.\n    Reading it is what makes the fill direction checkable at all: six of the\n    ten gold fills across these apps declare no colour of their own.\n    """\n    for selector, body in BLOCK.findall(text):\n        name = \' \'.join(selector.split())\n        if \':\' in name or \'::\' in name:\n            continue          # a state rule, not the base it inherits from\n        decl = DECL.search(body)\n        if decl:\n            resolved = _resolve(decl.group(1), palette, binds)\n            if resolved:\n                return resolved\n    return None\n\n\ndef _fill_sweep():\n    """(key, mode, label, fill, ratio, where) for every rule whose BACKGROUND\n    is a gold-family value, with the label drawn on it."""\n    rows, unresolved = [], 0\n    golds = _golds()\n    for path in sorted(ROOT.rglob(\'*.py\')):\n        if any(part in {\'.git\', \'tests\', \'build\'} for part in path.parts):\n            continue\n        if path.name == \'up.py\':\n            continue\n        source = path.read_text(encoding=\'utf-8-sig\', errors=\'replace\')\n        if \'background-color\' not in source:\n            continue\n        for lineno, text, binds in _fstrings(source):\n            for selector, body in BLOCK.findall(text):\n                bg_decl = BGDECL.search(body)\n                if not bg_decl:\n                    continue\n                fg_decl = DECL.search(body)\n                key = f\'{path.relative_to(ROOT)} :: {" ".join(bg_decl.group(0).split())}\'\n                modes = _modes_for(bg_decl.group(1), binds)\n                if fg_decl is not None:\n                    modes = [m for m in modes\n                             if m in _modes_for(fg_decl.group(1), binds)]\n                for mode in modes:\n                    palette = PALETTES[mode]\n                    fill = _resolve(bg_decl.group(1), palette, binds)\n                    if fill is None:\n                        unresolved += 1\n                        continue\n                    if fill not in golds:\n                        continue\n                    label = (_resolve(fg_decl.group(1), palette, binds)\n                             if fg_decl is not None else None)\n                    if label is None:\n                        if _is_textless(selector):\n                            # A painted sub-control. It has no label to\n                            # inherit, and giving it one manufactures a\n                            # failure that cannot render.\n                            continue\n                        label = _enclosing_label(text, palette, binds)\n                    if label is None:\n                        # No text is drawn here that this reader can find --\n                        # a checkbox indicator or a progress chunk. Counted,\n                        # not guessed at.\n                        unresolved += 1\n                        continue\n                    rows.append((key, mode, label, fill, _contrast(label, fill),\n                                 f\'{path.relative_to(ROOT)}:{lineno} \'\n                                 f\'{" ".join(selector.split())}\'))\n    return rows, unresolved\n\n\ndef _sweep():\n    """(key, mode, fg, bg, ratio, where) for every resolved gold-as-text pair,\n    plus the count of declarations that could not be resolved."""\n    rows, unresolved = [], 0\n    golds = _golds()\n    for path in sorted(ROOT.rglob(\'*.py\')):\n        if any(part in {\'.git\', \'tests\', \'build\'} for part in path.parts):\n            continue\n        if path.name == \'up.py\':\n            continue\n        source = path.read_text(encoding=\'utf-8-sig\', errors=\'replace\')\n        if \'color:\' not in source:\n            continue\n        for lineno, text, binds in _fstrings(source):\n            for selector, body in BLOCK.findall(text):\n                fg_decl = DECL.search(body)\n                if not fg_decl:\n                    continue\n                bg_decl = BGDECL.search(body)\n                key = f\'{path.relative_to(ROOT)} :: {" ".join(fg_decl.group(0).split())}\'\n                modes = _modes_for(fg_decl.group(1), binds)\n                if bg_decl is not None:\n                    modes = [m for m in modes\n                             if m in _modes_for(bg_decl.group(1), binds)]\n                for mode in modes:\n                    palette = PALETTES[mode]\n                    fg = _resolve(fg_decl.group(1), palette, binds)\n                    if fg is None:\n                        unresolved += 1\n                        continue\n                    if fg not in golds:\n                        continue\n                    bg = (_resolve(bg_decl.group(1), palette, binds)\n                          if bg_decl is not None else None)\n                    if bg is None:\n                        # INHERITANCE, in three steps, most specific first.\n                        # A rule with no ground of its own sits on whatever the\n                        # enclosing rule painted -- usually `body` or the\n                        # top-level widget in the SAME stylesheet. Reading that\n                        # is the difference between measuring what renders and\n                        # measuring a guess: rnv-text-transformer\'s exported\n                        # h1 inherits #ffffff from `body` and clears at 4.5429,\n                        # and a palette guess of #f5f5f5 scored it 4.1670 and\n                        # called it a failure.\n                        bg = _enclosing_ground(text, palette, binds)\n                    if bg is None:\n                        for candidate in GROUND_KEYS:\n                            value = palette.get(candidate)\n                            if isinstance(value, str) and HEX.match(value):\n                                bg = value.lower()\n                                break\n                    if bg is None:\n                        unresolved += 1\n                        continue\n                    rows.append((key, mode, fg, bg, _contrast(fg, bg),\n                                 f\'{path.relative_to(ROOT)}:{lineno} {" ".join(selector.split())}\'))\n    return rows, unresolved\n\n\n# ------------------------------------------------------------- guard the guard\n\ndef test_the_sweep_still_finds_things():\n    """Every assertion below reads this sweep. One that resolves nothing\n    reports no failures and passes -- which is what a blind check looks like\n    from the outside."""\n    rows, _ = _sweep()\n    assert len(rows) >= MIN_RESOLVED, (\n        f\'only {len(rows)} gold-as-text pairs resolved, expected at least \'\n        f\'{MIN_RESOLVED}. Either the QSS moved out of f-strings or the \'\n        f\'resolver stopped following it. A sweep that finds nothing is not a \'\n        f\'clean sweep.\')\n\n\ndef test_the_gold_family_is_not_empty():\n    """The sweep filters on this set. Empty, it matches nothing."""\n    golds = _golds()\n    assert len(golds) >= 3, f\'only {sorted(golds)} found as gold values\'\n\n\ndef test_the_two_golds_actually_differ_in_light():\n    """The premise of this whole file. If accent and accent_ink ever hold the\n    same value in light mode, the distinction it enforces has gone and the\n    tests below would pass without meaning anything."""\n    light = PALETTES.get(\'LIGHT\')\n    if light is None or \'accent\' not in light or \'accent_ink\' not in light:\n        pytest.skip(\'this app does not name accent and accent_ink\')\n    assert light[\'accent\'] != light[\'accent_ink\'], (\n        \'accent and accent_ink are the same value in light mode. In dark they \'\n        \'legitimately are; in light the whole point is that they are not.\')\n\n\n# ------------------------------------------------------------------- the floor\n\ndef test_no_gold_is_drawn_as_text_below_the_floor():\n    rows, _unresolved = _sweep()\n    failures = []\n    for key, mode, fg, bg, ratio, where in rows:\n        if ratio >= TEXT_FLOOR or key in ACCEPTED:\n            continue\n        failures.append(f\'{ratio:.4f}  {mode}  {fg} on {bg}  {where}\')\n    assert not failures, (\n        \'gold drawn as text below the 4.5 floor:\\n  \' + \'\\n  \'.join(sorted(failures))\n        + \'\\n\\nThe palette names a derivative for this: accent_ink. In dark it \'\n          \'is the same value as accent, which is why the difference only shows \'\n          \'in light.\')\n\n\ndef test_no_exemption_has_outlived_its_reason():\n    """An exemption whose site has stopped failing is a licence with no\n    subject -- it would let a future regression at the same declaration pass\n    unseen. Fixing a site means deleting its entry in the same commit."""\n    rows, _unresolved = _sweep()\n    failing = {key for key, _m, _f, _b, ratio, _w in rows if ratio < TEXT_FLOOR}\n    stale = sorted(set(ACCEPTED) - failing)\n    assert not stale, (\n        \'these ACCEPTED entries no longer describe a failing site:\\n  \'\n        + \'\\n  \'.join(stale)\n        + \'\\n\\nDelete the entry in the commit that fixed it.\')\n\n\n# ------------------------------------------------------- the other direction\n\ndef test_no_gold_fill_carries_a_label_below_the_floor():\n    """THE OTHER HALF OF THE RULE, and it is not symmetric.\n\n    rnv-brand rev 25 publishes it bidirectionally:\n\n        On a light ground, gold as TEXT is BRAND_DARK_GOLD_DEEP.\n        Gold as a FILL or an EDGE is BRAND_DARK_GOLD.\n\n    The second sentence is not politeness. BRAND_DARK_GOLD_DEEP is derived for\n    text and FAILS the fill job -- black on it reads 3.7806 against a 4.5\n    floor, where BRAND_DARK_GOLD reads 4.6226. So a sweep that replaced every\n    BRAND_DARK_GOLD with the derivative, reading the rule as "prefer DEEP",\n    would fix the text sites and break the fills.\n\n    Nothing fails this today, in any of the five applications. That is the\n    reason to arm it now: a guard proposed against a live defect writes\n    itself, and a guard proposed against a clean sweep gets harder to justify\n    every month the sweep stays clean.\n    """\n    rows, _unresolved = _fill_sweep()\n    failures = []\n    for key, mode, label, fill, ratio, where in rows:\n        if ratio >= TEXT_FLOOR or key in ACCEPTED:\n            continue\n        failures.append(f\'{ratio:.4f}  {mode}  {label} on {fill}  {where}\')\n    assert not failures, (\n        \'a label falls below the floor on a gold fill:\\n  \'\n        + \'\\n  \'.join(sorted(failures))\n        + \'\\n\\nA FILL takes BRAND_DARK_GOLD, not the text derivative. Black \'\n          \'on the derivative is 3.7806.\')\n\n\ndef test_the_fill_sweep_still_finds_things():\n    """Guard the guard, on the half with no failures. A sweep over a clean\n    codebase and a sweep that resolves nothing produce the same report, and\n    this is the only thing that tells them apart."""\n    rows, _unresolved = _fill_sweep()\n    assert rows, (\n        \'no gold fills resolved at all. Either this app draws none -- in \'\n        \'which case delete this test rather than leave it passing over \'\n        \'nothing -- or the resolver has stopped following the expressions \'\n        \'that reach them.\')\n\n\ndef test_every_textless_entry_is_a_real_sub_control():\n    """TEXTLESS is an exclusion list, so it is an exemption: an entry that\n    names nothing excludes nothing, and one that names a sub-control which\n    actually draws text excludes a site that should be checked.\n\n    Only the first half can be asserted -- that every entry appears as a\n    `::name` somewhere in this app\'s stylesheets. Whether a sub-control draws\n    text is a fact about Qt, not about this repository, and it lives in the\n    comment beside the list.\n    """\n    seen = set()\n    for path in ROOT.rglob(\'*.py\'):\n        if any(part in {\'.git\', \'build\'} for part in path.parts):\n            continue\n        source = path.read_text(encoding=\'utf-8-sig\', errors=\'replace\')\n        for match in re.finditer(r\'::([a-z][a-z-]*)\', source):\n            seen.add(match.group(1))\n    stale = [name for name in TEXTLESS if name not in seen]\n    assert not stale, (\n        f\'TEXTLESS names sub-controls this app never styles: {stale}. An \'\n        f\'exclusion that excludes nothing is a licence with no subject -- \'\n        f\'delete it, or find out why the sub-control went away.\')\n'
 
 
 # ------------------------------------------------------------------ plumbing
