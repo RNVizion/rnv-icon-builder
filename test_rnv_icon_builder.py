@@ -115,8 +115,9 @@ from ui.colors               import (
     BRAND_GOLD, BRAND_DARK_GOLD, BRAND_GOLD_RGB, BRAND_DARK_GOLD_RGB,
     DARK_THEME_COLORS, LIGHT_THEME_COLORS, IMAGE_MODE_COLORS,
     get_theme_colors,
-    DEFAULT_CUSTOM_BG_COLOR, CONTRAST_ON_LIGHT, CONTRAST_ON_DARK,
-    SWATCH_BORDER_ON_LIGHT, SWATCH_BORDER_ON_DARK, STATUS_ACTIVE_COLOR,
+    DEFAULT_CUSTOM_BG_COLOR, STATUS_ACTIVE_COLOR,
+    TRUE_BLACK, WHITE, APP_BORDER, GREY_CC,
+    contrast_ink, swatch_edge, contrast_ratio,
 )
 from ui.theme_manager        import ThemeManager
 from ui.preview_utils        import (
@@ -209,18 +210,31 @@ class TestColors(unittest.TestCase):
     def test_default_custom_bg_color(self):
         self.assertRegex(DEFAULT_CUSTOM_BG_COLOR, r'^#[0-9a-fA-F]{6}$')
 
-    def test_contrast_on_light_is_black(self):
-        self.assertEqual(CONTRAST_ON_LIGHT, "#000000")
+    def test_contrast_ink_picks_black_on_a_light_ground(self):
+        """RNV-INK-RULE: the pair used to be two constants named for the
+        ground they sat on. The question is now asked, not answered in
+        advance, so the test asks it too."""
+        self.assertEqual(contrast_ink("#ffffff"), TRUE_BLACK)
+        self.assertEqual(contrast_ink((0, 255, 0)), TRUE_BLACK)
 
-    def test_contrast_on_dark_is_white(self):
-        self.assertEqual(CONTRAST_ON_DARK, "#ffffff")
+    def test_contrast_ink_picks_white_on_a_dark_ground(self):
+        self.assertEqual(contrast_ink("#000000"), WHITE)
+        self.assertEqual(contrast_ink((0, 0, 128)), WHITE)
 
     def test_status_active_color_nonempty(self):
         self.assertGreater(len(STATUS_ACTIVE_COLOR), 3)
 
-    def test_swatch_borders_nonempty(self):
-        self.assertGreater(len(SWATCH_BORDER_ON_LIGHT), 0)
-        self.assertGreater(len(SWATCH_BORDER_ON_DARK), 0)
+    def test_swatch_edge_shares_the_ink_rule(self):
+        """The same question with a different pair of candidates. A
+        len() > 0 assertion could not have caught either of the two
+        disagreeing brightness rules this replaced."""
+        self.assertEqual(swatch_edge("#ffffff"), APP_BORDER)
+        self.assertEqual(swatch_edge("#000000"), GREY_CC)
+        for ground in ("#ffffff", "#000000", "#8c7337", "#00ff00", "#777777"):
+            edge = swatch_edge(ground)
+            other = GREY_CC if edge == APP_BORDER else APP_BORDER
+            self.assertGreaterEqual(contrast_ratio(ground, edge),
+                                    contrast_ratio(ground, other))
 
     # ── Required keys present in all theme dicts ───────────────────────────────
     _REQUIRED_KEYS = [

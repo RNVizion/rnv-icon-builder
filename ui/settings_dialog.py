@@ -47,7 +47,7 @@ from PyQt6.QtGui import QIcon, QPixmap, QColor
 from utils.config import ICON_SIZES
 from ui.colors import (
     BRAND_GOLD, get_theme_colors,
-    SWATCH_BORDER_ON_LIGHT, SWATCH_BORDER_ON_DARK, STATUS_ACTIVE_COLOR,
+    swatch_edge, STATUS_ACTIVE_COLOR,
 )
 from utils.logger import Logger, get_logger_instance
 from utils.dialog_helper import DialogHelper
@@ -822,7 +822,9 @@ class SettingsDialog(BaseDialog):
         """Update a color swatch button's background color."""
         r, g, b = color[:3]
         # Use contrasting border for visibility
-        border_color = SWATCH_BORDER_ON_LIGHT if (r + g + b) / 3 > 128 else SWATCH_BORDER_ON_DARK
+        # RNV-INK-RULE: was (r + g + b) / 3 > 128, which is not a contrast
+        # measurement and disagreed with preview_utils.py on saturated colour.
+        border_color = swatch_edge((r, g, b))
         button.setStyleSheet(f"""
             QPushButton {{
                 background-color: rgb({r}, {g}, {b});

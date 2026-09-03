@@ -101,6 +101,17 @@ Not on the ink grid (n = 1.53) and not required to be -- it is a surface."""
 APP_CARD: Final[str] = "#2a2a2a"
 """engine/brand.py APP["card"]. A surface, not on the grid (n = 2.47)."""
 
+STATUS_SUCCESS: Final[str] = "#28a745"
+"""MIRRORS the register's STATUS["success"].
+
+RNV-STATUS-REGISTER (2026-09-02): both palettes already held this value,
+written out rather than named. Named here so it has one home. Defined
+above the palettes because they consume it.
+"""
+
+STATUS_WARNING: Final[str] = "#ffc107"
+"""MIRRORS the register's STATUS["warning"]. Value unchanged."""
+
 APP_BORDER: Final[str] = "#333333"
 """engine/brand.py APP["border"]. grey(3). An edge, so the grid governs it."""
 
@@ -278,8 +289,8 @@ DARK_THEME_COLORS: Final[dict[str, str]] = {
     'tooltip_text': APP_TEXT,
     
     # Success/Warning/Error
-    'success': '#28a745',
-    'warning': '#ffc107',
+    'success': STATUS_SUCCESS,
+    'warning': STATUS_WARNING,
 }
 
 
@@ -392,8 +403,8 @@ LIGHT_THEME_COLORS: Final[dict[str, str]] = {
     'tooltip_text': '#000000',
     
     # Success/Warning/Error
-    'success': '#28a745',
-    'warning': '#ffc107',
+    'success': STATUS_SUCCESS,
+    'warning': STATUS_WARNING,
 }
 
 
@@ -486,20 +497,101 @@ OS_SIM_COLORS: Final[dict[str, str]] = {
 DEFAULT_CUSTOM_BG_COLOR: Final[str] = "#808080"
 """Default custom preview background color (neutral gray starting value)"""
 
-CONTRAST_ON_LIGHT: Final[str] = "#000000"
-"""Black — used as contrast text on light/bright backgrounds (e.g. color swatches)"""
+GREY_CC: Final[str] = "#cccccc"
+"""Grey cc. The light edge swatch_edge() reaches for on a dark ground.
 
-CONTRAST_ON_DARK: Final[str] = "#ffffff"
-"""White — used as contrast text on dark/dim backgrounds (e.g. color swatches)"""
+RNV-INK-RULE (2026-09-02). It used to be three digits under a role name,
+which is why a census that reads six-digit hexes never saw it.
+"""
 
-SWATCH_BORDER_ON_LIGHT: Final[str] = "#333"
-"""Dark border for color swatch buttons on light-colored swatches"""
 
-SWATCH_BORDER_ON_DARK: Final[str] = "#ccc"
-"""Light border for color swatch buttons on dark-colored swatches"""
+# ── Which ink goes on this ground ──
+#
+# RNV-INK-RULE (2026-09-02, ruled by Chris). This application asked the
+# question in two places and answered it two different ways:
+#
+#     ui/settings_dialog.py     (r + g + b) / 3 > 128
+#     ui/preview_utils.py       ITU-R 601 luma > 128
+#
+# Neither is a contrast measurement, and they part company on saturated
+# colour, because 601 weights green 587/1000 where the mean weights it 333.
+# On pure green the mean calls it dark and puts WHITE on it at 1.37:1, where
+# the right answer is black at 15.30:1.
+#
+# One rule now, stated as a real comparison rather than a threshold --
+# whichever candidate has the higher contrast ratio against the ground wins.
+# A threshold would have to be re-derived for every pair of candidates; a
+# ratio does not, which is what lets swatch_edge() share the rule with
+# contrast_ink().
+#
+# The same maths as the surface ladder and the 4.5 floor. rnv-color-picker
+# carries the identical block.
 
-STATUS_ACTIVE_COLOR: Final[str] = "#4caf50"
-"""Green — used for active/running status indicators (e.g. folder watcher)"""
+
+def _channel(value: float) -> float:
+    """One sRGB channel, 0-255, linearised."""
+    c = value / 255.0
+    return c / 12.92 if c <= 0.03928 else ((c + 0.055) / 1.055) ** 2.4
+
+
+def _rgb(color: "str | tuple[int, int, int]") -> tuple[int, int, int]:
+    """Accept either shape. Callers hold hex strings and RGB triples both."""
+    if isinstance(color, str):
+        h = color.lstrip("#")
+        if len(h) == 3:
+            h = "".join(ch * 2 for ch in h)
+        return (int(h[0:2], 16), int(h[2:4], 16), int(h[4:6], 16))
+    return (int(color[0]), int(color[1]), int(color[2]))
+
+
+def relative_luminance(color: "str | tuple[int, int, int]") -> float:
+    """WCAG 2.x relative luminance, 0.0 (black) to 1.0 (white)."""
+    r, g, b = _rgb(color)
+    return 0.2126 * _channel(r) + 0.7152 * _channel(g) + 0.0722 * _channel(b)
+
+
+def contrast_ratio(a: "str | tuple[int, int, int]",
+                   b: "str | tuple[int, int, int]") -> float:
+    """WCAG contrast ratio between two colours, 1.0 to 21.0."""
+    la, lb = relative_luminance(a), relative_luminance(b)
+    hi, lo = (la, lb) if la >= lb else (lb, la)
+    return (hi + 0.05) / (lo + 0.05)
+
+
+def better_on(background: "str | tuple[int, int, int]", *candidates: str) -> str:
+    """Whichever candidate reads best on this ground. Ties go to the first."""
+    return max(candidates, key=lambda c: contrast_ratio(background, c))
+
+
+def contrast_ink(background: "str | tuple[int, int, int]") -> str:
+    """Text colour for an arbitrary ground: WHITE or TRUE_BLACK.
+
+    For a colour the USER chose -- a swatch, a preview background. Not for
+    brand surfaces: what sits on a brand gold is a ruling, not a measurement,
+    and the two are only 0.08 apart on BRAND_DARK_GOLD.
+    """
+    return better_on(background, TRUE_BLACK, WHITE)
+
+
+def prefers_dark_ink(background: "str | tuple[int, int, int]") -> bool:
+    """True when TRUE_BLACK reads better on this ground than WHITE does."""
+    return contrast_ink(background) == TRUE_BLACK
+
+
+def swatch_edge(background: "str | tuple[int, int, int]") -> str:
+    """Outline for a swatch of an arbitrary colour: GREY_CC or APP_BORDER."""
+    return better_on(background, APP_BORDER, GREY_CC)
+
+STATUS_ACTIVE_COLOR: Final[str] = STATUS_SUCCESS
+"""The folder watcher, running. RNV-STATUS-REGISTER (2026-09-02): was
+#4caf50, Material's green, where the register publishes #28a745 and where
+rnv-color-picker's identically-named constant already used the register's.
+Two applications, one role, two greens; ruled onto one.
+
+It is an ALIAS rather than a copy because "running" is not "succeeded" and
+the register has no name for the first. If status-active is ever
+registered, this line is the only one that moves.
+"""
 
 
 __all__: list[str] = [
@@ -515,9 +607,17 @@ __all__: list[str] = [
     'OS_SIM_COLORS',
     'get_theme_colors',
     'DEFAULT_CUSTOM_BG_COLOR',
-    'CONTRAST_ON_LIGHT',
-    'CONTRAST_ON_DARK',
-    'SWATCH_BORDER_ON_LIGHT',
-    'SWATCH_BORDER_ON_DARK',
+    'TRUE_BLACK',
+    'WHITE',
+    'APP_BORDER',
+    'GREY_CC',
+    'relative_luminance',
+    'contrast_ratio',
+    'better_on',
+    'contrast_ink',
+    'prefers_dark_ink',
+    'swatch_edge',
+    'STATUS_SUCCESS',
+    'STATUS_WARNING',
     'STATUS_ACTIVE_COLOR',
 ]

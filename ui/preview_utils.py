@@ -41,7 +41,7 @@ from utils.pixmap_cache import ThumbnailCache
 from ui.base_dialog import BaseDialog
 from ui.colors import (
     BRAND_GOLD, BRAND_DARK_GOLD, get_theme_colors,
-    CONTRAST_ON_LIGHT, CONTRAST_ON_DARK, DARK_THEME_COLORS,
+    contrast_ink, DARK_THEME_COLORS,
     DEFAULT_CUSTOM_BG_COLOR,
 )
 
@@ -1022,8 +1022,9 @@ class ColorPaletteWidget(QFrame):
         hex_color = color_to_hex(color)
         
         # Calculate contrast text color
-        brightness = (color[0] * 299 + color[1] * 587 + color[2] * 114) / 1000
-        text_color = CONTRAST_ON_LIGHT if brightness > 128 else CONTRAST_ON_DARK
+        # RNV-INK-RULE: was ITU-R 601 perceived brightness, a photographic
+        # weighting rather than a contrast measurement.
+        text_color = contrast_ink(color)
         
         swatch.setStyleSheet(f"""
             QFrame {{
