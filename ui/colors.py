@@ -236,7 +236,10 @@ DARK_THEME_COLORS: Final[dict[str, str]] = {
     'dialog_btn_accent_pressed_text': TRUE_BLACK,
     
     # Platform button
-    'platform_btn_bg': '#252525',
+    # RNV-COLLAPSE-252525 (2026-09-02): was #252525, a value a third of
+    # the way from panel to card and on neither ladder nor grid. Ruled
+    # onto the card rung. Image mode inherits this through the splat.
+    'platform_btn_bg': APP_CARD,
     'platform_btn_hover_bg': APP_BORDER,
     
     # Clear/subtle button
@@ -257,14 +260,14 @@ DARK_THEME_COLORS: Final[dict[str, str]] = {
     'tab_indicator': BRAND_GOLD,
     
     # Scrollbar
-    'scrollbar_bg': '#252525',
+    'scrollbar_bg': APP_CARD,   # was #252525, see platform_btn_bg
     'scrollbar_handle': '#444444',
     'scrollbar_handle_hover': BRAND_GOLD,
     'scrollbar_border': APP_BORDER,
     
     # List/Table
     'list_bg': BRAND_BLACK,
-    'list_alt_bg': '#252525',
+    'list_alt_bg': APP_CARD,   # was #252525, see platform_btn_bg
     'list_selected_bg': BRAND_GOLD,
     'list_hover_bg': APP_PANEL_HOVER,
     'list_header_bg': APP_CARD,
