@@ -139,20 +139,30 @@ rule held live becomes an edit anyone can make, and retuning it would silently
 change what a warning looks like in five applications.
 """
 
-STATUS_SUCCESS_TEXT_LIGHT: Final[str] = "#8a6581"
-STATUS_WARNING_TEXT_LIGHT: Final[str] = "#976633"
+STATUS_SUCCESS_TEXT_LIGHT: Final[str] = "#825d79"
+STATUS_WARNING_TEXT_LIGHT: Final[str] = "#8e5e2b"
 """MIRROR the register's STATUS["*-text-light"]. TEXT on a light ground:
 4.52 on #f5f5f5, this application's light dialog background.
 
-RNV-STATUS-LIGHT-FLOOR: the register walked these against #f5f5f5 as "the
-worst light ground". It is not the worst one the register publishes -- APP
-hover-light #eeeeee, GOLD_TEXT_GROUND_FLOOR #e8e8e8 and pressed-light #e0e0e0
-all sit below it, and both values fail 4.5 on all three rungs (4.25 / 4.02 /
-3.74 for success). Both were walked to the FIRST step that clears, so there is
-no margin and one rung down they fail together. The values here are the
-register's AS PUBLISHED and the question is open with the brand chat; if it
-re-walks against #e8e8e8 the answers are #825d79 and #8e5e2b, each moving less
-than the register's own 8.40 "clearly different" bar.
+RNV-STATUS-LIGHT-FLOOR, CLOSED 2026-09-05 at register rev 31.
+
+These were first walked against #f5f5f5 as "the worst light ground". It was
+not the worst: rev 27 had put APP hover-light #eeeeee, GOLD_TEXT_GROUND_FLOOR
+#e8e8e8 and pressed-light #e0e0e0 below it, and because the rule takes the
+FIRST step that clears, each value stopped at 4.52 with no margin and they
+failed one rung down together.
+
+Re-walked against #e8e8e8. THE DECIDING REASON IS NOT THE SIZE OF THE MOVE --
+#e0e0e0 was affordable on identical grounds, so cost does not pick between
+them. It is that #e8e8e8 is where BRAND_DARK_GOLD_DEEP already stops:
+
+    on #e8e8e8   gold-deep 4.53   these 4.52 / 4.53 / 4.52   pass
+    on #e0e0e0   gold-deep 4.21   these 4.20 / 4.20 / 4.20   fail
+
+ONE boundary for every brand text family instead of two. Walking to #e0e0e0
+would have covered the pressed plate and left an author having to remember
+which family they were in to know where text stops. Below #e8e8e8, no brand
+text of any family.
 
 WHY THIS APPLICATION HAS THEM AT ALL. Both palettes previously held the same
 #28a745 and #ffc107. As text on #f5f5f5 that is 2.87 and 1.50 -- illegal, and

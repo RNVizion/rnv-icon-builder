@@ -113,8 +113,8 @@ REGISTERED = {
     "STATUS_WARNING": "#a2703c",
     "STATUS_SUCCESS_TEXT": "#ad85a3",
     "STATUS_WARNING_TEXT": "#bc8752",
-    "STATUS_SUCCESS_TEXT_LIGHT": "#8a6581",
-    "STATUS_WARNING_TEXT_LIGHT": "#976633",
+    "STATUS_SUCCESS_TEXT_LIGHT": "#825d79",
+    "STATUS_WARNING_TEXT_LIGHT": "#8e5e2b",
 }
 
 
@@ -173,7 +173,10 @@ def test_the_text_variants_carry_text_on_their_own_ground():
             ratio = _contrast(getattr(colors, name), ground)
             assert ratio >= TEXT_FLOOR, f"{name} on {ground} = {ratio:.4f}"
     for name in ("STATUS_SUCCESS_TEXT_LIGHT", "STATUS_WARNING_TEXT_LIGHT"):
-        for ground in ("#ffffff", "#f5f5f5"):
+        # Restored at rev 31: the re-walked pair reaches all four rungs.
+        # #e0e0e0 is deliberately absent -- BRAND_DARK_GOLD_DEEP fails
+        # there too, so it is the boundary for every brand text family.
+        for ground in ("#ffffff", "#f5f5f5", "#eeeeee", "#e8e8e8"):
             ratio = _contrast(getattr(colors, name), ground)
             assert ratio >= TEXT_FLOOR, f"{name} on {ground} = {ratio:.4f}"
 
