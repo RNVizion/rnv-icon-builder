@@ -101,16 +101,64 @@ Not on the ink grid (n = 1.53) and not required to be -- it is a surface."""
 APP_CARD: Final[str] = "#2a2a2a"
 """engine/brand.py APP["card"]. A surface, not on the grid (n = 2.47)."""
 
-STATUS_SUCCESS: Final[str] = "#28a745"
-"""MIRRORS the register's STATUS["success"].
+STATUS_SUCCESS: Final[str] = "#926c89"
+"""MIRRORS the register's STATUS["success"]. A FILL.
+
+RNV-STATUS-FAMILY (2026-09-03): was #28a745, Bootstrap's green. Retired
+because it and Bootstrap's red collapsed to one olive under deuteranopia at
+about 4 apart -- success and error are the two most consequential colours in
+an interface, and roughly 8% of men could not tell them apart.
+
+It is a FILL and cannot carry text: 3.92 on #1a1a1a, 3.23 on #2a2a2a, above
+the 3:1 fill floor and below the 4.5:1 text floor. That is not a shortcoming,
+it is the fill band -- a value that works on a dark AND a light ground sits at
+L* 48-59 by arithmetic, and a mid-tone reaches 4.5 on neither side.
 
 RNV-STATUS-REGISTER (2026-09-02): both palettes already held this value,
-written out rather than named. Named here so it has one home. Defined
-above the palettes because they consume it.
+written out rather than named. Named here so it has one home. Defined above
+the palettes because they consume it.
 """
 
-STATUS_WARNING: Final[str] = "#ffc107"
-"""MIRRORS the register's STATUS["warning"]. Value unchanged."""
+STATUS_WARNING: Final[str] = "#a2703c"
+"""MIRRORS the register's STATUS["warning"]. A FILL.
+
+RNV-STATUS-FAMILY (2026-09-03): was #ffc107, retired on arithmetic rather
+than taste -- it read 1.63 on #ffffff and 1.49 on #f5f5f5 against a 3:1 fill
+floor, so it could not legally carry a boundary on a light ground at all.
+"""
+
+STATUS_SUCCESS_TEXT: Final[str] = "#ad85a3"
+STATUS_WARNING_TEXT: Final[str] = "#bc8752"
+"""MIRROR the register's STATUS["success-text"] and ["warning-text"].
+TEXT on a dark ground: 4.55 and 4.60 on APP card #2a2a2a.
+
+REGISTERED, not derived. The register's rule -- hold hue and chroma, move
+lightness only, take the first step that clears 4.5 on the worst ground -- is
+published as PROVENANCE so the choice is auditable. It is not re-run here. A
+rule held live becomes an edit anyone can make, and retuning it would silently
+change what a warning looks like in five applications.
+"""
+
+STATUS_SUCCESS_TEXT_LIGHT: Final[str] = "#8a6581"
+STATUS_WARNING_TEXT_LIGHT: Final[str] = "#976633"
+"""MIRROR the register's STATUS["*-text-light"]. TEXT on a light ground:
+4.52 on #f5f5f5, this application's light dialog background.
+
+RNV-STATUS-LIGHT-FLOOR: the register walked these against #f5f5f5 as "the
+worst light ground". It is not the worst one the register publishes -- APP
+hover-light #eeeeee, GOLD_TEXT_GROUND_FLOOR #e8e8e8 and pressed-light #e0e0e0
+all sit below it, and both values fail 4.5 on all three rungs (4.25 / 4.02 /
+3.74 for success). Both were walked to the FIRST step that clears, so there is
+no margin and one rung down they fail together. The values here are the
+register's AS PUBLISHED and the question is open with the brand chat; if it
+re-walks against #e8e8e8 the answers are #825d79 and #8e5e2b, each moving less
+than the register's own 8.40 "clearly different" bar.
+
+WHY THIS APPLICATION HAS THEM AT ALL. Both palettes previously held the same
+#28a745 and #ffc107. As text on #f5f5f5 that is 2.87 and 1.50 -- illegal, and
+invisible only because the two keys are unused. Light now carries its own
+siblings, so the keys are legal on arrival if they are ever wired up.
+"""
 
 APP_BORDER: Final[str] = "#333333"
 """engine/brand.py APP["border"]. grey(3). An edge, so the grid governs it."""
@@ -292,8 +340,16 @@ DARK_THEME_COLORS: Final[dict[str, str]] = {
     'tooltip_text': APP_TEXT,
     
     # Success/Warning/Error
+    # RNV-STATUS-FAMILY: the fills, unwired. Both keys are looked
+    # up nowhere in this application and are on the dead-key list;
+    # whether they should exist is a separate question. If either
+    # is ever painted as TEXT it must take the _TEXT variant
+    # instead -- a fill sits at L* 48-59 and cannot reach 4.5:1.
     'success': STATUS_SUCCESS,
     'warning': STATUS_WARNING,
+    # RNV-STATUS-FAMILY: the watcher's label is TEXT, and a module
+    # constant cannot know which mode it is being painted in.
+    'status_active': STATUS_SUCCESS_TEXT,
 }
 
 
@@ -406,8 +462,11 @@ LIGHT_THEME_COLORS: Final[dict[str, str]] = {
     'tooltip_text': '#000000',
     
     # Success/Warning/Error
+    # RNV-STATUS-FAMILY: light's own siblings. This palette held
+    # the dark values, which as text on #f5f5f5 read 2.87 and 1.50.
     'success': STATUS_SUCCESS,
     'warning': STATUS_WARNING,
+    'status_active': STATUS_SUCCESS_TEXT_LIGHT,
 }
 
 
@@ -585,11 +644,28 @@ def swatch_edge(background: "str | tuple[int, int, int]") -> str:
     """Outline for a swatch of an arbitrary colour: GREY_CC or APP_BORDER."""
     return better_on(background, APP_BORDER, GREY_CC)
 
-STATUS_ACTIVE_COLOR: Final[str] = STATUS_SUCCESS
+STATUS_ACTIVE_COLOR: Final[str] = STATUS_SUCCESS_TEXT
 """The folder watcher, running. RNV-STATUS-REGISTER (2026-09-02): was
 #4caf50, Material's green, where the register publishes #28a745 and where
 rnv-color-picker's identically-named constant already used the register's.
 Two applications, one role, two greens; ruled onto one.
+
+RNV-STATUS-FAMILY (2026-09-03): this constant is no longer what
+gets painted. ui/settings_dialog.py wrote `color: {STATUS_ACTIVE_COLOR}`
+on the watch label -- TEXT, in a dialog that runs in three modes --
+and a module-level constant does not know which mode it is in. One
+value cannot be legal on all three grounds: the dark text variant
+reads 5.52 on #1a1a1a and 3.15 on #ffffff. The palettes now carry a
+`status_active` key resolved per mode, and the call site reads the
+theme it was already holding. This constant remains as the
+REGISTER-FACING alias below, which is what it was always for.
+
+AND IT NOW ALIASES success-text RATHER THAN success, ruled by the
+register 2026-09-04. It pointed at the FILL, which was safe only by
+accident: Bootstrap's green read 5.55 on BRAND_BLACK and doubled as
+text. The RNV fills are mid-tones by design and #926c89 reads 3.91
+there, so the alias would have failed the 4.5 text floor on the day
+the family landed. An alias onto a fill is a fill used as text.
 
 It is an ALIAS rather than a copy because "running" is not "succeeded" and
 the register has no name for the first. If status-active is ever
@@ -622,5 +698,9 @@ __all__: list[str] = [
     'swatch_edge',
     'STATUS_SUCCESS',
     'STATUS_WARNING',
+    'STATUS_SUCCESS_TEXT',
+    'STATUS_WARNING_TEXT',
+    'STATUS_SUCCESS_TEXT_LIGHT',
+    'STATUS_WARNING_TEXT_LIGHT',
     'STATUS_ACTIVE_COLOR',
 ]

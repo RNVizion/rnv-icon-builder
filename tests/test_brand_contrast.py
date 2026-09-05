@@ -458,7 +458,12 @@ _PALETTES = {
 
 # Values that are gold-adjacent but are not brand gold, with the reason.
 NOT_BRAND_GOLD = {
-    "#ffc107": "Material amber -- the semantic warning colour, not brand gold",
+    "#a2703c": "STATUS warning -- the semantic warning colour, not brand gold. "
+               "RNV-STATUS-FAMILY (2026-09-03): it reads as gold to the r > g > b "
+               "shape test because it half IS one -- the register derives it 50% "
+               "toward BRAND_DARK_GOLD in OKLab. CIEDE2000 9.1 from that gold, "
+               "clearing the register's own 8.40 threshold by 0.7. Replaced "
+               "#ffc107, which sat 17.7 away and tripped only the shape test.",
 }
 
 

@@ -47,7 +47,7 @@ from PyQt6.QtGui import QIcon, QPixmap, QColor
 from utils.config import ICON_SIZES
 from ui.colors import (
     BRAND_GOLD, get_theme_colors,
-    swatch_edge, STATUS_ACTIVE_COLOR,
+    swatch_edge,
 )
 from utils.logger import Logger, get_logger_instance
 from utils.dialog_helper import DialogHelper
@@ -1843,7 +1843,11 @@ class SettingsDialog(BaseDialog):
         self._is_watching = is_watching
         if is_watching:
             self.watch_status_label.setText(f"\u25B6 Watching: {folder}")
-            self.watch_status_label.setStyleSheet(f"color: {STATUS_ACTIVE_COLOR};")
+            # RNV-STATUS-FAMILY: read per mode. This was
+            # STATUS_ACTIVE_COLOR, a module constant, on a label
+            # that is painted in dark, light and image mode.
+            _active = get_theme_colors()['status_active']
+            self.watch_status_label.setStyleSheet(f"color: {_active};")
             self.watch_start_btn.setEnabled(False)
             self.watch_stop_btn.setEnabled(True)
             self.watch_input_edit.setEnabled(False)

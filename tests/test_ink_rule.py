@@ -109,10 +109,17 @@ def test_no_call_site_measures_brightness_by_hand():
 
 
 def test_the_retired_names_are_gone():
+    """Reads code with comments and strings removed, for the same
+    reason the sweep above does: an explanation of why a name was
+    retired has to be allowed to say the name. Until 2026-09-03
+    this sweep read raw text while its sibling four lines up did
+    not, so the file held both answers to one question.
+    """
     strays = []
     for path, text in _sources():
+        code = _code_only(text)
         for old in RETIRED:
-            if re.search(r"\b%s\b" % re.escape(old), text):
+            if re.search(r"\b%s\b" % re.escape(old), code):
                 strays.append(f"{path.relative_to(ROOT)}: {old}")
     assert not strays, "retired names are still in use:\n  " + "\n  ".join(strays)
 
