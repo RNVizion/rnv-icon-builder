@@ -24,8 +24,8 @@ and publishes six TEXT variants, because nothing in the fill band can carry
 text: a value that works as a fill on a dark AND a light ground sits at
 L* 48-59 by arithmetic, and a mid-tone reaches 4.5:1 on neither side.
 
-    success-text  #ad85a3    success-text-light  #8a6581
-    warning-text  #bc8752    warning-text-light  #976633
+    success-text  #ad85a3    success-text-light  #825d79
+    warning-text  #bc8752    warning-text-light  #8e5e2b
 
 This application carries no error value, so the red is not in its scope.
 
@@ -78,16 +78,62 @@ the keys are unused. The light palette now carries the light siblings, so if
 either key is ever wired up it is legal on arrival.
 
 
-THE OPEN QUESTION THIS SCRIPT DOES NOT DECIDE
+THE BOUNDARY THIS PASS WAITED ON, NOW CLOSED
 
-RNV-STATUS-LIGHT-FLOOR: the register walked its three light text variants
-against #f5f5f5 as "the worst light ground". It is not -- rev 27 put APP
-hover-light #eeeeee, GOLD_TEXT_GROUND_FLOOR #e8e8e8 and pressed-light #e0e0e0
-below it, and all three variants fail 4.5 on all three rungs. The values here
-are the register's AS PUBLISHED; the question is open with the brand chat. If
-it re-walks against #e8e8e8 the answers are #825d79 / #8e5e2b / #ae4650, each
-moving less than the register's own 8.40 threshold. The guard names the marker
-so the follow-up is one search away.
+RNV-STATUS-LIGHT-FLOOR was open while these scripts were written. The three
+LIGHT text variants had been walked to clear 4.5:1 on #f5f5f5, which the
+register's rule called "the worst light ground". It was not: rev 27 had put
+APP hover-light #eeeeee, GOLD_TEXT_GROUND_FLOOR #e8e8e8 and pressed-light
+#e0e0e0 below it, and because the rule takes the FIRST step that clears, each
+value stopped at 4.52 with no margin and all three failed one rung down.
+
+Register rev 31 (2026-09-05) re-walked them against #e8e8e8:
+
+    success-text-light  #8a6581 -> #825d79
+    warning-text-light  #976633 -> #8e5e2b
+    error-text-light    #b84e58 -> #ae4650
+
+AND THE DECIDING REASON IS NOT THE ONE THIS CHAT GAVE. The argument here was
+from cost -- a small move, the same three colours. True, and not sufficient,
+because #e0e0e0 would have been affordable too. The register's reason is
+better: #e8e8e8 is where BRAND_DARK_GOLD_DEEP already stops.
+
+    on #e8e8e8   gold-deep 4.53   the three 4.52 / 4.53 / 4.52   pass
+    on #e0e0e0   gold-deep 4.21   the three 4.20 / 4.20 / 4.20   fail
+
+ONE boundary for every brand text family instead of two. Walking to #e0e0e0
+would have covered the pressed plate and left an author having to remember
+which family they were in to know where text stops.
+
+So the boundary tests are not narrowed. They run the full four rungs, and they
+pass -- which is the point of the re-walk being visible in the test rather than
+only in the register.
+
+
+ONE THING IS STILL OPEN, AND IT IS THE OTHER SIDE OF THE SAME FAULT
+
+The three DARK text variants were derived against APP card #2a2a2a. Rev 29
+then registered panel-hover #3a3a3a, which is LIGHTER and therefore worse for
+light text on a dark ground. All three fail there:
+
+    success-text 3.61   warning-text 3.64   error-text 3.58   floor 4.5
+    BRAND_GOLD clears every dark surface at 6.15
+
+Same two-boundary asymmetry, other side. The register left it open rather than
+fixing it in rev 31, because the fix is not symmetric: on light the worst
+surface is a PRESSED plate and ruling that running text is not carried on a
+transient state is defensible, while on dark the worst is a HOVER, which a
+label sits under for as long as a cursor rests there. The walk would cost
+CIEDE2000 6.53-7.06 -- inside the 8.40 bar, but more than double the light
+move, and it lightens all three toward the ink ramp.
+
+WHAT THIS CHAT CAN ADD: the fleet's exposure today is ZERO. The element sweep
+across all five applications resolves four status elements, all of them plain
+dialog labels painted with an inline `color:` on a dialog ground; not one
+status key is painted in a selector carrying :hover. So this is a register
+question about where the boundary should be, not a live defect in these apps
+-- and if a status label is ever put on a hover row, the dark-ground
+assertions in the guard are where it should surface.
 """
 from __future__ import annotations
 
@@ -117,8 +163,8 @@ SUITES = [
 
 # role -> (fill, text on a dark ground, text on a light ground)
 FAMILY = {
-    "SUCCESS": ("#926c89", "#ad85a3", "#8a6581"),
-    "WARNING": ("#a2703c", "#bc8752", "#976633"),
+    "SUCCESS": ("#926c89", "#ad85a3", "#825d79"),
+    "WARNING": ("#a2703c", "#bc8752", "#8e5e2b"),
 }
 RETIRED = ("#28a745", "#ffc107", "#4caf50")
 
@@ -238,8 +284,8 @@ REGISTERED = {
     "STATUS_WARNING": "#a2703c",
     "STATUS_SUCCESS_TEXT": "#ad85a3",
     "STATUS_WARNING_TEXT": "#bc8752",
-    "STATUS_SUCCESS_TEXT_LIGHT": "#8a6581",
-    "STATUS_WARNING_TEXT_LIGHT": "#976633",
+    "STATUS_SUCCESS_TEXT_LIGHT": "#825d79",
+    "STATUS_WARNING_TEXT_LIGHT": "#8e5e2b",
 }
 
 
@@ -278,27 +324,36 @@ def test_a_fill_cannot_carry_text_and_that_is_the_point():
 
 
 def test_the_text_variants_carry_text_on_their_own_ground():
-    """RNV-STATUS-LIGHT-FLOOR -- READ BEFORE ADDING GROUNDS.
+    """RNV-STATUS-LIGHT-FLOOR, closed 2026-09-05 at register rev 31.
 
-    The light pair is checked on #ffffff and #f5f5f5 only. They do NOT reach
-    the lighter registered rungs: on APP hover-light #eeeeee they read 4.25
-    and 4.24, on GOLD_TEXT_GROUND_FLOOR #e8e8e8 4.02, on pressed-light
-    #e0e0e0 3.74. The cause is in the register's own rule, which walks the
-    light variants against #f5f5f5 as "the worst light ground" -- rev 27 put
-    three rungs below it. Both were walked to the FIRST step that clears, so
-    there is no margin.
+    The light pair was briefly checked on #ffffff and #f5f5f5 only. It did not
+    reach the registered rungs below: walked against #f5f5f5 as "the worst
+    light ground" and taken at the first step that cleared, both stopped at
+    4.52 with no margin, and read 4.25 on APP hover-light #eeeeee and 4.02 on
+    GOLD_TEXT_GROUND_FLOOR #e8e8e8.
 
-    This is an open question with the brand chat, not a loosened test. If the
-    register re-walks against #e8e8e8 the answers are #825d79 and #8e5e2b,
-    each moving less than its own 8.40 threshold; the fix here is to add the
-    darker rungs back and update REGISTERED.
+    The register re-walked them against #e8e8e8, and the reason is not the
+    size of the move. It is that #e8e8e8 is where BRAND_DARK_GOLD_DEEP already
+    stops -- gold-deep 4.53 there and 4.21 on #e0e0e0, the re-walked three
+    4.52 and 4.20. ONE boundary for every brand text family instead of two.
+    Below #e8e8e8, no brand text of any family.
+
+    THE DARK PAIR HAS THE SAME FAULT AND IT IS STILL OPEN. Both were derived
+    against APP card #2a2a2a; rev 29 then registered panel-hover #3a3a3a,
+    which is LIGHTER and therefore worse for light text. They read 3.61 and
+    3.64 there against a 4.5 floor, while BRAND_GOLD clears every dark surface
+    at 6.15 -- the same two-boundary asymmetry, other side. Nothing in this
+    application paints status text on a hover plate today (the sweep resolves
+    no status element with :hover in any of the five), so the dark grounds
+    below are the ones this app actually uses. If a status label is ever put
+    on a hover row, this test is where the shortfall should surface.
     """
     for name in ("STATUS_SUCCESS_TEXT", "STATUS_WARNING_TEXT"):
         for ground in ("#1a1a1a", "#2a2a2a"):
             ratio = _contrast(getattr(colors, name), ground)
             assert ratio >= TEXT_FLOOR, f"{name} on {ground} = {ratio:.4f}"
     for name in ("STATUS_SUCCESS_TEXT_LIGHT", "STATUS_WARNING_TEXT_LIGHT"):
-        for ground in ("#ffffff", "#f5f5f5"):
+        for ground in ("#ffffff", "#f5f5f5", "#eeeeee", "#e8e8e8"):
             ratio = _contrast(getattr(colors, name), ground)
             assert ratio >= TEXT_FLOOR, f"{name} on {ground} = {ratio:.4f}"
 
@@ -439,20 +494,29 @@ rule held live becomes an edit anyone can make, and retuning it would silently
 change what a warning looks like in five applications.
 """
 
-STATUS_SUCCESS_TEXT_LIGHT: Final[str] = "#8a6581"
-STATUS_WARNING_TEXT_LIGHT: Final[str] = "#976633"
+STATUS_SUCCESS_TEXT_LIGHT: Final[str] = "#825d79"
+STATUS_WARNING_TEXT_LIGHT: Final[str] = "#8e5e2b"
 """MIRROR the register's STATUS["*-text-light"]. TEXT on a light ground:
 4.52 on #f5f5f5, this application's light dialog background.
 
-RNV-STATUS-LIGHT-FLOOR: the register walked these against #f5f5f5 as "the
-worst light ground". It is not the worst one the register publishes -- APP
-hover-light #eeeeee, GOLD_TEXT_GROUND_FLOOR #e8e8e8 and pressed-light #e0e0e0
-all sit below it, and both values fail 4.5 on all three rungs (4.25 / 4.02 /
-3.74 for success). Both were walked to the FIRST step that clears, so there is
-no margin and one rung down they fail together. The values here are the
-register's AS PUBLISHED and the question is open with the brand chat; if it
-re-walks against #e8e8e8 the answers are #825d79 and #8e5e2b, each moving less
-than the register's own 8.40 "clearly different" bar.
+RNV-STATUS-LIGHT-FLOOR, CLOSED 2026-09-05 at register rev 31. The three
+light text variants were first walked against #f5f5f5 as "the worst light
+ground". It was not the worst: rev 27 had put APP hover-light #eeeeee,
+GOLD_TEXT_GROUND_FLOOR #e8e8e8 and pressed-light #e0e0e0 below it, and each
+value was taken at the FIRST step that cleared -- 4.52 -- so none had margin
+and one rung down they failed together.
+
+They were re-walked against #e8e8e8, and the deciding reason is not the small
+size of the move. It is that #e8e8e8 is where BRAND_DARK_GOLD_DEEP already
+stops:
+
+    on #e8e8e8   gold-deep 4.53   the three 4.52 / 4.53 / 4.52   all pass
+    on #e0e0e0   gold-deep 4.21   the three 4.20 / 4.20 / 4.20   all fail
+
+ONE boundary for every brand text family rather than two. Walking to #e0e0e0
+was affordable and would have covered the pressed plate, at the cost of an
+author having to remember which family they were in to know where text stops.
+Below #e8e8e8, no brand text of any family.
 
 WHY THIS APPLICATION HAS THEM AT ALL. Both palettes previously held the same
 #28a745 and #ffc107. As text on #f5f5f5 that is 2.87 and 1.50 -- illegal, and
