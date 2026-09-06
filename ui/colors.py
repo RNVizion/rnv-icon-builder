@@ -218,6 +218,80 @@ boundary is not a plate. This value is a grid step inside it and reads 4.7875.
 #e8e8e8 keeps everything else -- registered, the published gold-as-text
 boundary, the binding ground. It is simply not the hover.
 """
+
+# RNV-LIGHT-WIRING (2026-09-06): the constants below name values the
+# palettes already carried as literals. Nothing here is a new colour.
+# Registered values take the register's key; ramp greys take their byte.
+
+APP_SURFACE_LIGHT_3: Final[str] = "#f5f5f5"
+"""engine/brand.py APP["surface-light-3"]. The light window and panel
+ground -- what a dialog sits on in light mode.
+
+RNV-LIGHT-WIRING (2026-09-06): this value was written out as a literal
+in every palette that used it, so nothing could move it. Registered by
+rev 27 as the third rung of the light surface ladder; named here under
+the register's key, the way APP_PANEL_HOVER and APP_HOVER_LIGHT are.
+Every key that carries it is a surface, so it is not split."""
+
+APP_SURFACE_LIGHT_2: Final[str] = "#fbfbfb"
+"""engine/brand.py APP["surface-light-2"]. One rung above the panel ground.
+
+RNV-LIGHT-WIRING (2026-09-06): new to this application. It arrives
+because two strays collapse onto it -- #f8f8f8 and #fafafa, which sat
+0.60 and 0.20 CIEDE2000 from this rung and on no ladder at all. Same
+ruling as #252525 onto the card: a value a fraction of a step from a
+registered one is that one, misspelled."""
+
+APP_PRESSED_LIGHT: Final[str] = "#e0e0e0"
+"""engine/brand.py APP["pressed-light"]. The light PRESSED plate -- an
+interaction state, which is why this name goes only on `pressed_bg`.
+
+RNV-LIGHT-WIRING (2026-09-06): SPLIT, NOT RENAMED. Other keys hold
+#e0e0e0 as a static surface (a tab, a scrollbar track) and keep the
+ramp-step name GREY_E0 below. Wiring a resting ground to a pressed
+state would claim a role for it on the strength of a shared hex --
+the same ruling rnv-text-transformer made for GREY_EE / APP_HOVER_LIGHT."""
+
+GREY_E0: Final[str] = "#e0e0e0"
+"""grey(14) on the ramp, #e0e0e0. Static surfaces that share a hex with
+APP_PRESSED_LIGHT without being a pressed state. See the split note
+there. Named by its byte, like every other ramp step."""
+
+GREY_EE: Final[str] = "#eeeeee"
+"""grey(14) on the ramp, #eeeeee. Static surfaces that share a hex with
+APP_HOVER_LIGHT without being a hover: a list header, a scroll ground.
+Same split rnv-text-transformer ruled for its diff headers."""
+
+GREY_DD: Final[str] = "#dddddd"
+"""grey(13) on the ramp, #dddddd. Edges and grid lines that share a hex
+with APP_TEXT without being text. The register's APP["text"] is ink;
+a gridline is not, and moving the ink should not move the grid."""
+
+GREY_66: Final[str] = "#666666"
+"""grey(6) on the ramp, #666666. Secondary and muted text on light."""
+
+GREY_88: Final[str] = "#888888"
+"""grey(8) on the ramp, #888888. Muted text on dark, a scrollbar handle
+hover on light."""
+
+GREY_55: Final[str] = "#555555"
+"""grey(5) on the ramp, #555555. Disabled text and a checkbox edge on dark."""
+
+GREY_44: Final[str] = "#444444"
+"""grey(4) on the ramp, #444444. The pressed plate and the scrollbar
+handle on dark."""
+
+# RNV-LIGHT-WIRING (2026-09-06): moved up from below the
+# palettes, unchanged. It now has palette callers, and a
+# name defined after its use is a NameError at import.
+GREY_CC: Final[str] = "#cccccc"
+"""Grey cc. The light edge swatch_edge() reaches for on a dark ground.
+
+RNV-INK-RULE (2026-09-02). It used to be three digits under a role name,
+which is why a census that reads six-digit hexes never saw it.
+"""
+
+
 APP_PROVENANCE: Final[dict[str, str]] = {
     "TRUE_BLACK": "register",
     "WHITE": "register",
@@ -228,6 +302,16 @@ APP_PROVENANCE: Final[dict[str, str]] = {
     "APP_TEXT_DIM": "register",
     "APP_PANEL_HOVER": "register",
     "APP_HOVER_LIGHT": "register",
+    "APP_SURFACE_LIGHT_3": "register",
+    "APP_SURFACE_LIGHT_2": "register",
+    "APP_PRESSED_LIGHT": "register",
+    "GREY_E0": "app-ramp",
+    "GREY_EE": "app-ramp",
+    "GREY_DD": "app-ramp",
+    "GREY_66": "app-ramp",
+    "GREY_88": "app-ramp",
+    "GREY_55": "app-ramp",
+    "GREY_44": "app-ramp",
 }
 """Declarative, and read by tests/test_app_mirror.py. A classification that
 lives only in a test drifts from the thing it classifies."""
@@ -251,9 +335,9 @@ DARK_THEME_COLORS: Final[dict[str, str]] = {
     
     # Text colors
     'text_primary': APP_TEXT,
-    'text_secondary': '#888888',
-    'text_muted': '#888888',
-    'text_disabled': '#555555',
+    'text_secondary': GREY_88,
+    'text_muted': GREY_88,
+    'text_disabled': GREY_55,
     'accent_hover': BRAND_GOLD_HOVER,
     'text_accent': BRAND_GOLD,
     'text_on_accent': TRUE_BLACK,
@@ -261,7 +345,7 @@ DARK_THEME_COLORS: Final[dict[str, str]] = {
     # Border colors
     'border_default': APP_BORDER,
     'border_focus': BRAND_GOLD,
-    'border_hover': '#444444',
+    'border_hover': GREY_44,
     'border_accent': BRAND_GOLD,
     'input_border': APP_BORDER,
     
@@ -282,7 +366,7 @@ DARK_THEME_COLORS: Final[dict[str, str]] = {
     'main_btn_border': APP_BORDER,
     'main_btn_hover_bg': APP_BORDER,
     'main_btn_hover_text': APP_TEXT,
-    'main_btn_pressed_bg': '#444444',
+    'main_btn_pressed_bg': GREY_44,
     'main_btn_pressed_text': TRUE_BLACK,
 
     # Accent button (gold border)
@@ -305,7 +389,7 @@ DARK_THEME_COLORS: Final[dict[str, str]] = {
     
     # Checkbox
     'checkbox_bg': APP_CARD,
-    'checkbox_border': '#555555',
+    'checkbox_border': GREY_55,
     'checkbox_checked_bg': BRAND_GOLD,
     'checkbox_checked_border': BRAND_GOLD,
     'checkbox_hover_border': BRAND_GOLD,
@@ -319,7 +403,7 @@ DARK_THEME_COLORS: Final[dict[str, str]] = {
     
     # Scrollbar
     'scrollbar_bg': APP_CARD,   # was #252525, see platform_btn_bg
-    'scrollbar_handle': '#444444',
+    'scrollbar_handle': GREY_44,
     'scrollbar_handle_hover': BRAND_GOLD,
     'scrollbar_border': APP_BORDER,
     
@@ -366,110 +450,110 @@ DARK_THEME_COLORS: Final[dict[str, str]] = {
 # ==================== Light Theme Colors ====================
 LIGHT_THEME_COLORS: Final[dict[str, str]] = {
     # Base colors
-    'window_bg': '#f5f5f5',
-    'panel_bg': '#f5f5f5',
-    'card_bg': '#ffffff',
-    'input_bg': '#ffffff',
+    'window_bg': APP_SURFACE_LIGHT_3,
+    'panel_bg': APP_SURFACE_LIGHT_3,
+    'card_bg': WHITE,
+    'input_bg': WHITE,
     'hover_bg': APP_HOVER_LIGHT,
-    'pressed_bg': '#e0e0e0',
+    'pressed_bg': APP_PRESSED_LIGHT,
     'selected_bg': BRAND_DARK_GOLD,
     
     # Text colors
-    'text_primary': '#000000',
-    'text_secondary': '#666666',
-    'text_muted': '#666666',
-    'text_disabled': '#aaaaaa',
+    'text_primary': TRUE_BLACK,
+    'text_secondary': GREY_66,
+    'text_muted': GREY_66,
+    'text_disabled': APP_TEXT_DIM,
     'accent_hover': BRAND_DARK_GOLD_DEEP,
     'text_accent': BRAND_DARK_GOLD_DEEP,
-    'text_on_accent': '#ffffff',
+    'text_on_accent': WHITE,
     
     # Border colors
-    'border_default': '#cccccc',
+    'border_default': GREY_CC,
     'border_focus': BRAND_DARK_GOLD,
-    'border_hover': '#aaaaaa',
+    'border_hover': APP_TEXT_DIM,
     'border_accent': BRAND_DARK_GOLD,
-    'input_border': '#cccccc',
+    'input_border': GREY_CC,
     
     # Button colors (dialog buttons - gold accent system)
-    'dialog_btn_bg': '#ffffff',
+    'dialog_btn_bg': WHITE,
     'dialog_btn_hover_bg': APP_HOVER_LIGHT,
     'dialog_btn_pressed_bg': BRAND_DARK_GOLD,
-    'dialog_btn_text': '#000000',
+    'dialog_btn_text': TRUE_BLACK,
     'dialog_btn_hover_text': BRAND_DARK_GOLD_DEEP,
-    'dialog_btn_pressed_text': '#ffffff',
-    'dialog_btn_border': '#cccccc',
+    'dialog_btn_pressed_text': WHITE,
+    'dialog_btn_border': GREY_CC,
     'dialog_btn_hover_border': BRAND_DARK_GOLD,
 
     # Main window buttons - color inverse system (no brand gold)
     # Light: rest=#ffffff bg / hover=#333333 bg / pressed=#444444 bg
-    'main_btn_bg': '#ffffff',
-    'main_btn_text': '#000000',
-    'main_btn_border': '#cccccc',
-    'main_btn_hover_bg': '#333333',
-    'main_btn_hover_text': '#000000',
-    'main_btn_pressed_bg': '#444444',
-    'main_btn_pressed_text': '#ffffff',
+    'main_btn_bg': WHITE,
+    'main_btn_text': TRUE_BLACK,
+    'main_btn_border': GREY_CC,
+    'main_btn_hover_bg': APP_BORDER,
+    'main_btn_hover_text': TRUE_BLACK,
+    'main_btn_pressed_bg': GREY_44,
+    'main_btn_pressed_text': WHITE,
 
     # Accent button (gold border)
-    'dialog_btn_accent_bg': '#ffffff',
+    'dialog_btn_accent_bg': WHITE,
     'dialog_btn_accent_text': BRAND_DARK_GOLD_DEEP,
     'dialog_btn_accent_border': BRAND_DARK_GOLD,
     'dialog_btn_accent_hover_bg': APP_HOVER_LIGHT,
     'dialog_btn_accent_pressed_bg': BRAND_DARK_GOLD,
-    'dialog_btn_accent_pressed_text': '#ffffff',
+    'dialog_btn_accent_pressed_text': WHITE,
     
     # Platform button
-    'platform_btn_bg': '#fafafa',
-    'platform_btn_hover_bg': '#f0f0f0',
+    'platform_btn_bg': APP_SURFACE_LIGHT_2,   # was #fafafa, collapsed onto #fbfbfb
+    'platform_btn_hover_bg': APP_HOVER_LIGHT,   # was #f0f0f0, collapsed onto #eeeeee
     
     # Clear/subtle button
-    'clear_btn_bg': '#f5f5f5',
+    'clear_btn_bg': APP_SURFACE_LIGHT_3,
     
     # Checkbox
-    'checkbox_bg': '#ffffff',
-    'checkbox_border': '#aaaaaa',
+    'checkbox_bg': WHITE,
+    'checkbox_border': APP_TEXT_DIM,
     'checkbox_checked_bg': BRAND_DARK_GOLD,
     'checkbox_checked_border': BRAND_DARK_GOLD,
     'checkbox_hover_border': BRAND_DARK_GOLD,
     
     # Tab widget
-    'tab_bg': '#e0e0e0',
-    'tab_selected_bg': '#ffffff',
+    'tab_bg': GREY_E0,
+    'tab_selected_bg': WHITE,
     'tab_hover_bg': APP_HOVER_LIGHT,
-    'tab_border': '#cccccc',
+    'tab_border': GREY_CC,
     'tab_indicator': BRAND_DARK_GOLD,
     
     # Scrollbar
-    'scrollbar_bg': '#e0e0e0',
-    'scrollbar_handle': '#aaaaaa',
+    'scrollbar_bg': GREY_E0,
+    'scrollbar_handle': APP_TEXT_DIM,
     'scrollbar_handle_hover': BRAND_DARK_GOLD,
-    'scrollbar_border': '#cccccc',
+    'scrollbar_border': GREY_CC,
     
     # List/Table
-    'list_bg': '#ffffff',
-    'list_alt_bg': '#f8f8f8',
+    'list_bg': WHITE,
+    'list_alt_bg': APP_SURFACE_LIGHT_2,   # was #f8f8f8, collapsed onto #fbfbfb
     'list_selected_bg': BRAND_DARK_GOLD,
     'list_hover_bg': APP_HOVER_LIGHT,
-    'list_header_bg': '#f0f0f0',
-    'list_grid': '#dddddd',
+    'list_header_bg': GREY_EE,   # was #f0f0f0, collapsed onto #eeeeee
+    'list_grid': GREY_DD,
     
     # Dialog
-    'dialog_bg': '#f5f5f5',
-    'dialog_border': '#cccccc',
+    'dialog_bg': APP_SURFACE_LIGHT_3,
+    'dialog_border': GREY_CC,
     
     # Status bar
-    'statusbar_bg': '#f5f5f5',
-    'statusbar_border': '#cccccc',
+    'statusbar_bg': APP_SURFACE_LIGHT_3,
+    'statusbar_border': GREY_CC,
     
     # Drop zone
-    'dropzone_bg': '#ffffff',
-    'dropzone_border': '#cccccc',
+    'dropzone_bg': WHITE,
+    'dropzone_border': GREY_CC,
     'dropzone_active_bg': 'rgba(210, 188, 147, 0.3)',
     
     # Tooltip
-    'tooltip_bg': '#ffffff',
+    'tooltip_bg': WHITE,
     'tooltip_border': BRAND_DARK_GOLD,
-    'tooltip_text': '#000000',
+    'tooltip_text': TRUE_BLACK,
     
     # Success/Warning/Error
     # RNV-STATUS-FAMILY: light's own siblings. This palette held
@@ -568,14 +652,6 @@ OS_SIM_COLORS: Final[dict[str, str]] = {
 
 DEFAULT_CUSTOM_BG_COLOR: Final[str] = "#808080"
 """Default custom preview background color (neutral gray starting value)"""
-
-GREY_CC: Final[str] = "#cccccc"
-"""Grey cc. The light edge swatch_edge() reaches for on a dark ground.
-
-RNV-INK-RULE (2026-09-02). It used to be three digits under a role name,
-which is why a census that reads six-digit hexes never saw it.
-"""
-
 
 # ── Which ink goes on this ground ──
 #
