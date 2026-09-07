@@ -19,6 +19,8 @@ import io
 from typing import Any
 from collections import Counter
 
+from utils.pil_compat import flat_pixels
+
 from PyQt6.QtWidgets import (
     QVBoxLayout, QHBoxLayout, QLabel, QFrame,
     QScrollArea, QWidget, QSizePolicy, QToolTip, QApplication,
@@ -228,7 +230,7 @@ def extract_dominant_colors(
         image = image.convert('RGBA')
     
     # Get pixel data
-    pixels = list(image.getdata())
+    pixels = flat_pixels(image)
     
     # Filter out transparent pixels if requested
     if ignore_transparent:
@@ -253,7 +255,7 @@ def extract_dominant_colors(
         if palette:
             # Get color counts from the quantized image
             color_counts: Counter = Counter()
-            for p in quantized.getdata():
+            for p in flat_pixels(quantized):
                 idx = p * 3
                 if idx + 2 < len(palette):
                     color = (palette[idx], palette[idx + 1], palette[idx + 2])
@@ -1412,3 +1414,7 @@ __all__: list[str] = [
     'ZoomControlsWidget',
     'BackgroundSelectorWidget',
 ]
+
+# RNV-PIL-COMPAT (2026-09-07): pixel access in this file goes through
+# utils.pil_compat.flat_pixels, not Image.getdata(), which Pillow removes
+# on 2027-10-15. tests/test_pil_compat.py fails if a direct call returns.
