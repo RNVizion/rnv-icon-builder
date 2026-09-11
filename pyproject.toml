@@ -8,7 +8,7 @@ version = "3.0.0"
 description = "Professional multi-resolution ICO file builder with theme support"
 readme = "README.md"
 license = {text = "MIT"}
-requires-python = ">=3.10"
+requires-python = ">=3.13"
 authors = [
     {name = "RNV"},
 ]
@@ -20,16 +20,13 @@ classifiers = [
     "License :: OSI Approved :: MIT License",
     "Operating System :: OS Independent",
     "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.10",
-    "Programming Language :: Python :: 3.11",
-    "Programming Language :: Python :: 3.12",
     "Programming Language :: Python :: 3.13",
     "Topic :: Multimedia :: Graphics :: Graphics Conversion",
     "Topic :: Software Development :: Build Tools",
     "Framework :: Qt",
 ]
 dependencies = [
-    "PyQt6>=6.6.0",
+    "PyQt6>=6.6.0,<7.0",
     "Pillow>=10.0.0,<13.0",
 ]
 

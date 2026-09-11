@@ -4,6 +4,10 @@
 # assertion that swallow everything they call, and self-skips on a
 # name that never existed. It deliberately permits a test with no
 # assertion at all -- those assert by not raising.
+# RNV-FLEET-FLOOR, 2026-09-11 -- tests/test_fleet_floor.py holds this
+# application to the fleet's Python floor (3.13, declared and run), the
+# PyQt6 major-version ceiling, and the dev tooling every repository must
+# declare rather than merely agree about.
 """
 RNV Icon Builder — Shared pytest fixtures and bootstrap
 =======================================================

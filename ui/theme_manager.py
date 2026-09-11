@@ -32,10 +32,12 @@ logger: Logger = get_logger_instance(__name__)
 
 
 # Type alias for theme dictionary.
-# Note: written as a plain assignment rather than PEP 695 `type ThemeDict = ...`
-# so the module imports on Python 3.10 and 3.11 (PEP 695 requires 3.12+).
-# The right-hand side `dict[str, str]` works on 3.10+ via PEP 585.
-ThemeDict = dict[str, str]
+# RNV-FLEET-FLOOR, 2026-09-11. PEP 695, matching ui/colors.py in the palette
+# manager, now that this application declares requires-python >= 3.13. The
+# plain assignment that stood here carried a note explaining it was avoided
+# so the module would import on 3.10 and 3.11 -- true while the CI matrix
+# ran those, and untrue the day it stopped.
+type ThemeDict = dict[str, str]
 
 
 class ThemeManager:

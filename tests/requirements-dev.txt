@@ -54,3 +54,7 @@ rnv-brand @ git+https://github.com/RNVizion/rnv-brand@b4fa970babbcb4141d1ea354c7
 # tests/test_test_tooling_pins.py fails if this repository drifts
 # from it, if a declaration here disagrees with another file in this
 # repository, or if an exact `==` pin comes back.
+
+# RNV-FLEET-FLOOR 2026-09-11: declared in all five. A timeout is the only
+# thing that turns a hang into a failure, and this fleet has had two.
+pytest-timeout>=2.4,<3.0
