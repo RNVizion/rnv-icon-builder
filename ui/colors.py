@@ -30,6 +30,37 @@ def lighten(hex_color: str, step: int) -> str:
     )
 
 
+def translucent(hex_color: str, alpha: int) -> str:
+    """Compose a colour and an alpha into Qt's eight-digit #AARRGGBB.
+
+    WHY A FUNCTION RATHER THAN A WRITTEN-OUT VALUE. A value computed from
+    another value must be computed in code; a written-down derivative is
+    orphaned the moment its source moves, silently. RNV-COLLAPSE-505050 is
+    what that costs: #505050 was collapsed onto GREY_44 on 2026-09-02 and went
+    on painting in four applications, because the alpha forms were written out
+    as rgba() and nothing followed them. Derived, the collapse would have
+    carried in the same edit.
+
+    WHY #AARRGGBB AND NOT rgba(). Both are valid in a Qt stylesheet and only
+    one is valid in QColor(). QColor('rgba(42, 42, 42, 0.93)') is INVALID and
+    Qt substitutes opaque black -- which is what _apply_image_mode_palette()
+    has been setting QPalette.Window and QPalette.Base to. The eight-digit
+    form works in both places.
+
+    ALPHA IS THE 0-255 BYTE, not a fraction. Qt TRUNCATES a float alpha in a
+    stylesheet: rgba(..., 0.3) is alpha 76, not 77, because 0.3 * 255 is 76.5.
+    The constants below carry the measured byte so the spelling change moves
+    nothing.
+    """
+    if not 0 <= alpha <= 255:
+        raise ValueError(f'alpha {alpha} is outside 0-255')
+    h = hex_color.lstrip('#').lower()
+    if len(h) != 6:
+        raise ValueError(f'{hex_color!r} is not a six-digit hex colour')
+    return '#%02x%s' % (alpha, h)
+
+
+
 BRAND_GOLD: Final[str] = "#d2bc93"
 """Primary brand gold - use for hover states, highlights, tooltips, accents.
 
@@ -323,6 +354,32 @@ lives only in a test drifts from the thing it classifies."""
 # light. Stated as "a lighter tint for hover" it is wrong half the time.
 BRAND_GOLD_HOVER: Final[str] = lighten(BRAND_GOLD, 13)   # -> #dfc9a0
 
+# ==================== Composite alphas ====================
+# Each is the integer byte Qt produces for the float spelling it replaces,
+# MEASURED through Qt's own stylesheet parser over three grounds rather than
+# computed -- Qt truncates, so 0.3 is 76 and not 77, and 0.1 is 25 and not 26.
+# Named so a chart row can carry its variants: change the base constant and
+# every alpha form of it follows.
+SCRIM_ALPHA: Final[int] = 0xED
+"""237. The image-mode chrome scrim, from rgba(..., 0.93).
+
+The colour picker derived the same byte by hand for its IMAGE_OVERLAY_ALPHA
+and spelled it "ED". Two derivations, one value."""
+
+DROPZONE_ALPHA_DARK: Final[int] = 0x33
+"""51, from rgba(..., 0.2). The active drop zone on a dark ground."""
+
+DROPZONE_ALPHA_LIGHT: Final[int] = 0x4C
+"""76, from rgba(..., 0.3). Heavier on light, because the tint has less
+ground to work against."""
+
+SCROLLBAR_HANDLE_ALPHA: Final[int] = 0x96
+"""150. Three of the four applications with an image scrollbar use this; the
+palette manager uses 100 and nothing records why."""
+
+SCROLLBAR_BORDER_ALPHA: Final[int] = 0x64
+"""100, from rgba(51, 51, 51, 100)."""
+
 DARK_THEME_COLORS: Final[dict[str, str]] = {
     # Base colors
     'window_bg': TRUE_BLACK,
@@ -426,7 +483,7 @@ DARK_THEME_COLORS: Final[dict[str, str]] = {
     # Drop zone
     'dropzone_bg': BRAND_BLACK,
     'dropzone_border': APP_BORDER,
-    'dropzone_active_bg': 'rgba(210, 188, 147, 0.2)',
+    'dropzone_active_bg': translucent(BRAND_GOLD, DROPZONE_ALPHA_DARK),
     
     # Tooltip
     'tooltip_bg': APP_CARD,
@@ -548,7 +605,7 @@ LIGHT_THEME_COLORS: Final[dict[str, str]] = {
     # Drop zone
     'dropzone_bg': WHITE,
     'dropzone_border': GREY_CC,
-    'dropzone_active_bg': 'rgba(210, 188, 147, 0.3)',
+    'dropzone_active_bg': translucent(BRAND_GOLD, DROPZONE_ALPHA_LIGHT),
     
     # Tooltip
     'tooltip_bg': WHITE,
@@ -568,15 +625,21 @@ LIGHT_THEME_COLORS: Final[dict[str, str]] = {
 IMAGE_MODE_COLORS: Final[dict[str, str]] = {
     **DARK_THEME_COLORS,
     # Override with transparent backgrounds
-    'window_bg': 'rgba(26, 26, 26, 0.93)',
-    'panel_bg': 'rgba(26, 26, 26, 0.93)',
-    'card_bg': 'rgba(42, 42, 42, 0.93)',
-    'input_bg': 'rgba(42, 42, 42, 0.93)',
-    'dropzone_bg': 'rgba(26, 26, 26, 0.93)',
+    'window_bg': translucent(BRAND_BLACK, SCRIM_ALPHA),
+    'panel_bg': translucent(BRAND_BLACK, SCRIM_ALPHA),
+    'card_bg': translucent(APP_CARD, SCRIM_ALPHA),
+    'input_bg': translucent(APP_CARD, SCRIM_ALPHA),
+    'dropzone_bg': translucent(BRAND_BLACK, SCRIM_ALPHA),
     'scrollbar_bg': 'transparent',
-    'scrollbar_handle': 'rgba(80, 80, 80, 150)',
+    # RNV-COLLAPSE-505050 closed here, 2026-09-24. This read
+    # rgba(80, 80, 80, 150) -- #505050 at 150 -- which the 2026-09-02
+    # ruling collapsed onto GREY_44 and which survived because the alpha
+    # form was written out and no sweep in the fleet decodes rgba().
+    # Composites to #333333 on the image ground, where #505050 gave
+    # #3a3a3a: a 2.26 CIEDE2000 step, rendered before it was ruled.
+    'scrollbar_handle': translucent(GREY_44, SCROLLBAR_HANDLE_ALPHA),
     'scrollbar_handle_hover': BRAND_GOLD,
-    'scrollbar_border': 'rgba(51, 51, 51, 100)',
+    'scrollbar_border': translucent(APP_BORDER, SCROLLBAR_BORDER_ALPHA),
 }
 
 
@@ -606,16 +669,16 @@ OS_SIM_COLORS: Final[dict[str, str]] = {
     # Windows Taskbar
     'taskbar_dark_bg':           '#202020',
     'taskbar_light_bg':          '#f0f0f0',
-    'taskbar_border':            APP_BORDER,
+    'taskbar_border':            '#333333',   # Windows taskbar edge
     'taskbar_text_dark':         '#ffffff',
-    'taskbar_text_light':        TRUE_BLACK,
+    'taskbar_text_light':        '#000000',   # Windows light taskbar
     'taskbar_text_muted_dark':   '#aaaaaa',
     'taskbar_text_muted_light':  '#666666',
 
     # Windows Explorer
     'explorer_bg':               '#ffffff',
     'explorer_border':           '#dddddd',
-    'explorer_text':             TRUE_BLACK,
+    'explorer_text':             '#000000',   # Windows Explorer
 
     # macOS Dock
     'dock_gradient_start':       'rgba(255,255,255,0.3)',
@@ -625,20 +688,20 @@ OS_SIM_COLORS: Final[dict[str, str]] = {
     # macOS Finder
     'finder_bg':                 '#f5f5f5',
     'finder_border':             '#dddddd',
-    'finder_text':               APP_BORDER,
+    'finder_text':               '#333333',   # macOS Finder
 
     # Chrome Browser Tab Bar
     'chrome_tabbar_bg':          '#dee1e6',
     'chrome_active_tab_bg':      '#ffffff',
     'chrome_inactive_tab_bg':    '#cccfd4',
-    'chrome_tab_title':          APP_BORDER,
+    'chrome_tab_title':          '#333333',   # Chrome tab title
     'chrome_tab_close':          '#666666',
     'chrome_inactive_tab_text':  '#555555',
 
     # Browser Bookmarks Bar
     'bookmarks_bg':              '#f8f9fa',
     'bookmarks_border':          '#dddddd',
-    'bookmarks_text':            APP_BORDER,
+    'bookmarks_text':            '#333333',   # Chrome bookmarks bar
 
     # Windows Desktop
     'desktop_gradient_start':    '#1e90ff',
@@ -766,6 +829,7 @@ __all__: list[str] = [
     'BRAND_GOLD_RGB',
     'BRAND_DARK_GOLD_RGB',
     'lighten',
+    'translucent',
     'DARK_THEME_COLORS',
     'LIGHT_THEME_COLORS',
     'IMAGE_MODE_COLORS',
