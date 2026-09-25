@@ -325,7 +325,22 @@ class TestColors(unittest.TestCase):
         self.assertEqual(IMAGE_MODE_COLORS['text_primary'], DARK_THEME_COLORS['text_primary'])
 
     def test_image_mode_window_is_transparent(self):
-        self.assertIn('rgba', IMAGE_MODE_COLORS['window_bg'])
+        # LOCK EXCEPTION, ruled 2026-09-25. This suite is the fixed point
+        # the other tests are measured against and is not edited; this
+        # one assertion is the exception, recorded here so it is not
+        # read as drift.
+        #
+        # It read assertIn('rgba', window_bg) -- the SPELLING, not the
+        # property. It passed on 'rgba(26, 26, 26, 0.93)', which QColor
+        # cannot parse, so QPalette painted the window opaque black; and
+        # it failed on '#ed1a1a1a', which is transparent at alpha 237.
+        # Transparency is a property of the colour, so ask the colour.
+        from PyQt6.QtGui import QColor
+        colour = QColor(IMAGE_MODE_COLORS['window_bg'])
+        self.assertTrue(colour.isValid(),
+                        f"{IMAGE_MODE_COLORS['window_bg']!r} is not a "
+                        f"colour QColor can read")
+        self.assertLess(colour.alpha(), 255)
 
     def test_image_mode_scrollbar_bg_transparent(self):
         self.assertEqual(IMAGE_MODE_COLORS['scrollbar_bg'], 'transparent')

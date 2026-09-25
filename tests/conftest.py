@@ -314,3 +314,8 @@ def app(qapp, monkeypatch):
     except Exception:
         pass
     QApplication.processEvents()
+
+# RNV-TRANSPARENCY-CHECK, 2026-09-25 -- the root suite's
+# test_image_mode_window_is_transparent now checks the colour's
+# alpha rather than its spelling. The one ruled exception to the
+# lock on test_rnv_icon_builder.py; see the comment at the test.
