@@ -1250,6 +1250,9 @@ class BackgroundSelectorWidget(QFrame):
         
         self.current_bg = DEFAULT_PREVIEW_BACKGROUND
         self.custom_color: tuple[int, int, int] = (128, 128, 128)  # Gray default
+        #: The mode apply_theme() last drew this in. The colour button reads
+        #: it, because a colour change repaints the button without a mode.
+        self._is_dark: bool = True
         
         self._setup_ui()
     
@@ -1292,6 +1295,8 @@ class BackgroundSelectorWidget(QFrame):
     
     def apply_theme(self, is_dark: bool = True) -> None:
         """Apply theme styling to background selector."""
+        self._is_dark = is_dark
+        self._update_color_button()
         colors = get_theme_colors(is_dark=is_dark)
         accent = BRAND_GOLD if is_dark else BRAND_DARK_GOLD
         accent_dark = BRAND_DARK_GOLD if is_dark else BRAND_GOLD
@@ -1343,12 +1348,21 @@ class BackgroundSelectorWidget(QFrame):
         """)
     
     def _update_color_button(self) -> None:
-        """Update the color button appearance."""
+        """Update the color button appearance, in the mode apply_theme() set.
+
+        RNV-RESTYLE-ON-SWITCH, 2026-09-26 (ruling 3). The edge read
+        DARK_THEME_COLORS by name, so in light mode the button kept dark's
+        #555555 edge while the combo beside it turned light. It takes the
+        mode's text_disabled now. The hover stays BRAND_GOLD in every mode:
+        a reviewed, permanent bypass in tests/test_brand_contrast.py, drawn
+        over the user's colour rather than a themed surface.
+        """
         hex_color = color_to_hex(self.custom_color)
+        edge = get_theme_colors(is_dark=getattr(self, '_is_dark', True))['text_disabled']
         self.color_btn.setStyleSheet(f"""
             QPushButton {{
                 background-color: {hex_color};
-                border: 2px solid {DARK_THEME_COLORS['text_disabled']};
+                border: 2px solid {edge};
                 border-radius: 3px;
             }}
             QPushButton:hover {{
