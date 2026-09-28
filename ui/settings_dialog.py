@@ -1846,7 +1846,11 @@ class SettingsDialog(BaseDialog):
             # RNV-STATUS-FAMILY: read per mode. This was
             # STATUS_ACTIVE_COLOR, a module constant, on a label
             # that is painted in dark, light and image mode.
-            _active = get_theme_colors()['status_active']
+            # RNV-WATCH-LABEL 2026-09-28: in the dialog's own mode. This
+            # asked get_theme_colors() for no mode, which is the default
+            # palette -- dark's -- so a dialog in light drew dark's value.
+            # _apply_theme() styles the label again on a switch.
+            _active = get_theme_colors(is_dark=self._current_theme_is_dark)['status_active']
             self.watch_status_label.setStyleSheet(f"color: {_active};")
             self.watch_start_btn.setEnabled(False)
             self.watch_stop_btn.setEnabled(True)
@@ -2416,6 +2420,12 @@ class SettingsDialog(BaseDialog):
         """Apply theme styling to dialog using centralized color definitions."""
         colors = get_theme_colors(is_dark=is_dark)
         self.setStyleSheet(self._build_stylesheet(colors))
+        
+        # RNV-WATCH-LABEL 2026-09-28: the Watching label carries a sheet of
+        # its own while watching, in the mode's status_active. Set once, when
+        # watching started, it kept that mode through every switch.
+        if self._is_watching:
+            self.watch_status_label.setStyleSheet(f"color: {colors['status_active']};")
         
         # Propagate theme to child widgets with their own stylesheets
         if hasattr(self, 'color_palette'):

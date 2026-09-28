@@ -224,8 +224,14 @@ def test_status_active_resolves_per_mode():
 
 
 def test_the_watch_label_reads_the_theme_rather_than_a_constant():
+    # RNV-WATCH-LABEL 2026-09-28: and the dialog's own mode. This pinned
+    # get_theme_colors() with no mode -- the default palette, dark's -- so
+    # a dialog in light drew dark's value. The label as drawn in each mode
+    # is held by tests/test_watch_label_follows_a_switch.py.
     src = (ROOT / "ui" / "settings_dialog.py").read_text(encoding="utf-8-sig")
-    assert "get_theme_colors()['status_active']" in src
+    assert "get_theme_colors(is_dark=self._current_theme_is_dark)['status_active']" in src
+    assert not re.search(r"get_theme_colors\s*\(\s*\)\s*\[\s*'status_active'", _code_only(src)), (
+        "the watch label asks for the default palette again")
     assert not re.search(r"\bSTATUS_ACTIVE_COLOR\b", _code_only(src)), (
         "the mode-blind constant is back in the dialog")
 
