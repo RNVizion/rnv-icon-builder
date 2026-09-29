@@ -248,3 +248,102 @@ def test_the_scrollbar_handle_is_grey_44_and_not_the_collapsed_value():
     assert handle[3:].lower() == colors.GREY_44.lstrip("#").lower()
 
 # RNV-DERIVE-ALPHA
+
+
+# ------------------------------------------------ eight-digit hex, lower case
+# RNV-LOWER-EIGHT-GUARD, 2026-09-29: the test the transformer, the picker and
+# the palette manager gained on 2026-09-25, added here by ruling ("Add the
+# same test"). This application already wrote lower case, so nothing else
+# moves; the register's Notation section (rev 42) says each app's guard holds
+# its eight-digit values to lower case, and until now this one did not.
+
+LOWER8_MODULES = ('ui.colors', 'ui.preview_utils', 'ui.theme_manager')
+#: Found when this was written; below the floor, the sweep has gone blind.
+LOWER8_FLOOR = 21
+LOWER8_FILES = 38
+
+
+def _bare_strings(tree: ast.AST) -> set[int]:
+    """The ids of string constants that stand alone as statements --
+    docstrings and bare strings -- which are prose, not values."""
+    bare = set()
+    for node in ast.walk(tree):
+        body = getattr(node, "body", None)
+        if isinstance(body, list):
+            for st in body:
+                if isinstance(st, ast.Expr) and isinstance(st.value, ast.Constant):
+                    bare.add(id(st.value))
+    return bare
+
+
+def _lower8_values():
+    """(where, value) for every eight-digit hex string the colour modules
+    build -- their constants, the dicts they hold, and their classes' dicts
+    -- as they EVALUATE, which is what a derived value is."""
+    import importlib
+
+    def walk(where, value):
+        if isinstance(value, str) and re.fullmatch(r"#[0-9a-fA-F]{8}", value):
+            yield where, value
+        elif isinstance(value, dict):
+            for key, item in value.items():
+                yield from walk(f"{where}[{key!r}]", item)
+
+    for name in LOWER8_MODULES:
+        module = importlib.import_module(name)
+        for attr, value in vars(module).items():
+            if attr.startswith("__"):
+                continue
+            if isinstance(value, type) and value.__module__ == name:
+                for cattr, cvalue in vars(value).items():
+                    if not cattr.startswith("__"):
+                        yield from walk(f"{name}.{attr}.{cattr}", cvalue)
+            else:
+                yield from walk(f"{name}.{attr}", value)
+
+
+def _lower8_trees():
+    """Application source: not tests, not a root test suite, not a delivery
+    script. BOM-aware."""
+    for path in sorted(ROOT.rglob("*.py")):
+        rel = path.relative_to(ROOT)
+        if any(p in {".git", "tests", "snapshots", "build", "dist", ".venv",
+                     "venv", "__pycache__"} for p in rel.parts):
+            continue
+        if len(rel.parts) == 1 and rel.name.startswith(("test_", "up")):
+            continue
+        text = path.read_bytes().decode("utf-8-sig", errors="replace")
+        if "RNV-DELIVERY-SCRIPT-DO-NOT-SWEEP" in text:
+            continue
+        yield rel, ast.parse(text)
+
+
+def test_eight_digit_hex_is_lower_case():
+    """RNV-LOWER-EIGHT, 2026-09-25. The register writes hex in lower case --
+    Notation, ruled 2026-08-15, Brand Book decision #19 -- and on 2026-09-25
+    Chris ruled that eight digits are hex too: #ed1a1a1a, never #ED1A1A1A.
+    Qt reads either case. This application's helper wrote lower case from
+    the start; this holds it there.
+
+    Both halves: every eight-digit value the application BUILDS, as its
+    colour modules evaluate, and every eight-digit literal it WRITES in code.
+    Docstrings are prose, and a sentence that names an upper-case value as
+    history keeps its case."""
+    built = list(_lower8_values())
+    assert len(built) >= LOWER8_FLOOR, (
+        f"only {len(built)} eight-digit values found; the sweep has gone blind")
+    upper = [f"{where} = {value}" for where, value in built
+             if value != value.lower()]
+    written, files = [], 0
+    for rel, tree in _lower8_trees():
+        files += 1
+        bare = _bare_strings(tree)
+        for node in ast.walk(tree):
+            if (isinstance(node, ast.Constant) and isinstance(node.value, str)
+                    and id(node) not in bare):
+                for hex8 in re.findall(r"#[0-9a-fA-F]{8}\b", node.value):
+                    if hex8 != hex8.lower():
+                        written.append(f"{rel}:{node.lineno}  {hex8}")
+    assert files >= LOWER8_FILES, f"only {files} files swept"
+    assert not upper, "built in upper case:\n  " + "\n  ".join(upper)
+    assert not written, "written in upper case:\n  " + "\n  ".join(written)
