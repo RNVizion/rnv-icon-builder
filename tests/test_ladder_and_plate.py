@@ -51,9 +51,12 @@ NEW = {'APP_PANEL_HOVER': ('panel-hover', '#3a3a3a'),
 
 #: palette dict name -> the keys in it that must now name the constant.
 WIRED = {
-    'DARK_THEME_COLORS': ('hover_bg', 'dialog_btn_hover_bg',
+    # RNV-NAMED-AND-USED, 2026-10-04: hover_bg headed both lists. Nothing
+    # read it but two copies in the main window's palettes that nothing
+    # read either, and it went with them.
+    'DARK_THEME_COLORS': ('dialog_btn_hover_bg',
                           'list_hover_bg'),
-    'LIGHT_THEME_COLORS': ('hover_bg', 'dialog_btn_hover_bg',
+    'LIGHT_THEME_COLORS': ('dialog_btn_hover_bg',
                            'dialog_btn_accent_hover_bg',
                            'tab_hover_bg', 'list_hover_bg'),
 }

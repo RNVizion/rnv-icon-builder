@@ -44,7 +44,10 @@ from ui.base_dialog import BaseDialog
 from ui.colors import (
     BRAND_GOLD, BRAND_DARK_GOLD, get_theme_colors,
     contrast_ink, DARK_THEME_COLORS,
-    DEFAULT_CUSTOM_BG_COLOR,
+    # RNV-NAMED-AND-USED (2026-10-04): the grounds a preview is composited
+    # onto, by name. Each was an integer tuple written out in this file.
+    DEFAULT_CUSTOM_BG_RGB, PREVIEW_CHECKER_DARK, PREVIEW_CHECKER_LIGHT,
+    PREVIEW_GROUND_BLACK, PREVIEW_GROUND_WHITE,
 )
 
 # Setup logger for this module
@@ -62,8 +65,8 @@ def create_checkerboard_pattern(
     width: int,
     height: int,
     square_size: int = TRANSPARENCY_CHECKERBOARD_SIZE,
-    color1: tuple[int, int, int] = (255, 255, 255),
-    color2: tuple[int, int, int] = (204, 204, 204)
+    color1: tuple[int, int, int] = PREVIEW_CHECKER_LIGHT,
+    color2: tuple[int, int, int] = PREVIEW_CHECKER_DARK
 ) -> Image.Image:
     """
     Create a checkerboard pattern image for transparency visualization.
@@ -105,8 +108,8 @@ def create_checkerboard_pattern(
 def composite_on_checkerboard(
     image: Image.Image,
     square_size: int = TRANSPARENCY_CHECKERBOARD_SIZE,
-    color1: tuple[int, int, int] = (255, 255, 255),
-    color2: tuple[int, int, int] = (204, 204, 204)
+    color1: tuple[int, int, int] = PREVIEW_CHECKER_LIGHT,
+    color2: tuple[int, int, int] = PREVIEW_CHECKER_DARK
 ) -> Image.Image:
     """
     Composite an image with alpha channel onto a checkerboard pattern.
@@ -151,7 +154,7 @@ def composite_on_checkerboard(
 
 def composite_on_color(
     image: Image.Image,
-    color: tuple[int, int, int] = (255, 255, 255)
+    color: tuple[int, int, int] = PREVIEW_GROUND_WHITE
 ) -> Image.Image:
     """
     Composite an image with alpha channel onto a solid color background.
@@ -195,9 +198,9 @@ def composite_with_background(
     if background_type == PREVIEW_BG_CHECKERBOARD:
         return composite_on_checkerboard(image)
     elif background_type == PREVIEW_BG_WHITE:
-        return composite_on_color(image, (255, 255, 255))
+        return composite_on_color(image, PREVIEW_GROUND_WHITE)
     elif background_type == PREVIEW_BG_BLACK:
-        return composite_on_color(image, (0, 0, 0))
+        return composite_on_color(image, PREVIEW_GROUND_BLACK)
     elif background_type == PREVIEW_BG_CUSTOM and custom_color:
         return composite_on_color(image, custom_color)
     else:
@@ -1249,7 +1252,7 @@ class BackgroundSelectorWidget(QFrame):
         super().__init__(parent)
         
         self.current_bg = DEFAULT_PREVIEW_BACKGROUND
-        self.custom_color: tuple[int, int, int] = (128, 128, 128)  # Gray default
+        self.custom_color: tuple[int, int, int] = DEFAULT_CUSTOM_BG_RGB  # Gray default
         #: The mode apply_theme() last drew this in. The colour button reads
         #: it, because a colour change repaints the button without a mode.
         self._is_dark: bool = True

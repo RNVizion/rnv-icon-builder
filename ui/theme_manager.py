@@ -61,12 +61,16 @@ class ThemeManager:
     
     # ==================== Theme Definitions ====================
     # Color values sourced from utils/colors.py — do not hardcode here.
+    #
+    # RNV-NAMED-AND-USED (2026-10-04): these two are what get_current_theme()
+    # hands the main window, and they hold what the main window looks up.
+    # Five more keys were copied across and one alias made, and nothing read
+    # any of the six: the dialogs take their colours from ui/colors.py.
 
     DARK_THEME: Final[ThemeDict] = {
         'name': 'Dark',
         **{k: DARK_THEME_COLORS[k] for k in (
-            'window_bg', 'text_primary', 'border_default', 'hover_bg',
-            'checkbox_bg', 'checkbox_border',
+            'window_bg',
             # The main window's buttons, passed through under the names
             # they already have. Until 2026-09-01 these six were republished
             # as button_* -- which is how one key name came to mean the main
@@ -78,14 +82,12 @@ class ThemeManager:
         # Legacy key aliases kept for backward-compatibility
         'text_color': DARK_THEME_COLORS['text_primary'],
         'border_color': DARK_THEME_COLORS['main_btn_border'],
-        'hover_color': DARK_THEME_COLORS['hover_bg'],
     }
 
     LIGHT_THEME: Final[ThemeDict] = {
         'name': 'Light',
         **{k: LIGHT_THEME_COLORS[k] for k in (
-            'window_bg', 'text_primary', 'border_default', 'hover_bg',
-            'checkbox_bg', 'checkbox_border',
+            'window_bg',
             # The main window's buttons, passed through under the names
             # they already have. Until 2026-09-01 these six were republished
             # as button_* -- which is how one key name came to mean the main
@@ -97,7 +99,6 @@ class ThemeManager:
         # Legacy key aliases kept for backward-compatibility
         'text_color': LIGHT_THEME_COLORS['text_primary'],
         'border_color': LIGHT_THEME_COLORS['main_btn_border'],
-        'hover_color': LIGHT_THEME_COLORS['hover_bg'],
     }
     
     # ==================== Scrollbar Styles ====================

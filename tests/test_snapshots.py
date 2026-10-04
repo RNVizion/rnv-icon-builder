@@ -97,7 +97,12 @@ class TestScrollbarSnapshots:
 class TestThemeKeySnapshots:
     """Locks the *names* of color slots in each theme dict. If anyone adds,
     removes, or renames a slot, every theme that defines colors must do the
-    same — these snapshots make that mismatch visible."""
+    same — these snapshots make that mismatch visible.
+
+    RNV-NAMED-AND-USED, 2026-10-04: dark and light hold the same slots.
+    Image holds those and four more -- the drop zone's and the status bar's
+    ground and edge -- which image mode alone reads, from its own palette
+    by name."""
 
     def test_dark_theme_keys(self, snapshots):
         from ui.colors import DARK_THEME_COLORS

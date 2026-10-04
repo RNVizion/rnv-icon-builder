@@ -32,7 +32,7 @@ from utils.config import (
 )
 from utils.logger import Logger, get_logger_instance
 from ui.base_dialog import BaseDialog
-from ui.colors import BRAND_GOLD, BRAND_DARK_GOLD, OS_SIM_COLORS, get_theme_colors
+from ui.colors import BRAND_GOLD, BRAND_DARK_GOLD, OS_SIM_COLORS, OS_SIM_GROUNDS_RGB, get_theme_colors
 from ui.preview_utils import pil_to_qpixmap, composite_on_checkerboard
 
 # Setup logger for this module
@@ -210,7 +210,8 @@ class ContextPreviewDialog(BaseDialog):
         if icon_img:
             icon_label = QLabel()
             # Composite on appropriate background
-            bg = (32, 32, 32) if dark else (240, 240, 240)
+            # RNV-NAMED-AND-USED (2026-10-04): the taskbar's own ground, by name.
+            bg = OS_SIM_GROUNDS_RGB['taskbar_dark_bg'] if dark else OS_SIM_GROUNDS_RGB['taskbar_light_bg']
             from ui.preview_utils import composite_on_color
             display = composite_on_color(icon_img, bg)
             pixmap = pil_to_qpixmap(display)
@@ -267,7 +268,7 @@ class ContextPreviewDialog(BaseDialog):
                 icon_label = QLabel()
                 # White background for explorer
                 from ui.preview_utils import composite_on_color
-                display = composite_on_color(icon_img, (255, 255, 255))
+                display = composite_on_color(icon_img, OS_SIM_GROUNDS_RGB['explorer_bg'])
                 pixmap = pil_to_qpixmap(display)
                 icon_label.setPixmap(pixmap)
                 icon_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
@@ -399,7 +400,7 @@ class ContextPreviewDialog(BaseDialog):
                 
                 icon_label = QLabel()
                 from ui.preview_utils import composite_on_color
-                display = composite_on_color(icon_img, (245, 245, 245))
+                display = composite_on_color(icon_img, OS_SIM_GROUNDS_RGB['finder_bg'])
                 pixmap = pil_to_qpixmap(display)
                 icon_label.setPixmap(pixmap)
                 icon_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
@@ -486,7 +487,7 @@ class ContextPreviewDialog(BaseDialog):
         if icon_img:
             icon_label = QLabel()
             from ui.preview_utils import composite_on_color
-            display = composite_on_color(icon_img, (255, 255, 255))
+            display = composite_on_color(icon_img, OS_SIM_GROUNDS_RGB['chrome_active_tab_bg'])
             pixmap = pil_to_qpixmap(display)
             icon_label.setPixmap(pixmap)
             tab1_layout.addWidget(icon_label)
@@ -558,7 +559,7 @@ class ContextPreviewDialog(BaseDialog):
             
             icon_label = QLabel()
             from ui.preview_utils import composite_on_color
-            display = composite_on_color(icon_img, (248, 249, 250))
+            display = composite_on_color(icon_img, OS_SIM_GROUNDS_RGB['bookmarks_bg'])
             pixmap = pil_to_qpixmap(display)
             icon_label.setPixmap(pixmap)
             item.addWidget(icon_label)

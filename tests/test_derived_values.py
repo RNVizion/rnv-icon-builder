@@ -259,7 +259,9 @@ def test_the_scrollbar_handle_is_grey_44_and_not_the_collapsed_value():
 
 LOWER8_MODULES = ('ui.colors', 'ui.preview_utils', 'ui.theme_manager')
 #: Found when this was written; below the floor, the sweep has gone blind.
-LOWER8_FLOOR = 21
+#: 19 since RNV-NAMED-AND-USED, 2026-10-04: image mode's card_bg override,
+#: which nothing read, went, and it was counted in two modules.
+LOWER8_FLOOR = 19
 LOWER8_FILES = 38
 
 

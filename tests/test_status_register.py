@@ -108,13 +108,14 @@ STRAYS = {
                "fill floor",
 }
 
+# RNV-NAMED-AND-USED, 2026-10-04: the two this application draws. It draws
+# one status colour, the folder watcher's label, as text in dark and in
+# light. The family's two fills and the warning's two text values were held
+# here too; nothing in the application read them, and they went. The
+# register holds the family.
 REGISTERED = {
-    "STATUS_SUCCESS": "#926c89",
-    "STATUS_WARNING": "#a2703c",
     "STATUS_SUCCESS_TEXT": "#ad85a3",
-    "STATUS_WARNING_TEXT": "#bc8752",
     "STATUS_SUCCESS_TEXT_LIGHT": "#825d79",
-    "STATUS_WARNING_TEXT_LIGHT": "#8e5e2b",
 }
 
 
@@ -129,27 +130,15 @@ def test_the_status_values_are_the_register_s():
     """Not "some purple" -- THE one. An application that picks its own status
     colour has an opinion about what success means, which is the register's
     job. Pinned by value: a test asserting only that these differ from each
-    other would pass on six wrong colours."""
+    other would pass on two wrong colours."""
     for name, value in REGISTERED.items():
         assert getattr(colors, name) == value, name
 
 
-def test_a_fill_cannot_carry_text_and_that_is_the_point():
-    """Why there are six values and not two.
-
-    STATUS_SUCCESS and STATUS_WARNING are fills. Every fill in this family
-    sits at L* 48-59, which is exactly what lets ONE value clear 3:1 on a dark
-    AND a light ground -- and a mid-tone reaches 4.5:1 on neither. If either
-    ever clears the text floor, the register has moved it out of the band and
-    somebody needs to know rather than quietly benefiting.
-    """
-    for name in ("STATUS_SUCCESS", "STATUS_WARNING"):
-        value = getattr(colors, name)
-        for ground in ("#1a1a1a", "#2a2a2a", "#f5f5f5", "#ffffff"):
-            assert _contrast(value, ground) >= FILL_FLOOR, f"{name} {ground}"
-            assert _contrast(value, ground) < TEXT_FLOOR, (
-                f"{name} now clears the text floor on {ground}. Do not relax "
-                f"this -- find out whether the register moved it.")
+# RNV-NAMED-AND-USED, 2026-10-04: a test stood here on the arithmetic of the
+# two fills -- that each clears 3:1 on both grounds and 4.5:1 on neither.
+# This application draws no fill and no longer carries them; the
+# arithmetic is the register's, where the fills are.
 
 
 def test_the_text_variants_carry_text_on_their_own_ground():
@@ -168,11 +157,11 @@ def test_the_text_variants_carry_text_on_their_own_ground():
     each moving less than its own 8.40 threshold; the fix here is to add the
     darker rungs back and update REGISTERED.
     """
-    for name in ("STATUS_SUCCESS_TEXT", "STATUS_WARNING_TEXT"):
+    for name in ("STATUS_SUCCESS_TEXT",):
         for ground in ("#1a1a1a", "#2a2a2a"):
             ratio = _contrast(getattr(colors, name), ground)
             assert ratio >= TEXT_FLOOR, f"{name} on {ground} = {ratio:.4f}"
-    for name in ("STATUS_SUCCESS_TEXT_LIGHT", "STATUS_WARNING_TEXT_LIGHT"):
+    for name in ("STATUS_SUCCESS_TEXT_LIGHT",):
         # Restored at rev 31: the re-walked pair reaches all four rungs.
         # #e0e0e0 is deliberately absent -- BRAND_DARK_GOLD_DEEP fails
         # there too, so it is the boundary for every brand text family.
@@ -181,23 +170,10 @@ def test_the_text_variants_carry_text_on_their_own_ground():
             assert ratio >= TEXT_FLOOR, f"{name} on {ground} = {ratio:.4f}"
 
 
-def test_the_watcher_green_is_an_alias_not_a_copy():
-    """"Running" is not "succeeded", and the register has no name for the
-    first. Holding it as an alias keeps the borrowing visible: if status-active
-    is ever registered, one line moves. A copied literal would hide that this
-    app is borrowing at all.
-
-    Unchanged in intent since 2026-09-02. What changed is that the alias is no
-    longer what gets PAINTED -- see the next test.
-    """
-    src = (ROOT / "ui" / "colors.py").read_text(encoding="utf-8-sig")
-    assert "STATUS_ACTIVE_COLOR: Final[str] = STATUS_SUCCESS_TEXT" in src
-    assert colors.STATUS_ACTIVE_COLOR == colors.STATUS_SUCCESS_TEXT
-    assert colors.STATUS_ACTIVE_COLOR != colors.STATUS_SUCCESS, (
-        "the alias points at the FILL again. It is painted with `color:` and "
-        "the fill reads 3.91 on BRAND_BLACK against a 4.5 text floor -- it was "
-        "safe under Bootstrap only because that green happened to be light "
-        "enough to double as text.")
+# RNV-NAMED-AND-USED, 2026-10-04: a test stood here holding
+# STATUS_ACTIVE_COLOR as an alias of the success text. Nothing painted from
+# the alias after 2026-09-03 -- the label reads status_active, per mode, as
+# the next three tests hold -- and it went.
 
 
 def test_status_active_resolves_per_mode():
@@ -246,26 +222,23 @@ def test_status_active_is_legal_in_every_mode_it_is_painted_in():
         assert ratio >= TEXT_FLOOR, f"{mode}: {value} on {ground} = {ratio:.4f}"
 
 
-def test_the_palettes_are_wired_through_the_constants_not_rewritten():
-    src = (ROOT / "ui" / "colors.py").read_text(encoding="utf-8-sig")
-    for key, const in (("success", "STATUS_SUCCESS"),
-                       ("warning", "STATUS_WARNING")):
-        found = len(re.findall(r"'%s':\s+%s\b" % (key, const), src))
-        assert found == 2, (
-            f"{key} is wired through {const} in {found} palettes, not 2")
+# RNV-NAMED-AND-USED, 2026-10-04: a test stood here holding the palettes'
+# success and warning keys to their constants. Nothing read the keys, so
+# they went, and the constants with them.
 
 
 def test_the_family_matches_the_rest_of_the_fleet():
     """The whole point of the ruling. Written as the literals the other
     applications hold, so this fails if either side drifts rather than only
     if this one does."""
-    assert colors.STATUS_SUCCESS == "#926c89"
-    assert colors.STATUS_WARNING == "#a2703c"
     assert colors.STATUS_SUCCESS_TEXT == "#ad85a3"
+    assert colors.STATUS_SUCCESS_TEXT_LIGHT == "#825d79"
 
 
 SWEPT = ("ui/colors.py", "ui/settings_dialog.py")
-LIVE_VALUE = "#926c89"
+# the success text: a value ui/colors.py holds. It was the success fill's
+# until RNV-NAMED-AND-USED, 2026-10-04, when the fill went.
+LIVE_VALUE = "#ad85a3"
 
 
 def test_this_guard_can_still_see():

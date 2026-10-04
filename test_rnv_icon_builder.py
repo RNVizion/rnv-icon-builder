@@ -112,10 +112,10 @@ from utils.logger            import (
 from utils.pixmap_cache      import QPixmapCache, ImagePixmapCache, ThumbnailCache, create_cache_key
 from utils.dialog_helper     import DialogHelper, DialogResult
 from ui.colors               import (
-    BRAND_GOLD, BRAND_DARK_GOLD, BRAND_GOLD_RGB, BRAND_DARK_GOLD_RGB,
+    BRAND_GOLD, BRAND_DARK_GOLD, _to_rgb,
     DARK_THEME_COLORS, LIGHT_THEME_COLORS, IMAGE_MODE_COLORS,
     get_theme_colors,
-    DEFAULT_CUSTOM_BG_COLOR, STATUS_ACTIVE_COLOR,
+    DEFAULT_CUSTOM_BG_COLOR,
     TRUE_BLACK, WHITE, APP_BORDER, GREY_CC,
     contrast_ink, swatch_edge, contrast_ratio,
 )
@@ -190,19 +190,23 @@ class TestColors(unittest.TestCase):
     def test_brand_gold_dark_value(self):
         self.assertEqual(BRAND_DARK_GOLD.lower(), "#8c7337")
 
+    # LOCK EXCEPTION, ruled 2026-10-04 (RNV-NAMED-AND-USED). The two golds
+    # as integer triples were constants nothing in the application read,
+    # held by these four tests alone, and they went. The tests stay and
+    # take the triple from the hex, as the constants did.
     def test_brand_gold_rgb_tuple(self):
-        self.assertEqual(BRAND_GOLD_RGB, (210, 188, 147))
+        self.assertEqual(_to_rgb(BRAND_GOLD), (210, 188, 147))
 
     def test_brand_gold_dark_rgb_tuple(self):
-        self.assertEqual(BRAND_DARK_GOLD_RGB, (140, 115, 55))
+        self.assertEqual(_to_rgb(BRAND_DARK_GOLD), (140, 115, 55))
 
     def test_rgb_matches_hex_gold(self):
-        r, g, b = BRAND_GOLD_RGB
+        r, g, b = _to_rgb(BRAND_GOLD)
         expected = f"#{r:02x}{g:02x}{b:02x}"
         self.assertEqual(BRAND_GOLD.lower(), expected)
 
     def test_rgb_matches_hex_gold_dark(self):
-        r, g, b = BRAND_DARK_GOLD_RGB
+        r, g, b = _to_rgb(BRAND_DARK_GOLD)
         expected = f"#{r:02x}{g:02x}{b:02x}"
         self.assertEqual(BRAND_DARK_GOLD.lower(), expected)
 
@@ -222,7 +226,12 @@ class TestColors(unittest.TestCase):
         self.assertEqual(contrast_ink((0, 0, 128)), WHITE)
 
     def test_status_active_color_nonempty(self):
-        self.assertGreater(len(STATUS_ACTIVE_COLOR), 3)
+        # LOCK EXCEPTION, ruled 2026-10-04 (RNV-NAMED-AND-USED). This read
+        # STATUS_ACTIVE_COLOR, an alias nothing painted from. The watcher's
+        # label reads status_active from the palette in force, so each
+        # palette's entry is what is held.
+        for theme in (DARK_THEME_COLORS, LIGHT_THEME_COLORS, IMAGE_MODE_COLORS):
+            self.assertGreater(len(theme['status_active']), 3)
 
     def test_swatch_edge_shares_the_ink_rule(self):
         """The same question with a different pair of candidates. A
@@ -237,6 +246,11 @@ class TestColors(unittest.TestCase):
                                     contrast_ratio(ground, other))
 
     # ── Required keys present in all theme dicts ───────────────────────────────
+    # LOCK EXCEPTION, ruled 2026-10-04 (RNV-NAMED-AND-USED): "for the locked
+    # key test if we don't use these values we can fix the test and remove
+    # unused values". Two status fills nothing read went from every palette,
+    # and the drop zone's ground and edge are in the image palette alone,
+    # the one palette they are read from.
     _REQUIRED_KEYS = [
         'window_bg', 'panel_bg', 'card_bg', 'input_bg',
         'text_primary', 'text_secondary', 'text_muted', 'text_disabled',
@@ -252,8 +266,7 @@ class TestColors(unittest.TestCase):
         'scrollbar_bg', 'scrollbar_handle', 'scrollbar_handle_hover',
         'tooltip_bg', 'tooltip_text', 'tooltip_border',
         'list_bg', 'list_selected_bg', 'list_hover_bg',
-        'dropzone_bg', 'dropzone_border', 'dropzone_active_bg',
-        'success', 'warning',
+        'dropzone_active_bg',
     ]
 
     def _assert_keys(self, d, label):

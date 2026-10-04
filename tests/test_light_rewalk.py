@@ -19,7 +19,9 @@ from ui import colors as C
 
 TEXT_FLOOR = 4.5
 
-REWALKED = {'STATUS_SUCCESS_TEXT_LIGHT': '#825d79', 'STATUS_WARNING_TEXT_LIGHT': '#8e5e2b'}
+# RNV-NAMED-AND-USED, 2026-10-04: the warning's light text stood beside this.
+# This application draws no warning, nothing read the value, and it went.
+REWALKED = {'STATUS_SUCCESS_TEXT_LIGHT': '#825d79'}
 
 # The rungs the register publishes, lightest first. #e0e0e0 is in the list on
 # purpose: it is asserted to FAIL, which is what makes it a boundary.

@@ -85,15 +85,9 @@ text at just 5.55:1 against black-on-gold's 3.78:1, so it must not become
 a fill.
 """
 
-BRAND_GOLD_RGB: Final[tuple[int, int, int]] = _to_rgb(BRAND_GOLD)
-"""Brand gold as an RGB tuple, derived from the hex above.
-
-Derived rather than written down: a hardcoded tuple is invisible to every
-hex-based search, so it survives sweeps that catch every other reference.
-"""
-
-BRAND_DARK_GOLD_RGB: Final[tuple[int, int, int]] = _to_rgb(BRAND_DARK_GOLD)
-"""Brand dark gold as an RGB tuple, derived from the hex above."""
+# RNV-NAMED-AND-USED (2026-10-04): the two golds as integer triples stood
+# here, and nothing in the application read either. _to_rgb() above still
+# derives a triple where one is needed.
 
 
 # ==================== APP Neutrals ====================
@@ -132,36 +126,15 @@ Not on the ink grid (n = 1.53) and not required to be -- it is a surface."""
 APP_CARD: Final[str] = "#2a2a2a"
 """engine/brand.py APP["card"]. A surface, not on the grid (n = 2.47)."""
 
-STATUS_SUCCESS: Final[str] = "#926c89"
-"""MIRRORS the register's STATUS["success"]. A FILL.
-
-RNV-STATUS-FAMILY (2026-09-03): was #28a745, Bootstrap's green. Retired
-because it and Bootstrap's red collapsed to one olive under deuteranopia at
-about 4 apart -- success and error are the two most consequential colours in
-an interface, and roughly 8% of men could not tell them apart.
-
-It is a FILL and cannot carry text: 3.92 on #1a1a1a, 3.23 on #2a2a2a, above
-the 3:1 fill floor and below the 4.5:1 text floor. That is not a shortcoming,
-it is the fill band -- a value that works on a dark AND a light ground sits at
-L* 48-59 by arithmetic, and a mid-tone reaches 4.5 on neither side.
-
-RNV-STATUS-REGISTER (2026-09-02): both palettes already held this value,
-written out rather than named. Named here so it has one home. Defined above
-the palettes because they consume it.
-"""
-
-STATUS_WARNING: Final[str] = "#a2703c"
-"""MIRRORS the register's STATUS["warning"]. A FILL.
-
-RNV-STATUS-FAMILY (2026-09-03): was #ffc107, retired on arithmetic rather
-than taste -- it read 1.63 on #ffffff and 1.49 on #f5f5f5 against a 3:1 fill
-floor, so it could not legally carry a boundary on a light ground at all.
-"""
+# RNV-NAMED-AND-USED (2026-10-04): the family's two fills, success and
+# warning, stood here, and the warning's two text values beside the
+# success text below. This application draws one status colour, the
+# folder watcher's label, as TEXT; nothing read the fills or the warning
+# text, so it carries none of them. The register holds the family.
 
 STATUS_SUCCESS_TEXT: Final[str] = "#ad85a3"
-STATUS_WARNING_TEXT: Final[str] = "#bc8752"
-"""MIRROR the register's STATUS["success-text"] and ["warning-text"].
-TEXT on a dark ground: 4.55 and 4.60 on APP card #2a2a2a.
+"""MIRRORS the register's STATUS["success-text"].
+TEXT on a dark ground: 4.55 on APP card #2a2a2a.
 
 REGISTERED, not derived. The register's rule -- hold hue and chroma, move
 lightness only, take the first step that clears 4.5 on the worst ground -- is
@@ -171,9 +144,8 @@ change what a warning looks like in five applications.
 """
 
 STATUS_SUCCESS_TEXT_LIGHT: Final[str] = "#825d79"
-STATUS_WARNING_TEXT_LIGHT: Final[str] = "#8e5e2b"
-"""MIRROR the register's STATUS["*-text-light"]. TEXT on a light ground:
-4.52 on #f5f5f5, this application's light dialog background.
+"""MIRRORS the register's STATUS["success-text-light"]. TEXT on a light
+ground: 4.52 on #f5f5f5, this application's light dialog background.
 
 RNV-STATUS-LIGHT-FLOOR, CLOSED 2026-09-05 at register rev 31.
 
@@ -386,7 +358,6 @@ DARK_THEME_COLORS: Final[dict[str, str]] = {
     'panel_bg': BRAND_BLACK,
     'card_bg': APP_CARD,
     'input_bg': BRAND_BLACK,
-    'hover_bg': APP_PANEL_HOVER,
     'pressed_bg': APP_BORDER,
     'selected_bg': BRAND_GOLD,
     
@@ -455,7 +426,6 @@ DARK_THEME_COLORS: Final[dict[str, str]] = {
     'tab_bg': APP_CARD,
     'tab_selected_bg': APP_BORDER,
     'tab_hover_bg': APP_BORDER,
-    'tab_border': APP_BORDER,
     'tab_indicator': BRAND_GOLD,
     
     # Scrollbar
@@ -474,15 +444,12 @@ DARK_THEME_COLORS: Final[dict[str, str]] = {
     
     # Dialog
     'dialog_bg': BRAND_BLACK,
-    'dialog_border': APP_BORDER,
     
-    # Status bar
-    'statusbar_bg': BRAND_BLACK,
-    'statusbar_border': APP_BORDER,
-    
-    # Drop zone
-    'dropzone_bg': BRAND_BLACK,
-    'dropzone_border': APP_BORDER,
+    # Drop zone, while a file is dragged over it. RNV-NAMED-AND-USED
+    # (2026-10-04): the drop zone's and the status bar's ground and edge
+    # stood here too. Dark and light never read them from a palette -- the
+    # main window writes those two widgets from the theme it holds -- so
+    # they are in IMAGE_MODE_COLORS alone, which is where they are read.
     'dropzone_active_bg': translucent(BRAND_GOLD, DROPZONE_ALPHA_DARK),
     
     # Tooltip
@@ -490,14 +457,7 @@ DARK_THEME_COLORS: Final[dict[str, str]] = {
     'tooltip_border': BRAND_GOLD,
     'tooltip_text': APP_TEXT,
     
-    # Success/Warning/Error
-    # RNV-STATUS-FAMILY: the fills, unwired. Both keys are looked
-    # up nowhere in this application and are on the dead-key list;
-    # whether they should exist is a separate question. If either
-    # is ever painted as TEXT it must take the _TEXT variant
-    # instead -- a fill sits at L* 48-59 and cannot reach 4.5:1.
-    'success': STATUS_SUCCESS,
-    'warning': STATUS_WARNING,
+    # Status
     # RNV-STATUS-FAMILY: the watcher's label is TEXT, and a module
     # constant cannot know which mode it is being painted in.
     'status_active': STATUS_SUCCESS_TEXT,
@@ -511,7 +471,6 @@ LIGHT_THEME_COLORS: Final[dict[str, str]] = {
     'panel_bg': APP_SURFACE_LIGHT_3,
     'card_bg': WHITE,
     'input_bg': WHITE,
-    'hover_bg': APP_HOVER_LIGHT,
     'pressed_bg': APP_PRESSED_LIGHT,
     'selected_bg': BRAND_DARK_GOLD,
     
@@ -577,7 +536,6 @@ LIGHT_THEME_COLORS: Final[dict[str, str]] = {
     'tab_bg': GREY_E0,
     'tab_selected_bg': WHITE,
     'tab_hover_bg': APP_HOVER_LIGHT,
-    'tab_border': GREY_CC,
     'tab_indicator': BRAND_DARK_GOLD,
     
     # Scrollbar
@@ -596,15 +554,8 @@ LIGHT_THEME_COLORS: Final[dict[str, str]] = {
     
     # Dialog
     'dialog_bg': APP_SURFACE_LIGHT_3,
-    'dialog_border': GREY_CC,
     
-    # Status bar
-    'statusbar_bg': APP_SURFACE_LIGHT_3,
-    'statusbar_border': GREY_CC,
-    
-    # Drop zone
-    'dropzone_bg': WHITE,
-    'dropzone_border': GREY_CC,
+    # Drop zone, while a file is dragged over it
     'dropzone_active_bg': translucent(BRAND_GOLD, DROPZONE_ALPHA_LIGHT),
     
     # Tooltip
@@ -612,11 +563,7 @@ LIGHT_THEME_COLORS: Final[dict[str, str]] = {
     'tooltip_border': BRAND_DARK_GOLD,
     'tooltip_text': TRUE_BLACK,
     
-    # Success/Warning/Error
-    # RNV-STATUS-FAMILY: light's own siblings. This palette held
-    # the dark values, which as text on #f5f5f5 read 2.87 and 1.50.
-    'success': STATUS_SUCCESS,
-    'warning': STATUS_WARNING,
+    # Status: light's own sibling of the watcher's label.
     'status_active': STATUS_SUCCESS_TEXT_LIGHT,
 }
 
@@ -624,12 +571,13 @@ LIGHT_THEME_COLORS: Final[dict[str, str]] = {
 # ==================== Image Mode Colors (Dark with transparency) ====================
 IMAGE_MODE_COLORS: Final[dict[str, str]] = {
     **DARK_THEME_COLORS,
-    # Override with transparent backgrounds
+    # Override with transparent backgrounds.
+    # RNV-NAMED-AND-USED (2026-10-04): a card_bg override stood here, the
+    # card at the scrim's alpha. Nothing in image mode read it: every reader
+    # of card_bg takes the dark or the light palette.
     'window_bg': translucent(BRAND_BLACK, SCRIM_ALPHA),
     'panel_bg': translucent(BRAND_BLACK, SCRIM_ALPHA),
-    'card_bg': translucent(APP_CARD, SCRIM_ALPHA),
     'input_bg': translucent(APP_CARD, SCRIM_ALPHA),
-    'dropzone_bg': translucent(BRAND_BLACK, SCRIM_ALPHA),
     'scrollbar_bg': 'transparent',
     # RNV-COLLAPSE-505050 closed here, 2026-09-24. This read
     # rgba(80, 80, 80, 150) -- #505050 at 150 -- which the 2026-09-02
@@ -640,6 +588,14 @@ IMAGE_MODE_COLORS: Final[dict[str, str]] = {
     'scrollbar_handle': translucent(GREY_44, SCROLLBAR_HANDLE_ALPHA),
     'scrollbar_handle_hover': BRAND_GOLD,
     'scrollbar_border': translucent(APP_BORDER, SCROLLBAR_BORDER_ALPHA),
+    # RNV-NAMED-AND-USED (2026-10-04). The drop zone and the status bar: the
+    # four keys image mode alone reads, in the one palette they are read
+    # from. The ground of the drop zone is the scrim, as it was; the other
+    # three came through the spread from dark, at these values.
+    'dropzone_bg': translucent(BRAND_BLACK, SCRIM_ALPHA),
+    'dropzone_border': APP_BORDER,
+    'statusbar_bg': BRAND_BLACK,
+    'statusbar_border': APP_BORDER,
 }
 
 
@@ -710,11 +666,57 @@ OS_SIM_COLORS: Final[dict[str, str]] = {
     'desktop_icon_label_bg':     'rgba(0,0,0,0.3)',
 }
 
+OS_SIM_GROUNDS_RGB: Final[dict[str, tuple[int, int, int]]] = {
+    key: _to_rgb(OS_SIM_COLORS[key]) for key in (
+        'taskbar_dark_bg', 'taskbar_light_bg', 'explorer_bg', 'finder_bg',
+        'chrome_active_tab_bg', 'bookmarks_bg',
+    )
+}
+"""The simulated grounds an icon is composited onto, as the RGB tuples PIL
+takes. Made from OS_SIM_COLORS, so the ground behind an icon and the ground
+of the widget it sits in are one value.
+
+RNV-NAMED-AND-USED (2026-10-04): each was written out as a tuple beside the
+widget that read the entry above -- (32, 32, 32), (240, 240, 240),
+(255, 255, 255) twice, (245, 245, 245) and (248, 249, 250)."""
+
 
 # ==================== Standalone Color Constants ====================
 
 DEFAULT_CUSTOM_BG_COLOR: Final[str] = "#808080"
 """Default custom preview background color (neutral gray starting value)"""
+
+DEFAULT_CUSTOM_BG_RGB: Final[tuple[int, int, int]] = _to_rgb(DEFAULT_CUSTOM_BG_COLOR)
+"""The same starting grey as the tuple the background selector holds.
+RNV-NAMED-AND-USED (2026-10-04): the selector wrote (128, 128, 128) out
+beside the name above, which nothing read. It reads this."""
+
+# ==================== Preview Grounds ====================
+# RNV-NAMED-AND-USED (2026-10-04). Ruled: "As long as a color exist in the
+# app it should be named and used no hardcoded or pointless literals should
+# exist". What a preview is composited onto and the fill of a size that is
+# missing were written out where they are used.
+# Each is named here at the value it had: NO PIXEL MOVES. One whose value is
+# a colour this file already names is LINKED to that name; one with a value
+# of its own holds it, and is this application's alone. PIL takes a tuple
+# for a ground, so the grounds are tuples.
+
+PREVIEW_CHECKER_LIGHT: Final[tuple[int, int, int]] = _to_rgb(WHITE)
+"""The transparency checkerboard's light square. Was (255, 255, 255): linked."""
+
+PREVIEW_CHECKER_DARK: Final[tuple[int, int, int]] = _to_rgb(GREY_CC)
+"""Its dark square. Was (204, 204, 204), which is GREY_CC: linked."""
+
+PREVIEW_GROUND_WHITE: Final[tuple[int, int, int]] = _to_rgb(WHITE)
+"""The "White" preview background, and what an image is composited onto
+when no ground is given. Was (255, 255, 255): linked."""
+
+PREVIEW_GROUND_BLACK: Final[tuple[int, int, int]] = _to_rgb(TRUE_BLACK)
+"""The "Black" preview background. Was (0, 0, 0): linked."""
+
+PREVIEW_MISSING_FILL: Final[str] = "#c8c8c8"
+"""The grey a size with no image of its own is previewed as. Was
+(200, 200, 200, 255), which PIL reads this as. App-owned."""
 
 # ── Which ink goes on this ground ──
 #
@@ -793,41 +795,15 @@ def swatch_edge(background: "str | tuple[int, int, int]") -> str:
     """Outline for a swatch of an arbitrary colour: GREY_CC or APP_BORDER."""
     return better_on(background, APP_BORDER, GREY_CC)
 
-STATUS_ACTIVE_COLOR: Final[str] = STATUS_SUCCESS_TEXT
-"""The folder watcher, running. RNV-STATUS-REGISTER (2026-09-02): was
-#4caf50, Material's green, where the register publishes #28a745 and where
-rnv-color-picker's identically-named constant already used the register's.
-Two applications, one role, two greens; ruled onto one.
-
-RNV-STATUS-FAMILY (2026-09-03): this constant is no longer what
-gets painted. ui/settings_dialog.py wrote `color: {STATUS_ACTIVE_COLOR}`
-on the watch label -- TEXT, in a dialog that runs in three modes --
-and a module-level constant does not know which mode it is in. One
-value cannot be legal on all three grounds: the dark text variant
-reads 5.52 on #1a1a1a and 3.15 on #ffffff. The palettes now carry a
-`status_active` key resolved per mode, and the call site reads the
-theme it was already holding. This constant remains as the
-REGISTER-FACING alias below, which is what it was always for.
-
-AND IT NOW ALIASES success-text RATHER THAN success, ruled by the
-register 2026-09-04. It pointed at the FILL, which was safe only by
-accident: Bootstrap's green read 5.55 on BRAND_BLACK and doubled as
-text. The RNV fills are mid-tones by design and #926c89 reads 3.91
-there, so the alias would have failed the 4.5 text floor on the day
-the family landed. An alias onto a fill is a fill used as text.
-
-It is an ALIAS rather than a copy because "running" is not "succeeded" and
-the register has no name for the first. If status-active is ever
-registered, this line is the only one that moves.
-"""
+# RNV-NAMED-AND-USED (2026-10-04): an alias for the running folder watcher's
+# colour stood here. Since 2026-09-03 the label reads the palettes'
+# status_active, resolved per mode, and nothing read the alias.
 
 
 __all__: list[str] = [
     'BRAND_GOLD',
     'BRAND_DARK_GOLD',
     'BRAND_DARK_GOLD_DEEP',
-    'BRAND_GOLD_RGB',
-    'BRAND_DARK_GOLD_RGB',
     'lighten',
     'translucent',
     'DARK_THEME_COLORS',
@@ -846,13 +822,15 @@ __all__: list[str] = [
     'contrast_ink',
     'prefers_dark_ink',
     'swatch_edge',
-    'STATUS_SUCCESS',
-    'STATUS_WARNING',
     'STATUS_SUCCESS_TEXT',
-    'STATUS_WARNING_TEXT',
     'STATUS_SUCCESS_TEXT_LIGHT',
-    'STATUS_WARNING_TEXT_LIGHT',
-    'STATUS_ACTIVE_COLOR',
+    'OS_SIM_GROUNDS_RGB',
+    'PREVIEW_CHECKER_LIGHT',
+    'PREVIEW_CHECKER_DARK',
+    'PREVIEW_GROUND_WHITE',
+    'PREVIEW_GROUND_BLACK',
+    'DEFAULT_CUSTOM_BG_RGB',
+    'PREVIEW_MISSING_FILL',
 ]
 
 # RNV-GOLD-GUARD (2026-09-07): the values below are swept by

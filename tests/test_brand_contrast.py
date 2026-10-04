@@ -79,10 +79,17 @@ def contrast_ratio(fg: str, bg: str) -> float:
 
 # Constants whose docstring claims they are derived. Each must be a call
 # expression in the source, not a literal.
+# RNV-NAMED-AND-USED, 2026-10-04: the two golds as triples went -- nothing
+# read them -- and the tuples the application does read took their place
+# here: the grounds a preview is composited onto, each made from the colour
+# it is.
 DERIVED_CONSTANTS = {
     "BRAND_DARK_GOLD_DEEP",
-    "BRAND_GOLD_RGB",
-    "BRAND_DARK_GOLD_RGB",
+    "PREVIEW_CHECKER_LIGHT",
+    "PREVIEW_CHECKER_DARK",
+    "PREVIEW_GROUND_WHITE",
+    "PREVIEW_GROUND_BLACK",
+    "DEFAULT_CUSTOM_BG_RGB",
 }
 
 # Constants that are registered brand values and must therefore be literals.
@@ -143,8 +150,11 @@ def test_deep_gold_tracks_its_source() -> None:
 
 
 @pytest.mark.parametrize("const,rgb", [
-    ("BRAND_GOLD", "BRAND_GOLD_RGB"),
-    ("BRAND_DARK_GOLD", "BRAND_DARK_GOLD_RGB"),
+    ("WHITE", "PREVIEW_CHECKER_LIGHT"),
+    ("GREY_CC", "PREVIEW_CHECKER_DARK"),
+    ("WHITE", "PREVIEW_GROUND_WHITE"),
+    ("TRUE_BLACK", "PREVIEW_GROUND_BLACK"),
+    ("DEFAULT_CUSTOM_BG_COLOR", "DEFAULT_CUSTOM_BG_RGB"),
 ])
 def test_rgb_tuple_matches_its_hex(const: str, rgb: str) -> None:
     """The RGB-tuple blind spot.
@@ -457,14 +467,11 @@ _PALETTES = {
 }
 
 # Values that are gold-adjacent but are not brand gold, with the reason.
-NOT_BRAND_GOLD = {
-    "#a2703c": "STATUS warning -- the semantic warning colour, not brand gold. "
-               "RNV-STATUS-FAMILY (2026-09-03): it reads as gold to the r > g > b "
-               "shape test because it half IS one -- the register derives it 50% "
-               "toward BRAND_DARK_GOLD in OKLab. CIEDE2000 9.1 from that gold, "
-               "clearing the register's own 8.40 threshold by 0.7. Replaced "
-               "#ffc107, which sat 17.7 away and tripped only the shape test.",
-}
+# RNV-NAMED-AND-USED, 2026-10-04: empty. Its one entry was the status
+# warning, which reads as gold to the shape test below. Nothing read the
+# palettes' warning key, so the key and its colour went, and no palette
+# holds a gold-adjacent value that is not brand gold.
+NOT_BRAND_GOLD: dict[str, str] = {}
 
 
 def _is_goldish(value: object) -> bool:

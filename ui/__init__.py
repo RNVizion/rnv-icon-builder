@@ -19,7 +19,6 @@ Modules:
 from .theme_manager import ThemeManager
 from .colors import (
     BRAND_GOLD, BRAND_DARK_GOLD,
-    BRAND_GOLD_RGB, BRAND_DARK_GOLD_RGB,
     DARK_THEME_COLORS, LIGHT_THEME_COLORS, IMAGE_MODE_COLORS,
     get_theme_colors,
 )
@@ -46,7 +45,6 @@ __all__: list[str] = [
     'ThemeManager',
     # Colors
     'BRAND_GOLD', 'BRAND_DARK_GOLD',
-    'BRAND_GOLD_RGB', 'BRAND_DARK_GOLD_RGB',
     'DARK_THEME_COLORS', 'LIGHT_THEME_COLORS', 'IMAGE_MODE_COLORS',
     'get_theme_colors',
     # Base

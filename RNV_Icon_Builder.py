@@ -125,7 +125,7 @@ from utils.config import (
 from ui.colors import (
     BRAND_GOLD, BRAND_DARK_GOLD,
     DARK_THEME_COLORS, LIGHT_THEME_COLORS, IMAGE_MODE_COLORS,
-    get_theme_colors,
+    get_theme_colors, PREVIEW_MISSING_FILL,
 )
 from utils.font_loader import load_embedded_font
 from utils.logger import setup_logger, Logger, get_logger_instance
@@ -2245,7 +2245,8 @@ class IconBuilderApp(QMainWindow):
                 )
                 tag = "(autofill)"
             else:
-                img = Image.new("RGBA", (size, size), (200, 200, 200, 255))
+                # RNV-NAMED-AND-USED (2026-10-04): was (200, 200, 200, 255).
+                img = Image.new("RGBA", (size, size), PREVIEW_MISSING_FILL)
                 tag = "(missing)"
             
             # Store full-size image for preview (Phase 1 enhancement)
