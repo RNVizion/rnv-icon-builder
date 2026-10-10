@@ -5,7 +5,7 @@
 ![Version](https://img.shields.io/badge/version-3.0.0-orange)
 ![License](https://img.shields.io/badge/license-MIT-yellow)
 ![Platform](https://img.shields.io/badge/platform-Windows%20%7C%20macOS%20%7C%20Linux-lightgrey)
-![Tests](https://img.shields.io/badge/tests-896%20passing-brightgreen)
+![Tests](https://img.shields.io/badge/tests-1100%2B%20passing-brightgreen)
 ![Coverage](https://img.shields.io/badge/coverage-70.21%25-brightgreen)
 
 [![Tests (Linux)](https://img.shields.io/github/actions/workflow/status/RNVizion/rnv-icon-builder/tests-linux.yml?branch=main&label=Tests%20%28Linux%29&logo=linux)](https://github.com/RNVizion/rnv-icon-builder/actions/workflows/tests-linux.yml)
@@ -194,7 +194,7 @@ RNV_Icon_Builder/
 │       └── tests-windows.yml  # CI: Windows, Python 3.10–3.13
 │
 │   # Test infrastructure (root-level)
-├── test_rnv_icon_builder.py   # Legacy unittest suite (471 tests)
+├── test_rnv_icon_builder.py   # Legacy unittest suite
 ├── run_tests.py               # Dual-suite runner (unittest + pytest + coverage)
 ├── pytest.ini                 # pytest configuration
 ├── setup.cfg                  # mutmut mutation-testing config
@@ -271,7 +271,7 @@ RNV_Icon_Builder/
 
 ## Testing
 
-The project ships with two complementary test suites totaling **896 tests** with **70.21% branch coverage** across all source modules. Run both via the unified runner:
+The project ships with two complementary test suites totaling **over 1,100 tests** with **70.21% branch coverage** across all source modules. Run both via the unified runner:
 
 ```bash
 python run_tests.py            # Run unittest + pytest + coverage report
@@ -285,8 +285,8 @@ python run_tests.py --benchmark # Run pytest-benchmark suite only
 
 | Suite | Location | Count | Purpose |
 |---|---|---:|---|
-| Legacy unittest | `test_rnv_icon_builder.py` | 471 | Original test suite, run via `unittest` |
-| pytest | `tests/` | 425 | Modern fixtures, qtbot, hypothesis, subprocess, snapshots |
+| Legacy unittest | `test_rnv_icon_builder.py` | over 400 | Original test suite, run via `unittest` |
+| pytest | `tests/` | over 600 | Modern fixtures, qtbot, hypothesis, subprocess, snapshots |
 
 The pytest suite includes property-based tests (Hypothesis), structural snapshot tests (Syrupy), performance benchmarks (pytest-benchmark), and subprocess-isolated CLI tests that participate in coverage via a `sitecustomize.py` bootstrap.
 

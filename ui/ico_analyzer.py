@@ -21,7 +21,7 @@ from PyQt6.QtWidgets import (
     QFileDialog, QWidget, QFrame
 )
 from PyQt6.QtCore import Qt, QTimer
-from PyQt6.QtGui import QFont
+from PyQt6.QtGui import QColor, QFont
 
 from utils.config import ICO_FILE_FILTER
 from utils.dialog_helper import DialogHelper
@@ -265,9 +265,6 @@ class IcoAnalyzerDialog(BaseDialog):
             compression = img.get('compression', 'BMP')
             comp_item = QTableWidgetItem(compression)
             comp_item.setTextAlignment(Qt.AlignmentFlag.AlignCenter)
-            # Color code: green for PNG, default for BMP
-            if compression == 'PNG':
-                comp_item.setForeground(Qt.GlobalColor.darkGreen)
             self.images_table.setItem(row, 1, comp_item)
             
             # Bit depth
@@ -288,6 +285,27 @@ class IcoAnalyzerDialog(BaseDialog):
             pct_item = QTableWidgetItem(f"{percentage:.1f}%")
             pct_item.setTextAlignment(Qt.AlignmentFlag.AlignCenter)
             self.images_table.setItem(row, 4, pct_item)
+        
+        self._mark_png_rows()
+    
+    def _mark_png_rows(self) -> None:
+        """
+        Draw PNG in the mode's success text. BMP keeps the table's own.
+        
+        RNV-RULINGS-2026-10-05, item 1. The mark was Qt's dark green, set on the
+        cell and never drawn: the sheet's QTableWidget::item rule coloured
+        every cell, and a sheet wins over a cell's own colour. That rule no
+        longer sets one (see _apply_theme), and the mark is the palette's
+        status_active, which holds each mode's success text.
+        
+        Called when the table is filled and when the theme is applied, so
+        a mark made in one mode is not left in another's colour.
+        """
+        mark = QColor(get_theme_colors(is_dark=self._dark_mode)['status_active'])
+        for row in range(self.images_table.rowCount()):
+            item = self.images_table.item(row, 1)
+            if item is not None and item.text() == 'PNG':
+                item.setForeground(mark)
     
     def _format_bytes(self, size: int) -> str:
         """Format byte size to human readable string."""
@@ -372,6 +390,8 @@ class IcoAnalyzerDialog(BaseDialog):
     
     def _apply_theme(self, dark_mode: bool = True) -> None:
         """Apply theme styling to the dialog."""
+        # The mode the PNG mark is drawn for: _mark_png_rows() reads it.
+        self._dark_mode = bool(dark_mode)
         c = get_theme_colors(is_dark=dark_mode)
         accent = BRAND_GOLD if dark_mode else BRAND_DARK_GOLD
 
@@ -468,7 +488,6 @@ class IcoAnalyzerDialog(BaseDialog):
             QTableWidget::item {{
                 padding: 5px;
                 background-color: {c['list_bg']};
-                color: {c['text_primary']};
             }}
 
             QTableWidget::item:alternate {{
@@ -536,6 +555,11 @@ class IcoAnalyzerDialog(BaseDialog):
                 height: 0px;
             }}
         """)
+        # RNV-RULINGS-2026-10-05, item 1. QTableWidget::item above sets no colour: a
+        # cell's own colour is drawn, and a cell without one takes the
+        # table's (QTableWidget's `color`, the same value). With a colour
+        # there, the sheet won and the PNG mark was never drawn.
+        self._mark_png_rows()
     
     def apply_theme_from_manager(self, theme_name: str) -> None:
         """

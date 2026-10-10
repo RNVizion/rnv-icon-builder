@@ -83,10 +83,6 @@ DATA = {
         "the name a preview background choice is stored under: an option, not a colour",
     ("utils/config.py", "black"):
         "the name a preview background choice is stored under: an option, not a colour",
-    ("ui/ico_analyzer.py", "Qt.GlobalColor.darkGreen"):
-        "HELD, and not data. Set on a PNG row's cell and never drawn: the table's stylesheet "
-        "colours every cell, and the sheet wins. Proven 2026-10-04 with a magenta control, in "
-        "all three modes. A ruling is asked: draw the mark, or drop the line",
 }
 
 CSS_NAMES = frozenset("""aliceblue antiquewhite aqua aquamarine azure beige bisque black blanchedalmond blue
