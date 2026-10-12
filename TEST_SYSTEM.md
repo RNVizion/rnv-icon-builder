@@ -54,7 +54,7 @@ python run_tests.py
 Runs both suites (`test_rnv_icon_builder.py` via unittest, then `tests/` via
 pytest), merges coverage data, and prints the report.
 
-**Expected output:** 471 unittest + 175 pytest = **646 tests passing**,
+**Expected output:** over 400 unittest + over 600 pytest = **over 1,100 tests passing**,
 **~57% branch coverage**.
 
 ### Other run_tests.py modes

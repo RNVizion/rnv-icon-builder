@@ -325,7 +325,7 @@ Subclass for thumbnail-specific caching, keyed by `(source_path, size, variant)`
 
 ## Testing
 
-`test_rnv_icon_builder.py` runs without a display server (`QT_QPA_PLATFORM=offscreen`). 471 tests across 24 classes.
+`test_rnv_icon_builder.py` runs without a display server (`QT_QPA_PLATFORM=offscreen`). Over 400 tests across 24 classes.
 
 ### Coverage
 

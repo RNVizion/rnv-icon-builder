@@ -4,7 +4,7 @@ run_tests.py — Unified test runner for RNV Icon Builder
 Runs both test sources under coverage with branch analysis (configured
 in .coveragerc), then merges the data files into a single coverage report.
 
-  Suite 1 — test_rnv_icon_builder.py    (471 unittest tests, ~1s)
+  Suite 1 — test_rnv_icon_builder.py    (the unittest suite, ~1s)
   Suite 2 — tests/                       (Phase 3-8 pytest tests:
                                           application, UI, workers,
                                           properties, snapshots, benchmarks)
