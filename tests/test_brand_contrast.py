@@ -194,7 +194,9 @@ ACCEPTED: dict[tuple[str, str], str] = {
         "and it is separate from the gold dialog-button scheme.",
     ("#000000", "#444444"):
         "main-window button pressed, same inverse scheme.",
-    ("#ffffff", "#d2bc93"):
+    # RNV-ACCENT-READ-2026-10-16: named, where it was written as two hex codes,
+    # so the exemption follows the accent.
+    (C.WHITE.lower(), C.BRAND_GOLD.lower()):
         "BRAND_GOLD as a list-item fill with white text. BRAND_GOLD is a "
         "registered value and is not in scope for the dark-gold alignment. "
         "Recorded here so it stays visible rather than forgotten.",
@@ -474,14 +476,42 @@ _PALETTES = {
 NOT_BRAND_GOLD: dict[str, str] = {}
 
 
+def _hue_and_chroma(value: str) -> tuple[float | None, int]:
+    """The hue in degrees (None for a grey) and the chroma, max - min channel."""
+    r, g, b = (int(value[i:i + 2], 16) for i in (1, 3, 5))
+    hi, lo = max(r, g, b), min(r, g, b)
+    if hi == lo:
+        return None, 0
+    c = hi - lo
+    if hi == r:
+        h = ((g - b) / c) % 6
+    elif hi == g:
+        h = (b - r) / c + 2
+    else:
+        h = (r - g) / c + 4
+    return h * 60, c
+
+
+#: RNV-ACCENT-READ-2026-10-16. The walk finds the golds by THIS APP'S accent:
+#: a colour within 20 degrees of the hue of BRAND_GOLD or BRAND_DARK_GOLD, read
+#: from the colour file. It found them by the shape of a gold, red > green >
+#: blue, which finds nothing once the brand's accent is another colour; every
+#: count above then passes by measuring an empty set. At today's golds the two
+#: tests find the same four values, in every palette.
+_ACCENT_HUES = tuple(_hue_and_chroma(v)[0] for v in (C.BRAND_GOLD, C.BRAND_DARK_GOLD))
+_ACCENT_HUE_WINDOW = 20
+
+
 def _is_goldish(value: object) -> bool:
     if not (isinstance(value, str) and len(value) == 7 and value.startswith("#")):
         return False
     try:
-        r, g, b = (int(value[i:i + 2], 16) for i in (1, 3, 5))
+        hue, chroma = _hue_and_chroma(value)
     except ValueError:
         return False
-    return r > g > b and (r - b) >= 30
+    if hue is None or chroma < 30:
+        return False
+    return min(min(abs(hue - a), 360 - abs(hue - a)) for a in _ACCENT_HUES) <= _ACCENT_HUE_WINDOW
 
 
 def _brand_golds(palette: dict) -> dict:
