@@ -1303,6 +1303,11 @@ class BackgroundSelectorWidget(QFrame):
         colors = get_theme_colors(is_dark=is_dark)
         accent = BRAND_GOLD if is_dark else BRAND_DARK_GOLD
         accent_dark = BRAND_DARK_GOLD if is_dark else BRAND_GOLD
+        # RNV-RULINGS-2026-10-15, item 34: accent_dark is the other mode's
+        # accent, so a row filled with it takes the other mode's ink on its
+        # accent: white on the dark gold, black on the bright gold. It took
+        # this mode's, the other gold's ink.
+        on_accent_dark = get_theme_colors(is_dark=not is_dark)['text_on_accent']
         
         self.bg_label.setStyleSheet(f"color: {colors['text_primary']};")
         
@@ -1332,7 +1337,7 @@ class BackgroundSelectorWidget(QFrame):
                 background-color: {colors['dialog_btn_bg']};
                 color: {colors['dialog_btn_text']};
                 selection-background-color: {accent_dark};
-                selection-color: {colors['text_on_accent']};
+                selection-color: {on_accent_dark};
                 border: 1px solid {colors['dialog_btn_border']};
                 outline: none;
             }}
@@ -1342,7 +1347,7 @@ class BackgroundSelectorWidget(QFrame):
             }}
             QComboBox QAbstractItemView::item:hover {{
                 background-color: {accent_dark};
-                color: {colors['text_on_accent']};
+                color: {on_accent_dark};
             }}
             QComboBox QAbstractItemView::item:selected {{
                 background-color: {accent};

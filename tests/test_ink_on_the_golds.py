@@ -23,8 +23,6 @@ main window and every window its own openers show:
 3. The application's palette and each window's, where a selection takes
    its ink when no rule sets one: if it highlights in a gold, it gives the
    highlighted text that gold's ink.
-   HELD lists what was found against the ruling while this was built: the
-   lists of combo boxes, hovered. A ruling is asked on them.
 4. The reader is looking: in each mode it reads every window, and finds at
    least as many rules putting an ink on a gold as it found on 2026-10-13;
    and it reads a sample sheet as Qt reads it.
@@ -61,16 +59,7 @@ MODES = ('dark', 'light')
 #: asked on it, -> why: ("rule", mode, selector, gold, ink) for a rule of a
 #: sheet, ("palette", mode, gold, ink) for a palette. One that is no longer
 #: found fails: take it out.
-HELD = {
-    ('rule', 'dark', 'QComboBox QAbstractItemView', '#8c7337', '#000000'):
-        "item 34, asked 2026-10-13: a combo box's list gives its hovered row the other mode's gold, black on the dark gold in dark mode and white on the bright gold in light",
-    ('rule', 'dark', 'QComboBox QAbstractItemView::item:hover', '#8c7337', '#000000'):
-        "item 34, asked 2026-10-13: a combo box's list gives its hovered row the other mode's gold, black on the dark gold in dark mode and white on the bright gold in light",
-    ('rule', 'light', 'QComboBox QAbstractItemView', '#d2bc93', '#ffffff'):
-        "item 34, asked 2026-10-13: a combo box's list gives its hovered row the other mode's gold, black on the dark gold in dark mode and white on the bright gold in light",
-    ('rule', 'light', 'QComboBox QAbstractItemView::item:hover', '#d2bc93', '#ffffff'):
-        "item 34, asked 2026-10-13: a combo box's list gives its hovered row the other mode's gold, black on the dark gold in dark mode and white on the bright gold in light",
-}
+HELD = {}
 
 
 def _mode(win) -> str:
