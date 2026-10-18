@@ -23,7 +23,7 @@ import re
 import tokenize
 from pathlib import Path
 
-from ui import colors
+from utils import colors
 # RNV-COLOR-SYNC, #53 A (2026-10-17): the color values this file needs that
 # are not the application's colors are named once, in tests/color_values.py.
 from tests.color_values import (REGISTER_GOLD_TEXT_GROUND_FLOOR, RETIRED_BOOTSTRAP_AMBER,
@@ -83,8 +83,8 @@ def _code_only(text: str) -> str:
 
 
 def _palettes():
-    from ui.colors import (DARK_THEME_COLORS as D, LIGHT_THEME_COLORS as L,
-                           IMAGE_MODE_COLORS as I)
+    from utils.colors import (DARK_THEME_COLORS as D, LIGHT_THEME_COLORS as L,
+                              IMAGE_MODE_COLORS as I)
     return {"dark": D, "light": L, "image": I}
 
 
@@ -254,11 +254,11 @@ def test_the_family_matches_the_rest_of_the_fleet():
     assert BRAND_MAP["STATUS_SUCCESS_TEXT_LIGHT"] == "STATUS.success-text-light"
 
 
-SWEPT = ("ui/colors.py", "ui/settings_dialog.py")
-# the success text: a value ui/colors.py holds. It was the success fill's
+SWEPT = ("utils/colors.py", "ui/settings_dialog.py")
+# the success text: a value utils/colors.py holds. It was the success fill's
 # until RNV-NAMED-AND-USED, 2026-10-04, when the fill went. RNV-COLOR-SYNC,
 # 2026-10-16: read from the constant, where it was written out; the sync
-# writes it into ui/colors.py as a literal, which is what the sweep must see.
+# writes it into utils/colors.py as a literal, which is what the sweep must see.
 LIVE_VALUE = colors.STATUS_SUCCESS_TEXT
 
 

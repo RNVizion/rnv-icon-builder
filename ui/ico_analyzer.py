@@ -26,7 +26,7 @@ from PyQt6.QtGui import QColor, QFont
 from utils.config import ICO_FILE_FILTER
 from utils.dialog_helper import DialogHelper
 from ui.base_dialog import BaseDialog
-from ui.colors import BRAND_GOLD, BRAND_DARK_GOLD, get_theme_colors
+from utils.colors import BRAND_GOLD, BRAND_DARK_GOLD, get_theme_colors
 from core.icon_builder_core import IconBuilderCore
 from utils.logger import Logger, get_logger_instance
 

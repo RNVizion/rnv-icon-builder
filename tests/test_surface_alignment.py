@@ -29,9 +29,9 @@ from __future__ import annotations
 
 import pytest
 
-from ui.colors import (DARK_THEME_COLORS as DARK, IMAGE_MODE_COLORS as IMAGE,
+from utils.colors import (DARK_THEME_COLORS as DARK, IMAGE_MODE_COLORS as IMAGE,
                           LIGHT_THEME_COLORS as LIGHT)
-from ui.colors import APP_SURFACE_LIGHT_3, BRAND_BLACK
+from utils.colors import APP_SURFACE_LIGHT_3, BRAND_BLACK
 
 FLAT = {"DARK": DARK, "LIGHT": LIGHT}
 

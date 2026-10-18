@@ -3,6 +3,7 @@ RNV Icon Builder - Utils Package
 Contains utility modules for configuration, logging, error handling, and helpers.
 
 Modules:
+    colors: Color constants, theme color dictionaries
     config: All configuration constants, paths, window dimensions
     logger: Colored logging, Logger class wrapper
     error_handler: ErrorHandler, safe_method decorator, exception_handler

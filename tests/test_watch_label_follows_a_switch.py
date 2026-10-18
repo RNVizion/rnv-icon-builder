@@ -29,7 +29,7 @@ from PyQt6.QtCore import QPoint, QRect
 from PyQt6.QtGui import QColor, QPalette
 from PyQt6.QtWidgets import QApplication
 
-from ui.colors import get_theme_colors
+from utils.colors import get_theme_colors
 
 FOLDER = "C:/Users/you/Icons/incoming"
 TEXT_FLOOR = 4.5

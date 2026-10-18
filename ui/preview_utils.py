@@ -41,7 +41,7 @@ from utils.config import (
 from utils.logger import Logger, get_logger_instance
 from utils.pixmap_cache import ThumbnailCache
 from ui.base_dialog import BaseDialog
-from ui.colors import (
+from utils.colors import (
     BRAND_GOLD, BRAND_DARK_GOLD, get_theme_colors,
     contrast_ink, DARK_THEME_COLORS,
     # RNV-NAMED-AND-USED (2026-10-04): the grounds a preview is composited

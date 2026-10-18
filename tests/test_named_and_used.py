@@ -45,12 +45,12 @@ import pytest
 ROOT = pathlib.Path(__file__).resolve().parents[1]
 
 #: Where this application writes its colors: the one place a literal belongs.
-COLOR_MODULES = ("ui/colors.py",)
+COLOR_MODULES = ("utils/colors.py",)
 #: Where its palettes are written: their own keys are not lookups.
-PALETTE_MODULES = ("ui/colors.py", "ui/theme_manager.py")
+PALETTE_MODULES = ("utils/colors.py", "ui/theme_manager.py")
 SKIP_DIRS = {"tests", "build", "dist", "docs", "resources", "scripts", "snapshots", "__pycache__"}
 
-from ui.colors import DARK_THEME_COLORS, IMAGE_MODE_COLORS, LIGHT_THEME_COLORS, OS_SIM_COLORS  # noqa: E402
+from utils.colors import DARK_THEME_COLORS, IMAGE_MODE_COLORS, LIGHT_THEME_COLORS, OS_SIM_COLORS  # noqa: E402
 from ui.theme_manager import ThemeManager  # noqa: E402
 # RNV-COLOR-SYNC, #53 A (2026-10-17): the probe's colors, named once.
 from tests.color_values import DATA_PROBE_CLEAR_RGBA, DATA_PROBE_HEX, DATA_PROBE_RGBA  # noqa: E402
@@ -69,7 +69,7 @@ MIN_CONSTANTS = 30
 DATA = {
     # RNV-COLOR-SYNC, #56 A (2026-10-17): the web manifest's two colors, in
     # cli.py and core/icon_builder_core.py, and browserconfig.xml's tile color
-    # stood here. They are named in ui/colors.py now, as the application's own
+    # stood here. They are named in utils/colors.py now, as the application's own
     # data, and both writers read the names.
     ("ui/settings_dialog.py", "(255, 255, 255, 255)"):
         "the fill a generated icon starts with: image content, and the person's to change",

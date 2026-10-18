@@ -37,12 +37,6 @@ from PyQt6.QtWidgets import QMessageBox, QWidget
 # Import logger
 from utils.logger import Logger, get_logger_instance
 
-# NOTE: ui.colors is NOT imported at the top level here.
-# utils.dialog_helper is imported early in the startup chain (via utils/__init__.py
-# and utils.error_handler), before ui is fully initialized. A top-level
-# 'from ui.colors import ...' would create a circular import: utils -> ui -> utils.
-# Instead, get_theme_colors() is imported lazily inside each method that needs it.
-
 logger: Logger = get_logger_instance(__name__)
 
 
@@ -100,7 +94,7 @@ class DialogHelper:
         Returns:
             CSS stylesheet string for dark theme
         """
-        from ui.colors import get_theme_colors  # lazy import - avoids circular dependency
+        from utils.colors import get_theme_colors
         c = get_theme_colors(is_dark=True)
         return f"""
             QMessageBox {{
@@ -146,7 +140,7 @@ class DialogHelper:
         Returns:
             CSS stylesheet string for light theme
         """
-        from ui.colors import get_theme_colors  # lazy import - avoids circular dependency
+        from utils.colors import get_theme_colors
         c = get_theme_colors(is_dark=False)
         return f"""
             QMessageBox {{

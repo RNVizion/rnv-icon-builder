@@ -1,7 +1,7 @@
 """Every color value the tests need that is not the application's color.
 
 RNV-COLOR-SYNC, #53 A (2026-10-17). The application's own colors and the
-brand's are named in ui/colors.py, which brand_map.json names, and a test
+brand's are named in utils/colors.py, which brand_map.json names, and a test
 reads them from there. Every other color value a test or the root suite
 writes is named here, once, with why: samples given to a helper or to the
 color math (EXAMPLE_), what a file, a parser or a sweep's probe holds
@@ -196,7 +196,7 @@ DATA_OS_SIM_TASKBAR_LIGHT = "#f0f0f0"
 another system's chrome, which the 2026-09-06 collapse of this application's
 light strays left alone. It shares a hex with RETIRED_LIGHT_HOVER_AND_HEADER
 and nothing else; tests/test_light_wiring.py exempts its one line of
-ui/colors.py by exact text."""
+utils/colors.py by exact text."""
 
 # ------------------------------------------------------------------- retired
 

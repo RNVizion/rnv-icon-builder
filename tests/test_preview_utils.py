@@ -239,7 +239,7 @@ class TestBackgroundColorButtonFollowsTheMode:
         return sheet, plate, hover
 
     def test_each_mode_draws_the_button_in_its_own_colors(self, qapp):
-        from ui.colors import BRAND_GOLD, get_theme_colors
+        from utils.colors import BRAND_GOLD, get_theme_colors
         from ui.preview_utils import BackgroundSelectorWidget
 
         widget = BackgroundSelectorWidget()
@@ -260,7 +260,7 @@ class TestBackgroundColorButtonFollowsTheMode:
         from PyQt6.QtGui import QColor
         from PyQt6.QtWidgets import QColorDialog
 
-        from ui.colors import BRAND_GOLD, get_theme_colors
+        from utils.colors import BRAND_GOLD, get_theme_colors
         from ui.preview_utils import BackgroundSelectorWidget
 
         widget = BackgroundSelectorWidget()

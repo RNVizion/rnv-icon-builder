@@ -43,7 +43,7 @@ from pathlib import Path
 
 import pytest
 
-from ui import colors as C
+from utils import colors as C
 # RNV-COLOR-SYNC, #53 A (2026-10-17): the color values this file needs that
 # are not the application's colors are named once, in tests/color_values.py.
 from tests.color_values import (
@@ -53,7 +53,7 @@ from tests.color_values import (
 
 
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
-COLORS_PY = PROJECT_ROOT / "ui" / "colors.py"
+COLORS_PY = PROJECT_ROOT / "utils" / "colors.py"
 
 TEXT_FLOOR = 4.5          # WCAG 1.4.3, normal-size text
 COMPONENT_FLOOR = 3.0     # WCAG 1.4.11, UI components and graphics
@@ -126,7 +126,7 @@ def test_derived_constant_is_actually_computed(name: str) -> None:
     """A derived constant must be a call, not a literal that looks right."""
     assigns = _module_level_assignments()
     assert name in assigns, (
-        f"{name} is expected to exist in ui/colors.py and does not. "
+        f"{name} is expected to exist in utils/colors.py and does not. "
         f"If it was deliberately removed, remove it from DERIVED_CONSTANTS "
         f"in this test too.")
     node = assigns[name]
@@ -141,7 +141,7 @@ def test_derived_constant_is_actually_computed(name: str) -> None:
 def test_registered_constant_is_a_literal(name: str) -> None:
     """A registered brand value must be written down, not computed."""
     assigns = _module_level_assignments()
-    assert name in assigns, f"{name} missing from ui/colors.py"
+    assert name in assigns, f"{name} missing from utils/colors.py"
     node = assigns[name]
     assert isinstance(node, ast.Constant) and isinstance(node.value, str), (
         f"{name} is a registered brand color and must be a literal. "
@@ -618,10 +618,17 @@ _BYPASS = re.compile(r"\{BRAND_[A-Z_]+\}")
 def _bypass_sites():
     import subprocess
     root = pathlib.Path(C.__file__).resolve().parent.parent
-    files = subprocess.run(["git", "ls-files", "*.py"], cwd=root,
-                           capture_output=True, text=True).stdout.split()
+    # --others --exclude-standard: a file a change adds is read before it
+    # is committed, as the commit will hold it.
+    files = subprocess.run(["git", "ls-files", "--cached", "--others", "--exclude-standard", "*.py"],
+                           cwd=root, capture_output=True, text=True).stdout.split()
     for rel in files:
-        if rel == "ui/colors.py" or rel.startswith("tests/") or rel.startswith("test_"):
+        if rel == "utils/colors.py" or rel.startswith("tests/") or rel.startswith("test_"):
+            continue
+        # A file git still lists but which is gone -- a move not yet
+        # committed, as the color file's from ui/ to utils/ was (#63 A,
+        # 2026-10-18) -- is not a source.
+        if not (root / rel).exists():
             continue
         text = (root / rel).read_text(encoding="utf-8", errors="surrogateescape")
         # RNV-FLEET-FLOOR 2026-09-11: one marker every scanner in this
@@ -708,7 +715,7 @@ def test_the_bypass_scan_is_still_looking():
 
 def test_the_checkbox_hover_reads_the_palette():
     """The one bypass this pass fixed, pinned so it cannot come back."""
-    src = (pathlib.Path(C.__file__).resolve().parent / "settings_dialog.py"
+    src = (PROJECT_ROOT / "ui" / "settings_dialog.py"
            ).read_text(encoding="utf-8")
     block = src.split("QCheckBox::indicator:checked:hover", 1)
     assert len(block) == 2, "the checked-hover rule is gone"

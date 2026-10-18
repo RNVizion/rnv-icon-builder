@@ -17,14 +17,14 @@ from pathlib import Path
 
 import pytest
 
-from ui import colors as C
+from utils import colors as C
 # RNV-COLOR-SYNC, #53 A (2026-10-17): the color values this file needs that
 # are not the application's colors are named once, in tests/color_values.py.
 from tests.color_values import (DATA_OS_SIM_TASKBAR_LIGHT, RETIRED_LIGHT_HOVER_AND_HEADER,
                                  RETIRED_LIGHT_LIST_ALT, RETIRED_LIGHT_PLATFORM_BG)
 
 ROOT = Path(__file__).resolve().parent.parent
-SOURCE = ROOT / 'ui/colors.py'
+SOURCE = ROOT / 'utils/colors.py'
 PALETTES = ['DARK_THEME_COLORS', 'LIGHT_THEME_COLORS', 'IMAGE_MODE_COLORS']
 HEX = re.compile(r"#[0-9a-fA-F]{6}$")
 

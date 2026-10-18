@@ -122,7 +122,7 @@ from utils.config import (
     DEFAULT_PREVIEW_BACKGROUND,
     STATUS_MESSAGE_TIMEOUT
 )
-from ui.colors import (
+from utils.colors import (
     BRAND_GOLD, BRAND_DARK_GOLD,
     DARK_THEME_COLORS, LIGHT_THEME_COLORS, IMAGE_MODE_COLORS,
     get_theme_colors, PREVIEW_MISSING_FILL,

@@ -21,7 +21,7 @@ from PIL import Image
 
 from utils.config import BACKGROUND_IMAGE_PATH, MAX_IMAGE_DIMENSION, MAX_IMAGE_PIXELS
 from utils.logger import Logger, get_logger_instance
-from ui.colors import (
+from utils.colors import (
     DARK_THEME_COLORS,
     LIGHT_THEME_COLORS,
     IMAGE_MODE_COLORS,
@@ -32,7 +32,7 @@ logger: Logger = get_logger_instance(__name__)
 
 
 # Type alias for theme dictionary.
-# RNV-FLEET-FLOOR, 2026-09-11. PEP 695, matching ui/colors.py in the palette
+# RNV-FLEET-FLOOR, 2026-09-11. PEP 695, matching utils/colors.py in the palette
 # manager, now that this application declares requires-python >= 3.13. The
 # plain assignment that stood here carried a note explaining it was avoided
 # so the module would import on 3.10 and 3.11 -- true while the CI matrix
@@ -65,7 +65,7 @@ class ThemeManager:
     # RNV-NAMED-AND-USED (2026-10-04): these two are what get_current_theme()
     # hands the main window, and they hold what the main window looks up.
     # Five more keys were copied across and one alias made, and nothing read
-    # any of the six: the dialogs take their colors from ui/colors.py.
+    # any of the six: the dialogs take their colors from utils/colors.py.
 
     DARK_THEME: Final[ThemeDict] = {
         'name': 'Dark',

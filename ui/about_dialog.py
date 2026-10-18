@@ -32,7 +32,7 @@ from ui.base_dialog import BaseDialog
 
 # Import logger
 from utils.logger import Logger, get_logger_instance
-from ui.colors import BRAND_GOLD, get_theme_colors
+from utils.colors import BRAND_GOLD, get_theme_colors
 logger: Logger = get_logger_instance("AboutDialog")
 
 # Import config for app info

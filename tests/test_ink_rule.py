@@ -15,7 +15,7 @@ import re
 import tokenize
 from pathlib import Path
 
-from ui import colors
+from utils import colors
 # RNV-COLOR-SYNC, #53 A (2026-10-17): the color values this file needs that
 # are not the application's colors are named once, in tests/color_values.py.
 from tests.color_values import (
@@ -139,7 +139,7 @@ def test_no_three_digit_hex_in_the_palette():
     """One of the retired constants spelled GRAY_CC in three digits. The census
     reads six-digit hexes, so a three-digit one is a value the chart cannot
     see."""
-    src = (ROOT / "ui" / "colors.py").read_text(encoding="utf-8-sig")
+    src = (ROOT / "utils" / "colors.py").read_text(encoding="utf-8-sig")
     hits = re.findall(r"""['"]#[0-9a-fA-F]{3}['"]""", src)
     assert not hits, f"three-digit hexes are back: {hits}"
 

@@ -43,7 +43,7 @@ from PyQt6.QtGui import QMoveEvent
 from utils.signal_manager import SignalMixin, WindowMoveMixin
 from utils.logger import Logger, get_logger_instance
 from utils.dialog_helper import DialogHelper
-from ui.colors import get_theme_colors, BRAND_GOLD, BRAND_DARK_GOLD
+from utils.colors import get_theme_colors, BRAND_GOLD, BRAND_DARK_GOLD
 
 if TYPE_CHECKING:
     pass

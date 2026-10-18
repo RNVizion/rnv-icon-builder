@@ -26,7 +26,7 @@ from PyQt6.QtGui import QFont
 
 from PIL import Image
 
-from ui.colors import get_theme_colors
+from utils.colors import get_theme_colors
 from utils.logger import Logger, get_logger_instance
 
 # Setup logger for this module

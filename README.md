@@ -221,7 +221,6 @@ RNV_Icon_Builder/
 │   ├── __init__.py
 │   ├── py.typed
 │   ├── base_dialog.py         # Base dialog with signal/move mixins
-│   ├── colors.py              # Brand colors, theme palettes
 │   ├── theme_manager.py       # Dark/Light/Image theme cycling
 │   ├── settings_dialog.py     # Tabbed settings (Sizes, Export, Adjust, etc.)
 │   ├── about_dialog.py        # About dialog with features and shortcuts
@@ -234,6 +233,7 @@ RNV_Icon_Builder/
 ├── utils/
 │   ├── __init__.py
 │   ├── py.typed
+│   ├── colors.py              # Brand colors, theme palettes
 │   ├── config.py              # Constants, paths, feature flags
 │   ├── logger.py              # Colored console + file logging
 │   ├── error_handler.py       # Centralized error handling
@@ -244,7 +244,7 @@ RNV_Icon_Builder/
 │   ├── signal_manager.py      # Qt signal connection tracking
 │   └── async_file_ops.py      # Non-blocking file operations
 ├── tools/
-│   └── sync_colors.py         # Writes the colors in ui/colors.py, and COLORS.md
+│   └── sync_colors.py         # Writes the colors in utils/colors.py, and COLORS.md
 ├── tests/
 │   ├── requirements-dev.txt   # Test-only dependencies
 │   ├── conftest.py            # Shared fixtures + Qt/font/theme bootstrapping

@@ -67,12 +67,12 @@ else:
         sys.modules[_pkg] = _m
 
     _LOAD = {
-        "utils": ["logger", "config", "error_handler", "file_utils",
+        "utils": ["logger", "colors", "config", "error_handler", "file_utils",
                   "signal_manager", "pixmap_cache", "async_file_ops"],
         "core":  ["icon_builder_core", "image_processor", "recent_files",
                   "preset_manager", "session_manager", "export_history",
                   "batch_processor", "project_manager"],
-        "ui":    ["colors", "theme_manager", "preview_utils", "image_adjustments"],
+        "ui":    ["theme_manager", "preview_utils", "image_adjustments"],
     }
     for _pkg, _names in _LOAD.items():
         for _name in _names:
@@ -111,7 +111,7 @@ from utils.logger            import (
 )
 from utils.pixmap_cache      import QPixmapCache, ImagePixmapCache, ThumbnailCache, create_cache_key
 from utils.dialog_helper     import DialogHelper, DialogResult
-from ui.colors               import (
+from utils.colors            import (
     BRAND_GOLD, BRAND_DARK_GOLD, _to_rgb,
     DARK_THEME_COLORS, LIGHT_THEME_COLORS, IMAGE_MODE_COLORS,
     get_theme_colors,
@@ -188,7 +188,7 @@ SessionManager._ensure_directory = lambda self: None
 # 1. COLORS MODULE
 # ══════════════════════════════════════════════════════════════════════════════
 class TestColors(unittest.TestCase):
-    """ui/colors.py — brand constants, theme dicts, get_theme_colors()."""
+    """utils/colors.py — brand constants, theme dicts, get_theme_colors()."""
 
     # ── Brand constants ────────────────────────────────────────────────────────
     def test_brand_gold_hex_format(self):

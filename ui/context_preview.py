@@ -32,7 +32,7 @@ from utils.config import (
 )
 from utils.logger import Logger, get_logger_instance
 from ui.base_dialog import BaseDialog
-from ui.colors import BRAND_GOLD, BRAND_DARK_GOLD, OS_SIM_COLORS, OS_SIM_GROUNDS_RGB, get_theme_colors
+from utils.colors import BRAND_GOLD, BRAND_DARK_GOLD, OS_SIM_COLORS, OS_SIM_GROUNDS_RGB, get_theme_colors
 from ui.preview_utils import pil_to_qpixmap, composite_on_checkerboard
 
 # Setup logger for this module

@@ -593,9 +593,8 @@ def export_favicon_package(
     
     # Create site.webmanifest
     # RNV-COLOR-SYNC, #56 A (2026-10-17): the colors it declares are named in
-    # ui/colors.py, the application's own data. Imported where the file is
-    # written, so a run that writes no manifest does not load the ui package.
-    from ui.colors import WEB_MANIFEST_THEME_COLOR, WEB_MANIFEST_BACKGROUND_COLOR
+    # utils/colors.py, the application's own data.
+    from utils.colors import WEB_MANIFEST_THEME_COLOR, WEB_MANIFEST_BACKGROUND_COLOR
     manifest = {
         "name": "",
         "short_name": "",

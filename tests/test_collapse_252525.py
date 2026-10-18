@@ -21,17 +21,17 @@ OLD_HEX = RETIRED_DARK_STRAY_GRAY
 CONST = "APP_CARD"
 KEYS = ['platform_btn_bg', 'scrollbar_bg', 'list_alt_bg']
 EXPECT = {'dark': ['platform_btn_bg', 'scrollbar_bg', 'list_alt_bg'], 'image': ['platform_btn_bg', 'list_alt_bg']}
-PALETTE_FILE = "ui/colors.py"
+PALETTE_FILE = "utils/colors.py"
 
 
 def _palettes():
-    from ui.colors import DARK_THEME_COLORS as D, IMAGE_MODE_COLORS as I; P={'dark':D,'image':I}
+    from utils.colors import DARK_THEME_COLORS as D, IMAGE_MODE_COLORS as I; P={'dark':D,'image':I}
     return P
 
 
 def _new_value():
     """The constant the keys were ruled onto, as the value it holds."""
-    from ui import colors
+    from utils import colors
     return getattr(colors, CONST)
 
 

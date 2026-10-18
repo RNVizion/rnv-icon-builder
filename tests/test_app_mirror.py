@@ -33,12 +33,12 @@ import pathlib
 
 import pytest
 
-from ui import colors
-from ui.colors import (DARK_THEME_COLORS as DARK, IMAGE_MODE_COLORS as IMAGE,
-                       LIGHT_THEME_COLORS as LIGHT)
+from utils import colors
+from utils.colors import (DARK_THEME_COLORS as DARK, IMAGE_MODE_COLORS as IMAGE,
+                          LIGHT_THEME_COLORS as LIGHT)
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
-SRC = ROOT / 'ui' / 'colors.py'
+SRC = ROOT / 'utils' / 'colors.py'
 
 #: RNV-COLOR-SYNC, 2026-10-16. Where each color comes from, as brand_map.json
 #: says. The values are held by tests/test_colors_in_sync.py, against the
@@ -49,7 +49,7 @@ GRID_STEP = 0x11
 
 #: The register's neutrals this app names. RNV-COLOR-SYNC, 2026-10-16: this
 #: was PINNED, each name with its value written beside it; the values are
-#: written into ui/colors.py from the register now, and held there.
+#: written into utils/colors.py from the register now, and held there.
 NEUTRALS = ('TRUE_BLACK', 'WHITE', 'BRAND_BLACK', 'APP_CARD', 'APP_BORDER',
             'APP_TEXT', 'APP_TEXT_DIM', 'APP_PANEL_HOVER', 'APP_HOVER_LIGHT',
             'APP_SURFACE_LIGHT_3', 'APP_SURFACE_LIGHT_2', 'APP_PRESSED_LIGHT')
@@ -62,7 +62,7 @@ INK_KEYS = ('text_primary', 'dialog_btn_text', 'main_btn_text',
 #: grid does not govern and which did not move. RNV-COLOR-SYNC, 2026-10-16:
 #: each key by the constant it paints, where all three were written as the
 #: hex code they share; the pressed plate is the register's, the other two
-#: the ramp's (the split in ui/colors.py).
+#: the ramp's (the split in utils/colors.py).
 LIGHT_SURFACE_KEYS = {'pressed_bg': 'APP_PRESSED_LIGHT', 'tab_bg': 'GRAY_E0',
                       'scrollbar_bg': 'GRAY_E0'}
 
@@ -79,7 +79,7 @@ def _dict_node(name: str) -> ast.Dict:
             target = node.targets[0] if isinstance(node, ast.Assign) else node.target
             if getattr(target, 'id', None) == name and isinstance(node.value, ast.Dict):
                 return node.value
-    raise AssertionError(f'{name} is not a dict literal in ui/colors.py')
+    raise AssertionError(f'{name} is not a dict literal in utils/colors.py')
 
 
 def _entry(node: ast.Dict, key: str) -> ast.AST | None:
@@ -99,7 +99,7 @@ def test_the_keys_this_file_reads_still_exist():
     for key in LIGHT_SURFACE_KEYS:
         assert key in LIGHT, f'LIGHT has no {key}'
     for name in NEUTRALS:
-        assert hasattr(colors, name), f'ui.colors has no {name}'
+        assert hasattr(colors, name), f'utils.colors has no {name}'
 
 
 # ------------------------------------------------------------------- the value

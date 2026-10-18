@@ -39,7 +39,7 @@ from PyQt6.QtCore import QEventLoop, QTimer
 from PyQt6.QtGui import QColor, QPalette
 from PyQt6.QtWidgets import QApplication, QDialog, QFileDialog, QMessageBox, QWidget
 
-from ui.colors import BRAND_DARK_GOLD, BRAND_GOLD, TRUE_BLACK, WHITE
+from utils.colors import BRAND_DARK_GOLD, BRAND_GOLD, TRUE_BLACK, WHITE
 # RNV-COLOR-SYNC, #53 A (2026-10-17): the color values this file needs that
 # are not the application's colors are named once, in tests/color_values.py.
 from tests.color_values import (DATA_PARSED_BLACK, DATA_PARSED_WHITE,

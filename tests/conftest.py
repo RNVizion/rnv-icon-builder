@@ -99,7 +99,7 @@ else:
 
     _MODULES_BY_PACKAGE = {
         "utils": [
-            "logger", "config", "error_handler", "file_utils",
+            "logger", "colors", "config", "error_handler", "file_utils",
             "signal_manager", "pixmap_cache", "async_file_ops",
             "dialog_helper", "font_loader",
         ],
@@ -109,7 +109,7 @@ else:
             "batch_processor", "project_manager", "folder_watcher",
         ],
         "ui": [
-            "colors", "theme_manager", "preview_utils",
+            "theme_manager", "preview_utils",
             "image_adjustments", "base_dialog", "context_preview",
             "metadata_panel", "ico_analyzer", "debug_button",
             "about_dialog", "settings_dialog",

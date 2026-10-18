@@ -1008,12 +1008,11 @@ class IconBuilderCore:
             
             # 5. Generate site.webmanifest
             # RNV-COLOR-SYNC, #56 A (2026-10-17): the colors the manifest and
-            # browserconfig.xml declare are named in ui/colors.py, the
-            # application's own data. Imported here, as image_processor imports
-            # from ui, so importing this module does not load the ui package.
-            from ui.colors import (WEB_MANIFEST_THEME_COLOR,
-                                   WEB_MANIFEST_BACKGROUND_COLOR,
-                                   BROWSERCONFIG_TILE_COLOR)
+            # browserconfig.xml declare are named in utils/colors.py, the
+            # application's own data.
+            from utils.colors import (WEB_MANIFEST_THEME_COLOR,
+                                      WEB_MANIFEST_BACKGROUND_COLOR,
+                                      BROWSERCONFIG_TILE_COLOR)
             manifest = {
                 "name": site_name,
                 "short_name": site_name,

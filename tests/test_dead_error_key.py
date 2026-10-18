@@ -12,7 +12,7 @@ lighten(RETIRED_ERROR_RED, -20) for light grounds -- rather than reviving this.
 
 import pytest
 
-from ui import colors
+from utils import colors
 # RNV-COLOR-SYNC, #53 A (2026-10-17): the color values this file needs that
 # are not the application's colors are named once, in tests/color_values.py.
 from tests.color_values import RETIRED_ERROR_RED

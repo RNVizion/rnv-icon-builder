@@ -39,16 +39,16 @@ import pathlib
 
 import pytest
 
-from ui import colors
-from ui.colors import (DARK_THEME_COLORS as DARK,
-                       IMAGE_MODE_COLORS as IMAGE,
-                       LIGHT_THEME_COLORS as LIGHT)
+from utils import colors
+from utils.colors import (DARK_THEME_COLORS as DARK,
+                          IMAGE_MODE_COLORS as IMAGE,
+                          LIGHT_THEME_COLORS as LIGHT)
 # RNV-COLOR-SYNC, #53 A (2026-10-17): the color values this file needs that
 # are not the application's colors are named once, in tests/color_values.py.
 from tests.color_values import REGISTER_GOLD_TEXT_GROUND_FLOOR
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
-SRC = ROOT / 'ui/colors.py'
+SRC = ROOT / 'utils/colors.py'
 
 #: RNV-COLOR-SYNC, 2026-10-16. Where each color comes from, as brand_map.json
 #: says. The values are held by tests/test_colors_in_sync.py, against the
@@ -109,7 +109,7 @@ def _dict_node(name: str) -> ast.Dict:
             target = node.targets[0] if isinstance(node, ast.Assign) else node.target
             if getattr(target, 'id', None) == name and isinstance(node.value, ast.Dict):
                 return node.value
-    raise AssertionError(f'{name} is not a dict literal in ui/colors.py')
+    raise AssertionError(f'{name} is not a dict literal in utils/colors.py')
 
 
 def _entry(node: ast.Dict, key: str):

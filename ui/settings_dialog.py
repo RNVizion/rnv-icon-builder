@@ -45,7 +45,7 @@ from PyQt6.QtCore import Qt, pyqtSignal, QSize, QTimer
 from PyQt6.QtGui import QIcon, QPixmap, QColor
 
 from utils.config import ICON_SIZES
-from ui.colors import (
+from utils.colors import (
     BRAND_GOLD, get_theme_colors,
     swatch_edge,
 )

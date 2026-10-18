@@ -37,7 +37,7 @@ from PyQt6.QtCore import Qt
 from PyQt6.QtGui import QColor, QImage
 from PyQt6.QtWidgets import QApplication
 
-from ui.colors import get_theme_colors
+from utils.colors import get_theme_colors
 
 INFO = {
     "file_name": "sample.ico", "file_size": 4096, "image_count": 3, "has_png": True, "has_bmp": True,

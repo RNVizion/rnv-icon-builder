@@ -105,18 +105,18 @@ class TestThemeKeySnapshots:
     by name."""
 
     def test_dark_theme_keys(self, snapshots):
-        from ui.colors import DARK_THEME_COLORS
+        from utils.colors import DARK_THEME_COLORS
 
         assert sorted(DARK_THEME_COLORS.keys()) == snapshots["dark_theme_keys"]
 
     def test_light_theme_keys(self, snapshots):
-        from ui.colors import LIGHT_THEME_COLORS
+        from utils.colors import LIGHT_THEME_COLORS
 
         assert sorted(LIGHT_THEME_COLORS.keys()) == \
             snapshots["light_theme_keys"]
 
     def test_image_mode_keys(self, snapshots):
-        from ui.colors import IMAGE_MODE_COLORS
+        from utils.colors import IMAGE_MODE_COLORS
 
         assert sorted(IMAGE_MODE_COLORS.keys()) == snapshots["image_mode_keys"]
 
@@ -253,8 +253,8 @@ def regenerate_snapshots() -> dict:
         QApplication(sys.argv[:1])
 
     from ui.theme_manager import ThemeManager
-    from ui.colors import (DARK_THEME_COLORS, LIGHT_THEME_COLORS,
-                            IMAGE_MODE_COLORS)
+    from utils.colors import (DARK_THEME_COLORS, LIGHT_THEME_COLORS,
+                              IMAGE_MODE_COLORS)
     from core.batch_processor import BatchJob
     from core.preset_manager import SizePreset
     from core.folder_watcher import WatchSettings

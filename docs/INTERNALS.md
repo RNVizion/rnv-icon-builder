@@ -64,7 +64,7 @@ Three themes are supported: **Dark**, **Light**, and **Image Mode** (background 
 
 ### Color Architecture
 
-All colors are defined in `ui/colors.py`:
+All colors are defined in `utils/colors.py`:
 
 - `BRAND_GOLD` (`#d2bc93`) — Primary brand accent
 - `BRAND_DARK_GOLD` (`#8c7337`) — Light-mode gold FILLS: pressed states,
@@ -84,7 +84,7 @@ The project deliberately uses two separate button color schemes:
 - **Main window buttons** — Neutral inverse monochrome hover system. No brand gold. Dark mode hover: `#333333` background, text unchanged.
 - **Dialog buttons** — Gold accent system. Hover reveals `BRAND_GOLD` borders/text.
 
-This is intentional — main window buttons sit against backgrounds where gold hover would be visually loud, while dialog buttons benefit from the accent. See `ui/colors.py` for the `main_btn_*` vs `button_*` key split.
+This is intentional — main window buttons sit against backgrounds where gold hover would be visually loud, while dialog buttons benefit from the accent. See `utils/colors.py` for the `main_btn_*` vs `button_*` key split.
 
 ### Palette vs Stylesheet
 
@@ -330,8 +330,8 @@ Subclass for thumbnail-specific caching, keyed by `(source_path, size, variant)`
 ### Coverage
 
 - Core modules: `icon_builder_core`, `image_processor`, `batch_processor`, `folder_watcher`, `preset_manager`, `project_manager`, `recent_files`, `session_manager`, `export_history`
-- UI modules: `colors`, `preview_utils`, `image_adjustments`
-- Utils: `config`, `logger`, `error_handler`, `file_utils`, `signal_manager`, `pixmap_cache`, `dialog_helper`
+- UI modules: `preview_utils`, `image_adjustments`
+- Utils: `colors`, `config`, `logger`, `error_handler`, `file_utils`, `signal_manager`, `pixmap_cache`, `dialog_helper`
 
 ### Mocking
 

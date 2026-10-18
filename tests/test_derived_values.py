@@ -22,12 +22,12 @@ import ast
 import pathlib
 import re
 
-from ui import colors
-from ui.colors import (DARK_THEME_COLORS as DARK,
-                       LIGHT_THEME_COLORS as LIGHT,
-                       IMAGE_MODE_COLORS as IMAGE,
-                       OS_SIM_COLORS as OS_SIM,
-                       translucent)
+from utils import colors
+from utils.colors import (DARK_THEME_COLORS as DARK,
+                          LIGHT_THEME_COLORS as LIGHT,
+                          IMAGE_MODE_COLORS as IMAGE,
+                          OS_SIM_COLORS as OS_SIM,
+                          translucent)
 # RNV-COLOR-SYNC, #53 A (2026-10-17): the color values this file needs that
 # are not the application's colors are named once, in tests/color_values.py.
 from tests.color_values import (
@@ -40,7 +40,7 @@ from tests.color_values import (
 )
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
-SRC = ROOT / "ui" / "colors.py"
+SRC = ROOT / "utils" / "colors.py"
 
 MODE_DICTS = ("DARK_THEME_COLORS", "LIGHT_THEME_COLORS", "IMAGE_MODE_COLORS")
 PALETTES = {"DARK_THEME_COLORS": DARK, "LIGHT_THEME_COLORS": LIGHT,
@@ -111,7 +111,7 @@ def test_the_alphas_are_the_measured_bytes():
     Qt TRUNCATES: 0.3 * 255 is 76.5 and Qt gives 76. Rounding here would move
     a pixel in a round that says it moves one, and names which."""
     for name, (byte, _was) in ALPHAS.items():
-        assert hasattr(colors, name), f"ui.colors has no {name}"
+        assert hasattr(colors, name), f"utils.colors has no {name}"
         assert getattr(colors, name) == byte, (
             f"{name} is {getattr(colors, name):#x}, measured {byte:#x}")
 
@@ -137,7 +137,7 @@ def test_every_derived_entry_names_a_constant_that_exists():
                     bad.append(f"{where} {pos} is a literal, not a name")
                 elif not hasattr(colors, arg.id):
                     bad.append(f"{where} {pos} names {arg.id}, which does not "
-                               f"exist in ui.colors")
+                               f"exist in utils.colors")
             if isinstance(alpha, ast.Name) and alpha.id not in ALPHAS:
                 bad.append(f"{where} uses alpha {alpha.id}, which is not one "
                            f"of the declared composite alphas")
@@ -272,7 +272,7 @@ def test_the_scrollbar_handle_is_gray_44_and_not_the_collapsed_value():
 # moves; the register's Notation section (rev 42) says each app's guard holds
 # its eight-digit values to lower case, and until now this one did not.
 
-LOWER8_MODULES = ('ui.colors', 'ui.preview_utils', 'ui.theme_manager')
+LOWER8_MODULES = ('utils.colors', 'ui.preview_utils', 'ui.theme_manager')
 #: Found when this was written; below the floor, the sweep has gone blind.
 #: 19 since RNV-NAMED-AND-USED, 2026-10-04: image mode's card_bg override,
 #: which nothing read, went, and it was counted in two modules.

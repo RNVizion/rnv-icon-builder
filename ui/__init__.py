@@ -12,16 +12,10 @@ Modules:
     metadata_panel: Display image file metadata
     image_adjustments: Brightness, contrast, saturation controls
     debug_button: Developer debug information button
-    colors: Color constants, theme color dictionaries
     base_dialog: Base dialog class with SignalMixin + WindowMoveMixin
 """
 
 from .theme_manager import ThemeManager
-from .colors import (
-    BRAND_GOLD, BRAND_DARK_GOLD,
-    DARK_THEME_COLORS, LIGHT_THEME_COLORS, IMAGE_MODE_COLORS,
-    get_theme_colors,
-)
 from .base_dialog import BaseDialog
 from .settings_dialog import SettingsDialog, SettingsButton
 from .about_dialog import AboutDialog
@@ -43,10 +37,6 @@ from .debug_button import DebugButton
 __all__: list[str] = [
     # Theme
     'ThemeManager',
-    # Colors
-    'BRAND_GOLD', 'BRAND_DARK_GOLD',
-    'DARK_THEME_COLORS', 'LIGHT_THEME_COLORS', 'IMAGE_MODE_COLORS',
-    'get_theme_colors',
     # Base
     'BaseDialog',
     # Dialogs
