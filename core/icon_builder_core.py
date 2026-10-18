@@ -1007,7 +1007,7 @@ class IconBuilderCore:
                 generated_files.append(filename)
             
             # 5. Generate site.webmanifest
-            # RNV-COLOUR-SYNC, #56 A (2026-10-17): the colours the manifest and
+            # RNV-COLOR-SYNC, #56 A (2026-10-17): the colors the manifest and
             # browserconfig.xml declare are named in ui/colors.py, the
             # application's own data. Imported here, as image_processor imports
             # from ui, so importing this module does not load the ui package.

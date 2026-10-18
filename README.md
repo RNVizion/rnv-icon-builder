@@ -4,7 +4,7 @@
 ![PyQt6](https://img.shields.io/badge/PyQt-6-41CD52)
 ![Version](https://img.shields.io/badge/version-3.0.0-orange)
 ![License](https://img.shields.io/badge/license-MIT-yellow)
-![Platform](https://img.shields.io/badge/platform-Windows%20%7C%20macOS%20%7C%20Linux-lightgrey)
+![Platform](https://img.shields.io/badge/platform-Windows%20%7C%20macOS%20%7C%20Linux-lightgray)
 ![Tests](https://img.shields.io/badge/tests-1100%2B%20passing-brightgreen)
 ![Coverage](https://img.shields.io/badge/coverage-70.21%25-brightgreen)
 
@@ -180,8 +180,8 @@ RNV_Icon_Builder/
 ├── RNV_Icon_Builder.spec      # PyInstaller build spec
 ├── pyproject.toml             # Package metadata & entry points
 ├── requirements.txt           # Runtime dependencies
-├── brand_map.json             # Where each colour comes from: rnv-brand or the app
-├── COLORS.md                  # This app's colour chart, written by the sync
+├── brand_map.json             # Where each color comes from: rnv-brand or the app
+├── COLORS.md                  # This app's color chart, written by the sync
 ├── README.md                  # This file
 ├── LICENSE                    # MIT license
 ├── .gitignore
@@ -192,7 +192,7 @@ RNV_Icon_Builder/
 │
 ├── .github/
 │   └── workflows/
-│       ├── brand-sync.yml     # Daily: colours from rnv-brand; a pull request only if one moved
+│       ├── brand-sync.yml     # Daily: colors from rnv-brand; a pull request only if one moved
 │       ├── tests-linux.yml    # CI: Ubuntu, Python 3.10–3.13, xvfb
 │       └── tests-windows.yml  # CI: Windows, Python 3.10–3.13
 │
@@ -244,16 +244,16 @@ RNV_Icon_Builder/
 │   ├── signal_manager.py      # Qt signal connection tracking
 │   └── async_file_ops.py      # Non-blocking file operations
 ├── tools/
-│   └── sync_colors.py         # Writes the colours in ui/colors.py, and COLORS.md
+│   └── sync_colors.py         # Writes the colors in ui/colors.py, and COLORS.md
 ├── tests/
 │   ├── requirements-dev.txt   # Test-only dependencies
 │   ├── conftest.py            # Shared fixtures + Qt/font/theme bootstrapping
 │   ├── snapshots.json         # Syrupy snapshot baselines
-│   ├── colour_values.py       # Every colour value a test needs that is not the app's, named once
+│   ├── color_values.py        # Every color value a test needs that is not the app's, named once
 │   ├── test_application.py    # Main window lifecycle, theme, public API
 │   ├── test_benchmarks.py     # pytest-benchmark performance tests
 │   ├── test_cli.py            # CLI subprocess tests (parallel-mode coverage)
-│   ├── test_colour_values.py  # No colour value written in a test outside colour_values.py
+│   ├── test_color_values.py   # No color value written in a test outside color_values.py
 │   ├── test_error_handler.py  # Error handler & validation
 │   ├── test_folder_watcher.py # Folder watcher behaviors
 │   ├── test_image_processor.py

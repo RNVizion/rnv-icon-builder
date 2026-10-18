@@ -134,7 +134,7 @@ def test_that_sweep_is_actually_looking():
 
 def test_the_diagram_exemptions_are_load_bearing():
     """Both directions. An exemption for a line that no longer exists is dead
-    weight, and dead weight is a licence waiting for a future defect."""
+    weight, and dead weight is a license waiting for a future defect."""
     for rel, line in DIAGRAM_LINES.items():
         text = (REPO / rel).read_text(encoding="utf-8", errors="replace")
         assert line in text, (

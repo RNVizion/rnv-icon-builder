@@ -65,7 +65,7 @@ class ThemeManager:
     # RNV-NAMED-AND-USED (2026-10-04): these two are what get_current_theme()
     # hands the main window, and they hold what the main window looks up.
     # Five more keys were copied across and one alias made, and nothing read
-    # any of the six: the dialogs take their colours from ui/colors.py.
+    # any of the six: the dialogs take their colors from ui/colors.py.
 
     DARK_THEME: Final[ThemeDict] = {
         'name': 'Dark',

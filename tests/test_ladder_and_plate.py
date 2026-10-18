@@ -9,7 +9,7 @@ provenance and spelling, not pixels.
 
 WHY THE LADDER WAS NOT "TWO-THIRDS SPECIFIED". The register originally said it
 was, because APP["border"] (APP_BORDER) is not APP_PANEL_HOVER and so looked
-like a missing rung. It is not a rung at all -- APP_BORDER is grey(3) on the
+like a missing rung. It is not a rung at all -- APP_BORDER is gray(3) on the
 INK grid, which governs inks and EDGES, and a border is an edge. The ladder
 was complete when the question was first asked; it was measured against the
 wrong family.
@@ -23,7 +23,7 @@ REGISTER_GOLD_TEXT_GROUND_FLOOR is the ground BRAND_DARK_GOLD_DEEP is
 calibrated against: the smallest uniform step that clears it is -14, and -13
 gives 4.4675 and fails. Registering it as the hover would have put every hover
 in the app on the one value the gold cannot afford to lose, with 0.0334 of
-margin. A boundary is not a plate. APP_HOVER_LIGHT is grey(14), one step
+margin. A boundary is not a plate. APP_HOVER_LIGHT is gray(14), one step
 inside, and gold reads 4.7875 on it. The margin is asserted below rather than
 described, because a comment cannot fail.
 
@@ -43,23 +43,23 @@ from ui import colors
 from ui.colors import (DARK_THEME_COLORS as DARK,
                        IMAGE_MODE_COLORS as IMAGE,
                        LIGHT_THEME_COLORS as LIGHT)
-# RNV-COLOUR-SYNC, #53 A (2026-10-17): the colour values this file needs that
-# are not the application's colours are named once, in tests/colour_values.py.
-from tests.colour_values import REGISTER_GOLD_TEXT_GROUND_FLOOR
+# RNV-COLOR-SYNC, #53 A (2026-10-17): the color values this file needs that
+# are not the application's colors are named once, in tests/color_values.py.
+from tests.color_values import REGISTER_GOLD_TEXT_GROUND_FLOOR
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
 SRC = ROOT / 'ui/colors.py'
 
-#: RNV-COLOUR-SYNC, 2026-10-16. Where each colour comes from, as brand_map.json
-#: says. The values are held by tests/test_colours_in_sync.py, against the
+#: RNV-COLOR-SYNC, 2026-10-16. Where each color comes from, as brand_map.json
+#: says. The values are held by tests/test_colors_in_sync.py, against the
 #: register at the pin; what this file holds is the name each one takes.
-BRAND_MAP = json.loads((ROOT / "brand_map.json").read_text(encoding="utf-8"))["colours"]
+BRAND_MAP = json.loads((ROOT / "brand_map.json").read_text(encoding="utf-8"))["colors"]
 
 GRID_STEP = 0x11
 LADDER_STEP = 0x10
 TEXT_FLOOR = 4.5
 
-#: Constant name -> the register key it mirrors. RNV-COLOUR-SYNC, 2026-10-16:
+#: Constant name -> the register key it mirrors. RNV-COLOR-SYNC, 2026-10-16:
 #: the value both held was written here too; it is written from the register now.
 NEW = {'APP_PANEL_HOVER': 'panel-hover',
        'APP_HOVER_LIGHT': 'hover-light'}
@@ -85,7 +85,7 @@ PALETTES = {'DARK_THEME_COLORS': DARK, 'IMAGE_MODE_COLORS': IMAGE,
 BOUNDARY = REGISTER_GOLD_TEXT_GROUND_FLOOR
 
 
-def grey(n: int) -> str:
+def gray(n: int) -> str:
     v = n * GRID_STEP
     return '#%02x%02x%02x' % (v, v, v)
 
@@ -144,9 +144,9 @@ def test_the_new_constants_hold_the_registered_values():
     """The local half of the mirror. Runs everywhere, including where
     engine.brand is not importable -- which is exactly why it is not optional.
 
-    RNV-COLOUR-SYNC, 2026-10-16: it held each value written out. It holds now
+    RNV-COLOR-SYNC, 2026-10-16: it held each value written out. It holds now
     that brand_map.json takes each from its APP key; the value is written from
-    there, and tests/test_colours_in_sync.py holds it."""
+    there, and tests/test_colors_in_sync.py holds it."""
     drift = {n: BRAND_MAP.get(n) for n, key in NEW.items()
              if BRAND_MAP.get(n) != f'APP.{key}'}
     assert not drift, (
@@ -190,9 +190,9 @@ def test_the_dark_rungs_are_exact_steps_on_the_ladder():
 
 
 def test_the_border_is_an_edge_and_not_a_rung():
-    """The distinction that made the ladder look incomplete. APP_BORDER is grey(3)
+    """The distinction that made the ladder look incomplete. APP_BORDER is gray(3)
     on the ink grid, which governs inks and edges; it was never a surface."""
-    assert colors.APP_BORDER == grey(3)
+    assert colors.APP_BORDER == gray(3)
     base = int(colors.BRAND_BLACK.lstrip('#'), 16)
     rungs = {base + n * (LADDER_STEP * 0x010101) for n in range(-1, 3)}
     assert int(colors.APP_BORDER.lstrip('#'), 16) not in rungs
@@ -201,7 +201,7 @@ def test_the_border_is_an_edge_and_not_a_rung():
 # ------------------------------------------------------------------- the plate
 
 def test_the_plate_is_a_step_on_the_ink_grid():
-    assert colors.APP_HOVER_LIGHT == grey(14)
+    assert colors.APP_HOVER_LIGHT == gray(14)
 
 
 def test_the_plate_carries_gold_with_room_to_spare():

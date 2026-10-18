@@ -1253,8 +1253,8 @@ class BackgroundSelectorWidget(QFrame):
         
         self.current_bg = DEFAULT_PREVIEW_BACKGROUND
         self.custom_color: tuple[int, int, int] = DEFAULT_CUSTOM_BG_RGB  # Gray default
-        #: The mode apply_theme() last drew this in. The colour button reads
-        #: it, because a colour change repaints the button without a mode.
+        #: The mode apply_theme() last drew this in. The color button reads
+        #: it, because a color change repaints the button without a mode.
         self._is_dark: bool = True
         
         self._setup_ui()
@@ -1363,7 +1363,7 @@ class BackgroundSelectorWidget(QFrame):
         #555555 edge while the combo beside it turned light. It takes the
         mode's text_disabled now. The hover stays BRAND_GOLD in every mode:
         a reviewed, permanent bypass in tests/test_brand_contrast.py, drawn
-        over the user's colour rather than a themed surface.
+        over the user's color rather than a themed surface.
         """
         hex_color = color_to_hex(self.custom_color)
         edge = get_theme_colors(is_dark=getattr(self, '_is_dark', True))['text_disabled']

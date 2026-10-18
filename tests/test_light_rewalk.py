@@ -21,15 +21,15 @@ import pathlib
 import pytest
 
 from ui import colors as C
-# RNV-COLOUR-SYNC, #53 A (2026-10-17): the colour values this file needs that
-# are not the application's colours are named once, in tests/colour_values.py.
-from tests.colour_values import (EXAMPLE_GROUND_BLACK, EXAMPLE_GROUND_WHITE,
+# RNV-COLOR-SYNC, #53 A (2026-10-17): the color values this file needs that
+# are not the application's colors are named once, in tests/color_values.py.
+from tests.color_values import (EXAMPLE_GROUND_BLACK, EXAMPLE_GROUND_WHITE,
                                  REGISTER_GOLD_TEXT_GROUND_FLOOR)
 
-#: RNV-COLOUR-SYNC, 2026-10-16. Where each colour comes from, as brand_map.json
-#: says. The values are held by tests/test_colours_in_sync.py, against the
+#: RNV-COLOR-SYNC, 2026-10-16. Where each color comes from, as brand_map.json
+#: says. The values are held by tests/test_colors_in_sync.py, against the
 #: register at the pin; what this file holds is the name each one takes.
-BRAND_MAP = json.loads((pathlib.Path(__file__).resolve().parents[1] / "brand_map.json").read_text(encoding="utf-8"))["colours"]
+BRAND_MAP = json.loads((pathlib.Path(__file__).resolve().parents[1] / "brand_map.json").read_text(encoding="utf-8"))["colors"]
 
 TEXT_FLOOR = 4.5
 
@@ -40,7 +40,7 @@ REWALKED = {'STATUS_SUCCESS_TEXT_LIGHT': 'STATUS.success-text-light'}
 
 # The rungs the register publishes, lightest first. APP_PRESSED_LIGHT is in the list on
 # purpose: it is asserted to FAIL, which is what makes it a boundary.
-# #52 A, 2026-10-17: each rung by the name the colour file gives it, and the
+# #52 A, 2026-10-17: each rung by the name the color file gives it, and the
 # floor, which this application does not draw, by the register's.
 REACHES = (C.WHITE, C.APP_SURFACE_LIGHT_2, C.APP_SURFACE_LIGHT_3, C.APP_HOVER_LIGHT,
            REGISTER_GOLD_TEXT_GROUND_FLOOR)
@@ -73,8 +73,8 @@ def test_the_light_values_are_the_re_walked_ones(name, value):
     against APP_SURFACE_LIGHT_3; rev 31 holds these, walked against
     REGISTER_GOLD_TEXT_GROUND_FLOOR.
 
-    RNV-COLOUR-SYNC, 2026-10-16: pinned by the register name brand_map.json
-    writes it from; tests/test_colours_in_sync.py holds the value."""
+    RNV-COLOR-SYNC, 2026-10-16: pinned by the register name brand_map.json
+    writes it from; tests/test_colors_in_sync.py holds the value."""
     assert BRAND_MAP[name] == value
 
 

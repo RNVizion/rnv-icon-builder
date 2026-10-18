@@ -40,9 +40,9 @@ from PyQt6.QtGui import QColor, QPalette
 from PyQt6.QtWidgets import QApplication, QDialog, QFileDialog, QMessageBox, QWidget
 
 from ui.colors import BRAND_DARK_GOLD, BRAND_GOLD, TRUE_BLACK, WHITE
-# RNV-COLOUR-SYNC, #53 A (2026-10-17): the colour values this file needs that
-# are not the application's colours are named once, in tests/colour_values.py.
-from tests.colour_values import (DATA_PARSED_BLACK, DATA_PARSED_WHITE,
+# RNV-COLOR-SYNC, #53 A (2026-10-17): the color values this file needs that
+# are not the application's colors are named once, in tests/color_values.py.
+from tests.color_values import (DATA_PARSED_BLACK, DATA_PARSED_WHITE,
                                  DATA_SHEET_INK_BLACK_SHORT, DATA_SHEET_INK_WHITE)
 
 @pytest.fixture
@@ -81,9 +81,9 @@ def _prepare(win) -> None:
 #: the bright gold.
 #:
 #: RNV-ACCENT-READ-2026-10-16. The golds and their inks are read from this
-#: app's own colour file, where they were written here as hex codes. A guard
+#: app's own color file, where they were written here as hex codes. A guard
 #: that names BRAND_DARK_GOLD's hex code finds nothing once the brand's accent
-#: is another colour, and fails by finding nothing; read from the colour file,
+#: is another color, and fails by finding nothing; read from the color file,
 #: it holds the rule
 #: on whatever the accent is.
 GOLD_INK = {BRAND_DARK_GOLD.lower(): WHITE.lower(), BRAND_GOLD.lower(): TRUE_BLACK.lower()}
@@ -95,7 +95,7 @@ DECL = re.compile(r"([a-zA-Z-]+)\s*:\s*([^;]+);?")
 #: A part of a widget that holds no text. A gold fill there needs no ink.
 TEXT_FREE = re.compile(r"::(?:indicator|handle|chunk|sub-page|add-page|up-button|down-button|groove|"
                        r"add-line|sub-line|up-arrow|down-arrow|branch)\b")
-#: The palettes' two colour groups text is drawn in.
+#: The palettes' two color groups text is drawn in.
 GROUPS = (QPalette.ColorGroup.Active, QPalette.ColorGroup.Inactive)
 
 
@@ -119,7 +119,7 @@ def _gold(value: str):
 
 
 def _ink(value):
-    """A colour written in a rule, as #rrggbb: None when the rule sets none."""
+    """A color written in a rule, as #rrggbb: None when the rule sets none."""
     if not value:
         return None
     found = HEX.findall(value)

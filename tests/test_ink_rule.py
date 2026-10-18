@@ -16,12 +16,12 @@ import tokenize
 from pathlib import Path
 
 from ui import colors
-# RNV-COLOUR-SYNC, #53 A (2026-10-17): the colour values this file needs that
-# are not the application's colours are named once, in tests/colour_values.py.
-from tests.colour_values import (
+# RNV-COLOR-SYNC, #53 A (2026-10-17): the color values this file needs that
+# are not the application's colors are named once, in tests/color_values.py.
+from tests.color_values import (
     EXAMPLE_GROUND_BLACK, EXAMPLE_GROUND_BLUE, EXAMPLE_GROUND_DARK_GOLD,
     EXAMPLE_GROUND_GOLD, EXAMPLE_GROUND_GREEN, EXAMPLE_GROUND_GREEN_SHORT,
-    EXAMPLE_GROUND_GREY_10, EXAMPLE_GROUND_GREY_77, EXAMPLE_GROUND_GREY_80,
+    EXAMPLE_GROUND_GRAY_10, EXAMPLE_GROUND_GRAY_77, EXAMPLE_GROUND_GRAY_80,
     EXAMPLE_GROUND_OLIVE, EXAMPLE_GROUND_TEAL, EXAMPLE_GROUND_WHITE,
     EXAMPLE_GROUND_YELLOW,
 )
@@ -35,9 +35,9 @@ def _code_only(text: str) -> str:
     """The file with every comment and string literal removed.
 
     A guard that sweeps for the thing it forbids must be able to tell a use
-    from a mention. Every earlier attempt at that in this programme did it by
+    from a mention. Every earlier attempt at that in this program did it by
     excluding files, which stops working the moment a third file has a
-    legitimate reason to say the word. Tokenising needs no list."""
+    legitimate reason to say the word. Tokenizing needs no list."""
     out = []
     try:
         for tok in tokenize.generate_tokens(io.StringIO(text).readline):
@@ -63,10 +63,10 @@ def test_the_rule_is_a_real_contrast_measurement():
     assert colors.contrast_ink(EXAMPLE_GROUND_WHITE) == colors.TRUE_BLACK
     assert colors.contrast_ink(EXAMPLE_GROUND_BLACK) == colors.WHITE
     assert round(colors.contrast_ratio(EXAMPLE_GROUND_WHITE, EXAMPLE_GROUND_BLACK), 2) == 21.0
-    assert round(colors.contrast_ratio(EXAMPLE_GROUND_GREY_77, EXAMPLE_GROUND_GREY_77), 2) == 1.0
+    assert round(colors.contrast_ratio(EXAMPLE_GROUND_GRAY_77, EXAMPLE_GROUND_GRAY_77), 2) == 1.0
 
 
-def test_the_rule_gets_saturated_colour_right():
+def test_the_rule_gets_saturated_color_right():
     """The case (r+g+b)/3 got wrong. Pure green is a LIGHT ground -- 71% of
     the luminance of white -- and the mean called it dark because it only
     counted how many channels were lit."""
@@ -80,7 +80,7 @@ def test_the_two_call_sites_now_agree():
     a saturated ground they disagreed about which way the ground faced. They
     cannot any more: both ask the same function."""
     for ground in (EXAMPLE_GROUND_GREEN, EXAMPLE_GROUND_YELLOW, EXAMPLE_GROUND_TEAL,
-                   EXAMPLE_GROUND_GREY_80, EXAMPLE_GROUND_GREY_10):
+                   EXAMPLE_GROUND_GRAY_80, EXAMPLE_GROUND_GRAY_10):
         dark_ink = colors.contrast_ink(ground) == colors.TRUE_BLACK
         dark_edge = colors.swatch_edge(ground) == colors.APP_BORDER
         assert dark_ink == dark_edge, (
@@ -94,11 +94,11 @@ def test_it_takes_a_hex_string_or_an_rgb_triple():
 
 def test_the_edge_rule_shares_the_ink_rule():
     assert colors.swatch_edge(EXAMPLE_GROUND_WHITE) == colors.APP_BORDER
-    assert colors.swatch_edge(EXAMPLE_GROUND_BLACK) == colors.GREY_CC
+    assert colors.swatch_edge(EXAMPLE_GROUND_BLACK) == colors.GRAY_CC
     for ground in (EXAMPLE_GROUND_WHITE, EXAMPLE_GROUND_BLACK, EXAMPLE_GROUND_DARK_GOLD,
-                   EXAMPLE_GROUND_GREEN, EXAMPLE_GROUND_GREY_77):
+                   EXAMPLE_GROUND_GREEN, EXAMPLE_GROUND_GRAY_77):
         edge = colors.swatch_edge(ground)
-        other = colors.GREY_CC if edge == colors.APP_BORDER else colors.APP_BORDER
+        other = colors.GRAY_CC if edge == colors.APP_BORDER else colors.APP_BORDER
         assert colors.contrast_ratio(ground, edge) >= \
             colors.contrast_ratio(ground, other)
 
@@ -136,7 +136,7 @@ def test_the_retired_names_are_gone():
 
 
 def test_no_three_digit_hex_in_the_palette():
-    """One of the retired constants spelled GREY_CC in three digits. The census
+    """One of the retired constants spelled GRAY_CC in three digits. The census
     reads six-digit hexes, so a three-digit one is a value the chart cannot
     see."""
     src = (ROOT / "ui" / "colors.py").read_text(encoding="utf-8-sig")
@@ -148,7 +148,7 @@ def test_the_rule_matches_the_pickers():
     """Two applications, one block. If they drift, the fleet has two rules
     again and the drift will be invisible until a swatch looks wrong in one
     app and right in the other."""
-    for ground in (EXAMPLE_GROUND_WHITE, EXAMPLE_GROUND_BLACK, EXAMPLE_GROUND_GREY_80,
+    for ground in (EXAMPLE_GROUND_WHITE, EXAMPLE_GROUND_BLACK, EXAMPLE_GROUND_GRAY_80,
                    EXAMPLE_GROUND_GREEN, EXAMPLE_GROUND_GOLD, EXAMPLE_GROUND_DARK_GOLD,
                    EXAMPLE_GROUND_TEAL, EXAMPLE_GROUND_OLIVE, EXAMPLE_GROUND_BLUE):
         want_black = colors.relative_luminance(ground) > 0.1791287

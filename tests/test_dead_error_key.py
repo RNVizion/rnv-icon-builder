@@ -2,7 +2,7 @@
 
 It held RETIRED_ERROR_RED in every palette and nothing drew it. An unread wrong value
 is still a wrong value waiting for a reader -- and a palette key that exists
-is an invitation to use it, which is how a colour nobody ruled ends up on
+is an invitation to use it, which is how a color nobody ruled ends up on
 screen.
 
 This app renders no error text at all, so there is nothing to replace it
@@ -13,9 +13,9 @@ lighten(RETIRED_ERROR_RED, -20) for light grounds -- rather than reviving this.
 import pytest
 
 from ui import colors
-# RNV-COLOUR-SYNC, #53 A (2026-10-17): the colour values this file needs that
-# are not the application's colours are named once, in tests/colour_values.py.
-from tests.colour_values import RETIRED_ERROR_RED
+# RNV-COLOR-SYNC, #53 A (2026-10-17): the color values this file needs that
+# are not the application's colors are named once, in tests/color_values.py.
+from tests.color_values import RETIRED_ERROR_RED
 
 PALETTES = ("DARK_THEME_COLORS", "LIGHT_THEME_COLORS", "IMAGE_MODE_COLORS")
 
@@ -57,7 +57,7 @@ def test_that_check_is_actually_looking():
 def test_no_palette_still_carries_the_value_under_another_name():
     """Deleting the key is not the same as removing the value. If RETIRED_ERROR_RED
     reappears on some other key it is back on screen under a new name, which
-    is exactly how a retired colour survives a rename sweep."""
+    is exactly how a retired color survives a rename sweep."""
     retired = RETIRED_ERROR_RED
     for name in PALETTES:
         offenders = [k for k, v in getattr(colors, name).items()

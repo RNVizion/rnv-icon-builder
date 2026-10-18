@@ -1,38 +1,38 @@
-"""Every colour value the tests need that is not the application's colour.
+"""Every color value the tests need that is not the application's color.
 
-RNV-COLOUR-SYNC, #53 A (2026-10-17). The application's own colours and the
+RNV-COLOR-SYNC, #53 A (2026-10-17). The application's own colors and the
 brand's are named in ui/colors.py, which brand_map.json names, and a test
-reads them from there. Every other colour value a test or the root suite
+reads them from there. Every other color value a test or the root suite
 writes is named here, once, with why: samples given to a helper or to the
-colour maths (EXAMPLE_), what a file, a parser or a sweep's probe holds
+color math (EXAMPLE_), what a file, a parser or a sweep's probe holds
 (DATA_), values the application no longer uses (RETIRED_), a value the brand
 publishes that this application does not draw (REGISTER_), and values written
-wrongly on purpose (INVALID_). tests/test_colour_values.py holds this file: no
-colour value is written anywhere else in tests/ or in test_rnv_icon_builder.py,
+wrongly on purpose (INVALID_). tests/test_color_values.py holds this file: no
+color value is written anywhere else in tests/ or in test_rnv_icon_builder.py,
 and every name here says what kind it is, says why, and is used.
 
-Tests import from here by name (`from tests.colour_values import ...`);
-tests/test_colours_in_sync.py loads it by path.
+Tests import from here by name (`from tests.color_values import ...`);
+tests/test_colors_in_sync.py loads it by path.
 
 RNV-COLLAPSE-GUARD
-This file quotes the retired card stray, RETIRED_DARK_STRAY_GREY, in order to
+This file quotes the retired card stray, RETIRED_DARK_STRAY_GRAY, in order to
 forbid it, so the source sweep in tests/test_collapse_252525.py skips it.
 
 RNV-GOLD-GUARD-FILE-NAMES-RETIRED-VALUES-BY-DESIGN
 This file names retired values on purpose, the retired app gold among them,
-so a tool that rewrites colour values must leave it alone.
+so a tool that rewrites color values must leave it alone.
 """
 
 # ------------------------------------------------------------------ examples
 
 EXAMPLE_GROUND_WHITE = "#ffffff"
 """A light ground given to contrast_ink(), swatch_edge() and the contrast
-maths: one end of the 21:1 range. A sample, not WHITE: it must not follow a
+math: one end of the 21:1 range. A sample, not WHITE: it must not follow a
 brand move."""
 
 EXAMPLE_GROUND_BLACK = "#000000"
 """A dark ground given to contrast_ink(), swatch_edge() and the contrast
-maths: the other end of the 21:1 range. A sample, not TRUE_BLACK."""
+math: the other end of the 21:1 range. A sample, not TRUE_BLACK."""
 
 EXAMPLE_GROUND_GREEN = "#00ff00"
 """Pure green, the saturated ground the old (r + g + b) / 3 rule got wrong:
@@ -48,29 +48,29 @@ EXAMPLE_GROUND_YELLOW = "#ffff00"
 
 EXAMPLE_GROUND_TEAL = "#20b0b0"
 """A mid-luminance saturated ground, for the ink/edge agreement check and the
-sample shared with the colour picker's identical block."""
+sample shared with the color picker's identical block."""
 
 EXAMPLE_GROUND_OLIVE = "#9a9a30"
 """A ground near the ink rule's crossover, in the sample shared with the
-colour picker's identical block."""
+color picker's identical block."""
 
 EXAMPLE_GROUND_BLUE = "#3060d0"
-"""A saturated dark ground, in the sample shared with the colour picker's
+"""A saturated dark ground, in the sample shared with the color picker's
 identical block."""
 
-EXAMPLE_GROUND_GREY_77 = "#777777"
-"""A mid grey: measured against itself for the 1:1 end of contrast_ratio(),
+EXAMPLE_GROUND_GRAY_77 = "#777777"
+"""A mid gray: measured against itself for the 1:1 end of contrast_ratio(),
 and a swatch the edge rule is tried on."""
 
-EXAMPLE_GROUND_GREY_80 = "#808080"
-"""A mid grey ground for the ink/edge agreement check and the shared sample.
+EXAMPLE_GROUND_GRAY_80 = "#808080"
+"""A mid gray ground for the ink/edge agreement check and the shared sample.
 It is DEFAULT_CUSTOM_BG_COLOR's value today, but a sample here."""
 
-EXAMPLE_GROUND_GREY_10 = "#101010"
+EXAMPLE_GROUND_GRAY_10 = "#101010"
 """A near-black ground for the ink/edge agreement check."""
 
 EXAMPLE_GROUND_GOLD = "#d2bc93"
-"""A swatch the ink rule is tried on, in the sample shared with the colour
+"""A swatch the ink rule is tried on, in the sample shared with the color
 picker. It is BRAND_GOLD's value today, but a sample: it must not follow the
 brand."""
 
@@ -129,8 +129,8 @@ EXAMPLE_TRANSLUCENT_UPPER_RESULT = "#33d2bc93"
 in lower case."""
 
 EXAMPLE_HAND_EDIT = "#123456"
-"""A value planted on one of the colour file's lines, as a hand edit the sync
-must put back (tests/test_colours_in_sync.py). Any colour the map does not
+"""A value planted on one of the color file's lines, as a hand edit the sync
+must put back (tests/test_colors_in_sync.py). Any color the map does not
 hold will do."""
 
 EXAMPLE_HAND_EDIT_FALLBACK = "#654321"
@@ -138,7 +138,7 @@ EXAMPLE_HAND_EDIT_FALLBACK = "#654321"
 
 EXAMPLE_MOVED_ACCENT = "#6f94bc"
 """Where a pretend brand move puts APP.accent, so the test can see that one
-line, and only that one, takes it (tests/test_colours_in_sync.py)."""
+line, and only that one, takes it (tests/test_colors_in_sync.py)."""
 
 EXAMPLE_MOVED_ACCENT_FALLBACK = "#456c91"
 """The pretend move to use when the brand's accent already is
@@ -152,15 +152,15 @@ and the find it must report. The probe text is built from this name."""
 
 DATA_PROBE_RGBA = "rgba(255, 255, 255, 230)"
 """The rgba() in the same probe, and the find the sweep must report, spaced
-as the sweep normalises it."""
+as the sweep normalizes it."""
 
 DATA_PROBE_CLEAR_RGBA = "rgba(0, 0, 0, 0)"
 """Clear, at alpha 0, in the probe source tests/test_named_and_used.py hands
 its sweep as what it must NOT report: clear is how a widget is told to paint
-nothing, not a colour."""
+nothing, not a color."""
 
 DATA_CUSTOM_BG_CHOICE = "#0ac81e"
-"""The custom preview background a person picks in the colour dialog,
+"""The custom preview background a person picks in the color dialog,
 QColor(10, 200, 30), as the background selector's button writes it into its
 stylesheet, compared in lower case (tests/test_preview_utils.py)."""
 
@@ -180,7 +180,7 @@ DATA_PARSED_BLACK = "#000000"
 """What the ink reader makes of DATA_SHEET_INK_BLACK_SHORT. A parse result,
 not TRUE_BLACK."""
 
-DATA_OS_SIM_CHROME_GREY = "#333333"
+DATA_OS_SIM_CHROME_GRAY = "#333333"
 """What OS_SIM_COLORS paints the Windows taskbar edge, the Finder text,
 Chrome's tab title and its bookmarks text with: another system's chrome, and
 the value APP_BORDER held when these entries were unbound from it. Not
@@ -200,11 +200,11 @@ ui/colors.py by exact text."""
 
 # ------------------------------------------------------------------- retired
 
-RETIRED_DARK_STRAY_GREY = "#252525"
+RETIRED_DARK_STRAY_GRAY = "#252525"
 """The dark platform button, scrollbar and alternate list row until
 2026-09-02, when it was ruled onto APP_CARD: a third of the way from panel to
 card, on neither the surface ladder nor the ink grid, and not a visible step
-from its neighbours."""
+from its neighbors."""
 
 RETIRED_LIGHT_PLATFORM_BG = "#fafafa"
 """The light platform button until 2026-09-06, collapsed onto
@@ -216,9 +216,9 @@ APP_SURFACE_LIGHT_2. Lower case, for the same sweep."""
 
 RETIRED_LIGHT_HOVER_AND_HEADER = "#f0f0f0"
 """The light platform-button hover and list header until 2026-09-06,
-collapsed onto one grey in two roles: APP_HOVER_LIGHT for the hover, GREY_EE
+collapsed onto one gray in two roles: APP_HOVER_LIGHT for the hover, GRAY_EE
 for the header. The simulated Windows light taskbar still has this hex, as
-DATA_OS_SIM_TASKBAR_LIGHT: another system's colour, not this application's."""
+DATA_OS_SIM_TASKBAR_LIGHT: another system's color, not this application's."""
 
 RETIRED_APP_GOLD = "#b19145"
 """An app-local approximation of the brand dark gold, retired: it carried
@@ -258,9 +258,9 @@ RETIRED_ERROR_TEXT_LIGHT_REV30 = "#b84e58"
 """STATUS["error-text-light"] at register rev 30, walked against
 APP_SURFACE_LIGHT_3 and re-walked at rev 31."""
 
-RETIRED_HANDLE_GREY = "#505050"
-"""Ruled onto GREY_44 on 2026-09-02 (RNV-COLLAPSE-505050), and still the
-colour half of image mode's scrollbar handle until 2026-09-24, because the
+RETIRED_HANDLE_GRAY = "#505050"
+"""Ruled onto GRAY_44 on 2026-09-02 (RNV-COLLAPSE-505050), and still the
+color half of image mode's scrollbar handle until 2026-09-24, because the
 alpha form was written out as rgba() and every sweep compared six-digit hex.
 A test looks for it, without its '#', inside the eight-digit value."""
 
@@ -296,7 +296,7 @@ INVALID_EIGHT_DIGIT_BASE = "#1a1a1a1a"
 refused."""
 
 INVALID_FIVE_DIGIT_BASE = "#1a1a1"
-"""Five digits, one short of a colour, so translucent() must refuse it."""
+"""Five digits, one short of a color, so translucent() must refuse it."""
 
 INVALID_EIGHT_DIGIT_UPPER = "#ED1A1A1A"
 """EXAMPLE_TRANSLUCENT_RESULT in upper case: the spelling of an eight-digit
@@ -310,5 +310,5 @@ REGISTER_REFS = {
     "REGISTER_STATUS_SUCCESS": "STATUS.success",
     "REGISTER_STATUS_WARNING_TEXT_LIGHT": "STATUS.warning-text-light",
 }
-"""The brand's name for each REGISTER_ value; tests/test_colour_values.py
+"""The brand's name for each REGISTER_ value; tests/test_color_values.py
 holds each against the register at the pin."""

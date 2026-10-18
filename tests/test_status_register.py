@@ -3,7 +3,7 @@
 Ruled by Chris on 2026-09-02, reading the STATUS family across the fleet, and
 again on 2026-09-03 when the register replaced the family outright.
 
-A status colour is not decoration. It carries MEANING -- success, warning,
+A status color is not decoration. It carries MEANING -- success, warning,
 error -- and the meaning is the same in every RNV product, which is why the
 register owns the value and an application must not have a second opinion.
 This guard is the thing that stops the second opinion coming back.
@@ -12,7 +12,7 @@ REWRITTEN, NOT PATCHED, on 2026-09-03. Three of the assertions here pinned
 RETIRED_BOOTSTRAP_GREEN and RETIRED_BOOTSTRAP_AMBER by hex and explained at
 length why those were THE green and THE amber. Changing the hex inside a
 docstring that argues for it would have left the argument standing for a
-value that lost it; tests/colour_values.py says why each lost. What replaced
+value that lost it; tests/color_values.py says why each lost. What replaced
 them, and why, is below.
 """
 from __future__ import annotations
@@ -24,17 +24,17 @@ import tokenize
 from pathlib import Path
 
 from ui import colors
-# RNV-COLOUR-SYNC, #53 A (2026-10-17): the colour values this file needs that
-# are not the application's colours are named once, in tests/colour_values.py.
-from tests.colour_values import (REGISTER_GOLD_TEXT_GROUND_FLOOR, RETIRED_BOOTSTRAP_AMBER,
+# RNV-COLOR-SYNC, #53 A (2026-10-17): the color values this file needs that
+# are not the application's colors are named once, in tests/color_values.py.
+from tests.color_values import (REGISTER_GOLD_TEXT_GROUND_FLOOR, RETIRED_BOOTSTRAP_AMBER,
                                  RETIRED_BOOTSTRAP_GREEN, RETIRED_MATERIAL_GREEN)
 
 ROOT = Path(__file__).resolve().parent.parent
 
-#: RNV-COLOUR-SYNC, 2026-10-16. Where each colour comes from, as brand_map.json
-#: says. The values are held by tests/test_colours_in_sync.py, against the
+#: RNV-COLOR-SYNC, 2026-10-16. Where each color comes from, as brand_map.json
+#: says. The values are held by tests/test_colors_in_sync.py, against the
 #: register at the pin; what this file holds is the name each one takes.
-BRAND_MAP = json.loads((ROOT / "brand_map.json").read_text(encoding="utf-8"))["colours"]
+BRAND_MAP = json.loads((ROOT / "brand_map.json").read_text(encoding="utf-8"))["colors"]
 
 
 def _code_only(text: str) -> str:
@@ -46,8 +46,8 @@ def _code_only(text: str) -> str:
     about what changed, which is the opposite of what the provenance is for.
 
     Why it is fussier than it looks: an earlier version dropped every STRING
-    token. In Python a colour value IS a string literal -- the way
-    tests/colour_values.py writes REGISTER_STATUS_SUCCESS --
+    token. In Python a color value IS a string literal -- the way
+    tests/color_values.py writes REGISTER_STATUS_SUCCESS --
     so that version removed the uses along with the mentions and the sweep
     could never find anything. It passed on every input, including a file that
     had just put a retired value back. This file's own guard-the-guard is what
@@ -109,15 +109,15 @@ TEXT_FLOOR = 4.5
 FILL_FLOOR = 3.0
 
 # #57 A, 2026-10-17: the retired status values, by name. What each was, and
-# when and why it went, is said once, beside it, in tests/colour_values.py.
+# when and why it went, is said once, beside it, in tests/color_values.py.
 STRAYS = (RETIRED_MATERIAL_GREEN, RETIRED_BOOTSTRAP_GREEN, RETIRED_BOOTSTRAP_AMBER)
 
 # RNV-NAMED-AND-USED, 2026-10-04: the two this application draws. It draws
-# one status colour, the folder watcher's label, as text in dark and in
+# one status color, the folder watcher's label, as text in dark and in
 # light. The family's two fills and the warning's two text values were held
 # here too; nothing in the application read them, and they went. The
 # register holds the family.
-# RNV-COLOUR-SYNC, 2026-10-16: each by the register name brand_map.json
+# RNV-COLOR-SYNC, 2026-10-16: each by the register name brand_map.json
 # writes it from, where it was its hex code.
 REGISTERED = {
     "STATUS_SUCCESS_TEXT": "STATUS.success-text",
@@ -134,12 +134,12 @@ def test_no_retired_status_value_is_in_any_palette():
 
 def test_the_status_values_are_the_register_s():
     """Not "some purple" -- THE one. An application that picks its own status
-    colour has an opinion about what success means, which is the register's
+    color has an opinion about what success means, which is the register's
     job. Pinned by value: a test asserting only that these differ from each
-    other would pass on two wrong colours.
+    other would pass on two wrong colors.
 
-    RNV-COLOUR-SYNC, 2026-10-16: pinned by the register name brand_map.json
-    writes each from; tests/test_colours_in_sync.py holds the value."""
+    RNV-COLOR-SYNC, 2026-10-16: pinned by the register name brand_map.json
+    writes each from; tests/test_colors_in_sync.py holds the value."""
     for name, value in REGISTERED.items():
         assert BRAND_MAP[name] == value, name
 
@@ -175,8 +175,8 @@ def test_the_text_variants_carry_text_on_their_own_ground():
         # Restored at rev 31: the re-walked pair reaches all four rungs.
         # APP_PRESSED_LIGHT is deliberately absent -- BRAND_DARK_GOLD_DEEP fails
         # there too, so it is the boundary for every brand text family.
-        # RNV-COLOUR-SYNC, 2026-10-16: the grounds by name, and the register's
-        # floor, REGISTER_GOLD_TEXT_GROUND_FLOOR, from tests/colour_values.py.
+        # RNV-COLOR-SYNC, 2026-10-16: the grounds by name, and the register's
+        # floor, REGISTER_GOLD_TEXT_GROUND_FLOOR, from tests/color_values.py.
         for ground in (colors.WHITE, colors.APP_SURFACE_LIGHT_3,
                        colors.APP_HOVER_LIGHT, REGISTER_GOLD_TEXT_GROUND_FLOOR):
             ratio = _contrast(getattr(colors, name), ground)
@@ -228,7 +228,7 @@ def test_the_watch_label_reads_the_theme_rather_than_a_constant():
 def test_status_active_is_legal_in_every_mode_it_is_painted_in():
     """The end-to-end assertion. A per-mode key that resolves to an illegal
     value in one mode has moved the bug rather than fixed it."""
-    # RNV-COLOUR-SYNC, 2026-10-16: the dialog's ground in each mode, by name.
+    # RNV-COLOR-SYNC, 2026-10-16: the dialog's ground in each mode, by name.
     grounds = {"dark": colors.BRAND_BLACK, "light": colors.APP_SURFACE_LIGHT_3,
                "image": colors.BRAND_BLACK}
     for mode, ground in grounds.items():
@@ -247,7 +247,7 @@ def test_the_family_matches_the_rest_of_the_fleet():
     applications hold, so this fails if either side drifts rather than only
     if this one does.
 
-    RNV-COLOUR-SYNC, 2026-10-16: exact in tests/test_colours_in_sync.py, against
+    RNV-COLOR-SYNC, 2026-10-16: exact in tests/test_colors_in_sync.py, against
     the register at the pin; here, by the names brand_map.json takes them from,
     which the other applications take them from too."""
     assert BRAND_MAP["STATUS_SUCCESS_TEXT"] == "STATUS.success-text"
@@ -256,7 +256,7 @@ def test_the_family_matches_the_rest_of_the_fleet():
 
 SWEPT = ("ui/colors.py", "ui/settings_dialog.py")
 # the success text: a value ui/colors.py holds. It was the success fill's
-# until RNV-NAMED-AND-USED, 2026-10-04, when the fill went. RNV-COLOUR-SYNC,
+# until RNV-NAMED-AND-USED, 2026-10-04, when the fill went. RNV-COLOR-SYNC,
 # 2026-10-16: read from the constant, where it was written out; the sync
 # writes it into ui/colors.py as a literal, which is what the sweep must see.
 LIVE_VALUE = colors.STATUS_SUCCESS_TEXT
@@ -273,7 +273,7 @@ def test_this_guard_can_still_see():
     """
     src = (ROOT / SWEPT[0]).read_text(encoding="utf-8-sig")
     code = _code_only(src)
-    assert len(code) > 2000, "the tokeniser returned almost nothing"
+    assert len(code) > 2000, "the tokenizer returned almost nothing"
     assert LIVE_VALUE in code, (
         f"the code-only sweep cannot see {LIVE_VALUE}, which is definitely a "
         f"value in {SWEPT[0]}. Any sweep built on it would be vacuous.")

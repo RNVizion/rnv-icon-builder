@@ -36,7 +36,7 @@ TEXT_FLOOR = 4.5
 
 
 def _ink(label) -> str:
-    """The colour the label's text is drawn in, as its sheet resolves."""
+    """The color the label's text is drawn in, as its sheet resolves."""
     label.ensurePolished()
     return label.palette().color(QPalette.ColorRole.WindowText).name()
 

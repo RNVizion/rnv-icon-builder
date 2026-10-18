@@ -823,7 +823,7 @@ class SettingsDialog(BaseDialog):
         r, g, b = color[:3]
         # Use contrasting border for visibility
         # RNV-INK-RULE: was (r + g + b) / 3 > 128, which is not a contrast
-        # measurement and disagreed with preview_utils.py on saturated colour.
+        # measurement and disagreed with preview_utils.py on saturated color.
         border_color = swatch_edge((r, g, b))
         button.setStyleSheet(f"""
             QPushButton {{

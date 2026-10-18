@@ -7,11 +7,11 @@ fields are BRAND_BLACK, which is what three of the five already used.
 WHAT THE ALIGNMENT ACTUALLY DID TO THE EDGES, measured from the adjacency map
 rather than assumed:
 
-  LIGHT   panel and card were the same colour here, so a card had no edge
+  LIGHT   panel and card were the same color here, so a card had no edge
           against the panel it sat on. Moving the panel to APP_SURFACE_LIGHT_3
           CREATES that edge.
 
-  DARK    the input field was the same colour as the card, so a field sitting
+  DARK    the input field was the same color as the card, so a field sitting
           on a card had no edge either. Moving it to BRAND_BLACK creates one --
           and makes it equal to the panel, which is how the three apps that
           already used BRAND_BLACK have always drawn it: the input border is what
@@ -55,7 +55,7 @@ def test_both_flat_palettes_carry_the_surface_keys():
 
 
 def test_the_light_panel_is_the_agreed_surface():
-    # RNV-COLOUR-SYNC, 2026-10-16: the agreed surface by name, where it was its
+    # RNV-COLOR-SYNC, 2026-10-16: the agreed surface by name, where it was its
     # hex code: the register's surface-light-3, which all five apps use.
     assert LIGHT["panel_bg"] == APP_SURFACE_LIGHT_3, (
         f"light panel is {LIGHT['panel_bg']}, not the {APP_SURFACE_LIGHT_3} all five apps use")
@@ -68,21 +68,21 @@ def test_the_dark_input_is_the_agreed_surface():
 
 def test_a_card_still_has_an_edge_against_its_panel():
     """This edge did not exist before the alignment in either app -- panel and
-    card were the same colour. It exists now and must not be merged away."""
+    card were the same color. It exists now and must not be merged away."""
     for name, theme in FLAT.items():
         assert theme["card_bg"] != theme["panel_bg"], (
-            f"{name}: card {theme['card_bg']} is the panel colour again, so a "
+            f"{name}: card {theme['card_bg']} is the panel color again, so a "
             f"card sitting on the panel has no edge")
 
 
 def test_the_input_is_separated_from_the_surface_it_sits_on():
-    """Dark deliberately draws the field in the panel colour and relies on the
+    """Dark deliberately draws the field in the panel color and relies on the
     border. That only works while the border differs from both."""
     for name, theme in FLAT.items():
         border = (theme.get("input_border") or theme.get("border_default")
                   or theme["border_color"])
         assert border != theme["input_bg"], (
-            f"{name}: the input border is the same colour as its fill")
+            f"{name}: the input border is the same color as its fill")
         if theme["input_bg"] == theme["panel_bg"]:
             assert border != theme["panel_bg"], (
                 f"{name}: the input fill matches the panel AND the border "

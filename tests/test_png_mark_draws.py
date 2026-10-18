@@ -3,26 +3,26 @@
 RNV-RULINGS-2026-10-05, item 1. Ruled 2026-10-05: "Yes".
 
 WHAT WAS THERE. The analyzer set Qt's dark green on a PNG row's Compression
-cell, and it was never drawn. The dialog's sheet coloured every cell
+cell, and it was never drawn. The dialog's sheet colored every cell
 (`QTableWidget::item { color: ... }`), and a sheet wins over a cell's own
-colour, so PNG was drawn like BMP in every mode. Shown on 2026-10-04 with a
+color, so PNG was drawn like BMP in every mode. Shown on 2026-10-04 with a
 magenta control: the cell set to magenta moved no pixel.
 
-WHAT IS THERE NOW. The item rule sets no colour, so a cell's own colour is
-drawn; a cell that has none takes the table's, which is the colour the rule
+WHAT IS THERE NOW. The item rule sets no color, so a cell's own color is
+drawn; a cell that has none takes the table's, which is the color the rule
 gave it. And the mark is the palette's `status_active`, which holds each
 mode's success text.
 
 WHAT THIS GUARD HOLDS.
 
-1. A PNG cell holds the mode's success text. A BMP cell holds no colour of
+1. A PNG cell holds the mode's success text. A BMP cell holds no color of
    its own.
 2. The mark is DRAWN. Read back from the table's own pixels, as a
    comparison: how far a PNG cell's text stands from its ground, against how
    far a BMP cell's does. Text is drawn with soft edges, more or less so
    from one machine to the next, and the comparison does not care how soft.
    This is the test the old line would have failed.
-3. The sheet's item rule sets no colour. That is why the mark draws, and it
+3. The sheet's item rule sets no color. That is why the mark draws, and it
    is the line a tidy-up would put back.
 4. The mark follows the mode: a theme applied again marks again.
 5. The mark can be read where it sits: 4.5:1 or better on both of the
@@ -52,8 +52,8 @@ PNG_ROWS, BMP_ROWS, COMPRESSION = (0, 2), (1,), 1
 MODES = (("dark", True), ("light", False), ("image", True))
 
 
-def _lum(colour: str) -> float:
-    c = QColor(colour)
+def _lum(color: str) -> float:
+    c = QColor(color)
     def lin(v):
         v /= 255
         return v / 12.92 if v <= 0.04045 else ((v + 0.055) / 1.055) ** 2.4
@@ -117,13 +117,13 @@ def test_a_png_cell_holds_the_modes_success_text(analyzer, mode, is_dark):
             f"{mode}: row {row}'s PNG cell does not hold status_active"
     for row in BMP_ROWS:
         assert table.item(row, COMPRESSION).data(Qt.ItemDataRole.ForegroundRole) is None, \
-            f"{mode}: a BMP cell was given a colour of its own"
+            f"{mode}: a BMP cell was given a color of its own"
 
 
 @pytest.mark.ui
 @pytest.mark.parametrize("mode,is_dark", MODES)
 def test_the_mark_is_drawn(analyzer, mode, is_dark):
-    """Read back from the pixels. Setting a colour on a cell is not drawing it."""
+    """Read back from the pixels. Setting a color on a cell is not drawing it."""
     dialog = analyzer(mode)
     table = dialog.images_table
     palette = get_theme_colors(is_dark=is_dark)
@@ -138,7 +138,7 @@ def test_the_mark_is_drawn(analyzer, mode, is_dark):
         assert abs(got - want) < 0.12, (
             f"{mode}: row {row}'s PNG stands {got:.2f} as far from its ground as BMP does from its own. In "
             f"the success text it stands {want:.2f} as far; at {as_plain_text:.2f} it is drawn in the "
-            f"table's text, which is what a sheet that colours every cell does")
+            f"table's text, which is what a sheet that colors every cell does")
         beside_ground, beside = _reach(table, row, 0)
         assert abs(beside / bmp - _far(text, beside_ground) / _far(text, bmp_ground)) < 0.12, \
             f"{mode}: the cell beside the mark in row {row} is not drawn in the table's text"
@@ -146,18 +146,18 @@ def test_the_mark_is_drawn(analyzer, mode, is_dark):
 
 @pytest.mark.ui
 @pytest.mark.parametrize("mode,is_dark", MODES)
-def test_the_sheets_item_rule_sets_no_colour(analyzer, mode, is_dark):
+def test_the_sheets_item_rule_sets_no_color(analyzer, mode, is_dark):
     sheet = analyzer(mode).styleSheet()
     rules = re.findall(r"QTableWidget::item \{([^}]*)\}", sheet)
     assert len(rules) == 1, f"{mode}: {len(rules)} plain item rules in the analyzer's sheet"
     properties = [line.split(":")[0].strip() for line in rules[0].split(";") if ":" in line]
     assert "color" not in properties, (
-        f"{mode}: the item rule sets a colour again ({properties}). A sheet wins over a cell's "
-        f"own colour, so the PNG mark would stop drawing.")
+        f"{mode}: the item rule sets a color again ({properties}). A sheet wins over a cell's "
+        f"own color, so the PNG mark would stop drawing.")
     table_rule = re.search(r"QTableWidget \{([^}]*)\}", sheet)
     assert table_rule and re.search(r"(?<![a-z-])color:\s*" + re.escape(get_theme_colors(is_dark=is_dark)["text_primary"]),
                                     table_rule.group(1)), \
-        f"{mode}: the table no longer gives its cells the text colour the item rule gave them"
+        f"{mode}: the table no longer gives its cells the text color the item rule gave them"
 
 
 @pytest.mark.ui
@@ -170,7 +170,7 @@ def test_the_mark_follows_the_mode(analyzer):
     QApplication.processEvents()
     for row in PNG_ROWS:
         assert table.item(row, COMPRESSION).foreground().color().name() == QColor(light["status_active"]).name(), \
-            "a theme applied again left the mark in the old mode's colour"
+            "a theme applied again left the mark in the old mode's color"
     bmp_ground, bmp = _reach(table, BMP_ROWS[0], COMPRESSION)
     ground, png = _reach(table, PNG_ROWS[0], COMPRESSION)
     want = _far(QColor(light["status_active"]), ground) / _far(QColor(light["text_primary"]), bmp_ground)

@@ -1,6 +1,6 @@
-"""RETIRED_DARK_STRAY_GREY no longer exists in this application. RNV-COLLAPSE-GUARD
+"""RETIRED_DARK_STRAY_GRAY no longer exists in this application. RNV-COLLAPSE-GUARD
 
-Ruled 2026-09-02: RETIRED_DARK_STRAY_GREY collapses onto APP_CARD. This guard
+Ruled 2026-09-02: RETIRED_DARK_STRAY_GRAY collapses onto APP_CARD. This guard
 pins the ruling in both directions: the keys hold the new value, and they
 hold it THROUGH the constant.
 """
@@ -9,13 +9,13 @@ from __future__ import annotations
 import re
 from pathlib import Path
 
-from tests.colour_values import RETIRED_DARK_STRAY_GREY
+from tests.color_values import RETIRED_DARK_STRAY_GRAY
 
 ROOT = Path(__file__).resolve().parent.parent
-#: RNV-COLOUR-SYNC, #53 A (2026-10-17): named once, in tests/colour_values.py,
+#: RNV-COLOR-SYNC, #53 A (2026-10-17): named once, in tests/color_values.py,
 #: which carries this guard's marker because it quotes the value to forbid it.
-OLD_HEX = RETIRED_DARK_STRAY_GREY
-#: RNV-COLOUR-SYNC, 2026-10-16: the value the keys were ruled onto is read
+OLD_HEX = RETIRED_DARK_STRAY_GRAY
+#: RNV-COLOR-SYNC, 2026-10-16: the value the keys were ruled onto is read
 #: from CONST, where it was written here as NEW_HEX, its hex code, so a brand
 #: move needs no edit here.
 CONST = "APP_CARD"
@@ -61,7 +61,7 @@ def test_the_keys_are_wired_through_the_constant_not_rewritten():
 
 def test_the_old_value_is_not_written_anywhere_in_source():
     """A sweep for the literal AS A STRING -- quoted. The palette file records
-    that each ruled key was RETIRED_DARK_STRAY_GREY, in a comment beside it, and
+    that each ruled key was RETIRED_DARK_STRAY_GRAY, in a comment beside it, and
     that mention is the provenance, not a use. The first version of this test matched the bare
     text and failed on its own script's comment: use versus mention, again.
     Excludes this guard and the delivery script, which quote the value in

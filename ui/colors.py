@@ -2,12 +2,12 @@
 RNV Icon Builder - Color Definitions
 Centralized color palette for consistent branding.
 """
-# RNV-COLOUR-SYNC (2026-10-16). Every colour value below whose line ends
+# RNV-COLOR-SYNC (2026-10-16). Every color value below whose line ends
 # "# brand: <name>" or "# app-owned" is written by tools/sync_colors.py from
 # brand_map.json: a brand name's value from rnv-brand at the commit pinned in
 # tests/requirements-dev.txt, an app-owned value from the map, with its reason.
 # To change one, change the map and run `python tools/sync_colors.py`. A value
-# edited here is put back by the next sync, and tests/test_colours_in_sync.py
+# edited here is put back by the next sync, and tests/test_colors_in_sync.py
 # fails until then. COLORS.md is the chart of them.
 
 from __future__ import annotations
@@ -16,11 +16,11 @@ from typing import Final
 # ==================== Brand Colors ====================
 # Registered values are sourced from RNVizion/rnv-brand (engine/brand.py).
 # Derived values are COMPUTED from their source below, never written down,
-# so a derivative cannot drift away from the colour it was derived from.
+# so a derivative cannot drift away from the color it was derived from.
 
 
 def _to_rgb(hex_color: str) -> tuple[int, int, int]:
-    """Split a 6-digit hex colour into an (r, g, b) tuple."""
+    """Split a 6-digit hex color into an (r, g, b) tuple."""
     h = hex_color.lstrip('#')
     return (int(h[0:2], 16), int(h[2:4], 16), int(h[4:6], 16))
 
@@ -29,7 +29,7 @@ def lighten(hex_color: str, step: int) -> str:
     """Shift every channel by the same number of 8-bit steps.
 
     A uniform per-channel shift preserves the hue exactly, which is what
-    keeps a derived gold recognisably the same gold. Negative darkens.
+    keeps a derived gold recognizably the same gold. Negative darkens.
     """
     r, g, b = _to_rgb(hex_color)
     return '#%02x%02x%02x' % tuple(
@@ -38,12 +38,12 @@ def lighten(hex_color: str, step: int) -> str:
 
 
 def translucent(hex_color: str, alpha: int) -> str:
-    """Compose a colour and an alpha into Qt's eight-digit #AARRGGBB.
+    """Compose a color and an alpha into Qt's eight-digit #AARRGGBB.
 
     WHY A FUNCTION RATHER THAN A WRITTEN-OUT VALUE. A value computed from
     another value must be computed in code; a written-down derivative is
     orphaned the moment its source moves, silently. RNV-COLLAPSE-505050 is
-    what that costs: #505050 was collapsed onto GREY_44 on 2026-09-02 and went
+    what that costs: #505050 was collapsed onto GRAY_44 on 2026-09-02 and went
     on painting in four applications, because the alpha forms were written out
     as rgba() and nothing followed them. Derived, the collapse would have
     carried in the same edit.
@@ -63,7 +63,7 @@ def translucent(hex_color: str, alpha: int) -> str:
         raise ValueError(f'alpha {alpha} is outside 0-255')
     h = hex_color.lstrip('#').lower()
     if len(h) != 6:
-        raise ValueError(f'{hex_color!r} is not a six-digit hex colour')
+        raise ValueError(f'{hex_color!r} is not a six-digit hex color')
     return '#%02x%s' % (alpha, h)
 
 
@@ -78,16 +78,16 @@ BRAND_DARK_GOLD: Final[str] = "#8c7337"  # brand: APP.accent-light-mode
 """Brand dark gold - light-mode FILLS, borders and pressed states.
 
 Registered brand value. Carries white text at 4.5429:1. It is a fill
-colour: as text it clears 4.5:1 only against pure white, which is why
+color: as text it clears 4.5:1 only against pure white, which is why
 BRAND_DARK_GOLD_DEEP exists.
 """
 
 BRAND_DARK_GOLD_DEEP: Final[str] = lighten(BRAND_DARK_GOLD, -14)  # -> #7e6529
-"""Derived from BRAND_DARK_GOLD - light-mode gold TEXT on grey surfaces.
+"""Derived from BRAND_DARK_GOLD - light-mode gold TEXT on gray surfaces.
 
 Every light surface in this app below #ffffff leaves BRAND_DARK_GOLD short
 as text (#fafafa 4.35, #f0f0f0 3.99, #eeeeee 3.92). This derivative clears
-the whole band (#eeeeee 4.79). It is a TEXT colour only - it carries white
+the whole band (#eeeeee 4.79). It is a TEXT color only - it carries white
 text at just 5.55:1 against black-on-gold's 3.78:1, so it must not become
 a fill.
 """
@@ -108,7 +108,7 @@ a fill.
 #
 # THE INK GRID, published in the brand beside that move:
 #
-#     grey(n) = n * 0x11, n in 0..15.   TRUE_BLACK -> WHITE in fifteen steps.
+#     gray(n) = n * 0x11, n in 0..15.   TRUE_BLACK -> WHITE in fifteen steps.
 #
 # IT GOVERNS INKS AND EDGES AND DELIBERATELY DOES NOT GOVERN SURFACES.
 # BRAND_BLACK sits at n = 1.53 and APP_CARD at n = 2.47; BRAND_BLACK is a
@@ -116,15 +116,15 @@ a fill.
 #
 # THIS PASS WIRES THE INK ONLY. The other five constants are defined and
 # mirrored here so drift is caught, but the palettes below still spell them as
-# literals; rewiring those is the grey-ramp derivation pass, and doing it here
+# literals; rewiring those is the gray-ramp derivation pass, and doing it here
 # would have mixed a mechanical substitution into a value change.
 
 TRUE_BLACK: Final[str] = "#000000"  # brand: PERMANENT.black
 """engine/brand.py TRUE_BLACK, and APP["window"]. Primary text in light mode,
-and the label on a pressed control in dark. grey(0)."""
+and the label on a pressed control in dark. gray(0)."""
 
 WHITE: Final[str] = "#ffffff"  # brand: PERMANENT.white
-"""engine/brand.py WHITE. Control surface in light mode. grey(15)."""
+"""engine/brand.py WHITE. Control surface in light mode. gray(15)."""
 
 BRAND_BLACK: Final[str] = "#1a1a1a"  # brand: APP.panel
 """engine/brand.py BRAND_BLACK, and APP["panel"]. Charcoal; a permanent.
@@ -135,7 +135,7 @@ APP_CARD: Final[str] = "#2a2a2a"  # brand: APP.card
 
 # RNV-NAMED-AND-USED (2026-10-04): the family's two fills, success and
 # warning, stood here, and the warning's two text values beside the
-# success text below. This application draws one status colour, the
+# success text below. This application draws one status color, the
 # folder watcher's label, as TEXT; nothing read the fills or the warning
 # text, so it carries none of them. The register holds the family.
 
@@ -181,10 +181,10 @@ siblings, so the keys are legal on arrival if they are ever wired up.
 """
 
 APP_BORDER: Final[str] = "#333333"  # brand: APP.border
-"""engine/brand.py APP["border"]. grey(3). An edge, so the grid governs it."""
+"""engine/brand.py APP["border"]. gray(3). An edge, so the grid governs it."""
 
 APP_TEXT: Final[str] = "#dddddd"  # brand: APP.text
-"""engine/brand.py APP["text"]. grey(13). Primary ink in dark and image mode.
+"""engine/brand.py APP["text"]. gray(13). Primary ink in dark and image mode.
 
 MOVED FROM #e0e0e0 ON 2026-08-28, with the brand rather than after it.
 #e0e0e0 was one hex doing two unrelated jobs -- ink in dark mode, and a light
@@ -195,7 +195,7 @@ plate #444444, the darkest ground it is ever drawn on.
 """
 
 APP_TEXT_DIM: Final[str] = "#aaaaaa"  # brand: APP.text-dim
-"""engine/brand.py APP["text-dim"]. grey(10)."""
+"""engine/brand.py APP["text-dim"]. gray(10)."""
 
 APP_PANEL_HOVER: Final[str] = "#3a3a3a"  # brand: APP.panel-hover
 """engine/brand.py APP["panel-hover"]. The dark interaction plate.
@@ -203,7 +203,7 @@ APP_PANEL_HOVER: Final[str] = "#3a3a3a"  # brand: APP.panel-hover
 REGISTERED 2026-08-29 in rnv-brand rev 22, and app-owned here until then. The
 register had called the dark ladder "two-thirds specified" because APP_BORDER
 #333333 is not #3a3a3a and so looked like a missing rung. It is not a rung at
-all: #333333 is grey(3) on the INK grid, which governs inks and EDGES, and a
+all: #333333 is gray(3) on the INK grid, which governs inks and EDGES, and a
 border is an edge. The ladder was complete when the question was first asked.
 
     BRAND_BLACK + n * 0x10,  n in -1..+2
@@ -213,7 +213,7 @@ This app holds three of the four; it has no canvas surface.
 """
 
 APP_HOVER_LIGHT: Final[str] = "#eeeeee"  # brand: APP.hover-light
-"""engine/brand.py APP["hover-light"]. grey(14). The light interaction plate.
+"""engine/brand.py APP["hover-light"]. gray(14). The light interaction plate.
 
 REGISTERED 2026-08-29 as #e8e8e8 and MOVED to #eeeeee on 2026-08-30 in rev 23,
 before any app had been wired to it. Nothing here changes value -- the five
@@ -230,8 +230,8 @@ boundary, the binding ground. It is simply not the hover.
 """
 
 # RNV-LIGHT-WIRING (2026-09-06): the constants below name values the
-# palettes already carried as literals. Nothing here is a new colour.
-# Registered values take the register's key; ramp greys take their byte.
+# palettes already carried as literals. Nothing here is a new color.
+# Registered values take the register's key; ramp grays take their byte.
 
 APP_SURFACE_LIGHT_3: Final[str] = "#f5f5f5"  # brand: APP.surface-light-3
 """engine/brand.py APP["surface-light-3"]. The light window and panel
@@ -258,44 +258,44 @@ interaction state, which is why this name goes only on `pressed_bg`.
 
 RNV-LIGHT-WIRING (2026-09-06): SPLIT, NOT RENAMED. Other keys hold
 #e0e0e0 as a static surface (a tab, a scrollbar track) and keep the
-ramp-step name GREY_E0 below. Wiring a resting ground to a pressed
+ramp-step name GRAY_E0 below. Wiring a resting ground to a pressed
 state would claim a role for it on the strength of a shared hex --
-the same ruling rnv-text-transformer made for GREY_EE / APP_HOVER_LIGHT."""
+the same ruling rnv-text-transformer made for GRAY_EE / APP_HOVER_LIGHT."""
 
-GREY_E0: Final[str] = "#e0e0e0"  # app-owned
-"""grey(14) on the ramp, #e0e0e0. Static surfaces that share a hex with
+GRAY_E0: Final[str] = "#e0e0e0"  # app-owned
+"""gray(14) on the ramp, #e0e0e0. Static surfaces that share a hex with
 APP_PRESSED_LIGHT without being a pressed state. See the split note
 there. Named by its byte, like every other ramp step."""
 
-GREY_EE: Final[str] = "#eeeeee"  # app-owned
-"""grey(14) on the ramp, #eeeeee. Static surfaces that share a hex with
+GRAY_EE: Final[str] = "#eeeeee"  # app-owned
+"""gray(14) on the ramp, #eeeeee. Static surfaces that share a hex with
 APP_HOVER_LIGHT without being a hover: a list header, a scroll ground.
 Same split rnv-text-transformer ruled for its diff headers."""
 
-GREY_DD: Final[str] = "#dddddd"  # app-owned
-"""grey(13) on the ramp, #dddddd. Edges and grid lines that share a hex
+GRAY_DD: Final[str] = "#dddddd"  # app-owned
+"""gray(13) on the ramp, #dddddd. Edges and grid lines that share a hex
 with APP_TEXT without being text. The register's APP["text"] is ink;
 a gridline is not, and moving the ink should not move the grid."""
 
-GREY_66: Final[str] = "#666666"  # app-owned
-"""grey(6) on the ramp, #666666. Secondary and muted text on light."""
+GRAY_66: Final[str] = "#666666"  # app-owned
+"""gray(6) on the ramp, #666666. Secondary and muted text on light."""
 
-GREY_88: Final[str] = "#888888"  # app-owned
-"""grey(8) on the ramp, #888888. Muted text on dark, a scrollbar handle
+GRAY_88: Final[str] = "#888888"  # app-owned
+"""gray(8) on the ramp, #888888. Muted text on dark, a scrollbar handle
 hover on light."""
 
-GREY_55: Final[str] = "#555555"  # app-owned
-"""grey(5) on the ramp, #555555. Disabled text and a checkbox edge on dark."""
+GRAY_55: Final[str] = "#555555"  # app-owned
+"""gray(5) on the ramp, #555555. Disabled text and a checkbox edge on dark."""
 
-GREY_44: Final[str] = "#444444"  # app-owned
-"""grey(4) on the ramp, #444444. The pressed plate and the scrollbar
+GRAY_44: Final[str] = "#444444"  # app-owned
+"""gray(4) on the ramp, #444444. The pressed plate and the scrollbar
 handle on dark."""
 
 # RNV-LIGHT-WIRING (2026-09-06): moved up from below the
 # palettes, unchanged. It now has palette callers, and a
 # name defined after its use is a NameError at import.
-GREY_CC: Final[str] = "#cccccc"  # app-owned
-"""Grey cc. The light edge swatch_edge() reaches for on a dark ground.
+GRAY_CC: Final[str] = "#cccccc"  # app-owned
+"""Gray cc. The light edge swatch_edge() reaches for on a dark ground.
 
 RNV-INK-RULE (2026-09-02). It used to be three digits under a role name,
 which is why a census that reads six-digit hexes never saw it.
@@ -315,13 +315,13 @@ APP_PROVENANCE: Final[dict[str, str]] = {
     "APP_SURFACE_LIGHT_3": "register",
     "APP_SURFACE_LIGHT_2": "register",
     "APP_PRESSED_LIGHT": "register",
-    "GREY_E0": "app-ramp",
-    "GREY_EE": "app-ramp",
-    "GREY_DD": "app-ramp",
-    "GREY_66": "app-ramp",
-    "GREY_88": "app-ramp",
-    "GREY_55": "app-ramp",
-    "GREY_44": "app-ramp",
+    "GRAY_E0": "app-ramp",
+    "GRAY_EE": "app-ramp",
+    "GRAY_DD": "app-ramp",
+    "GRAY_66": "app-ramp",
+    "GRAY_88": "app-ramp",
+    "GRAY_55": "app-ramp",
+    "GRAY_44": "app-ramp",
 }
 """Declarative, and read by tests/test_app_mirror.py. A classification that
 lives only in a test drifts from the thing it classifies."""
@@ -342,7 +342,7 @@ BRAND_GOLD_HOVER: Final[str] = lighten(BRAND_GOLD, 13)   # -> #dfc9a0
 SCRIM_ALPHA: Final[int] = 0xED
 """237. The image-mode chrome scrim, from rgba(..., 0.93).
 
-The colour picker derived the same byte by hand for its IMAGE_OVERLAY_ALPHA
+The color picker derived the same byte by hand for its IMAGE_OVERLAY_ALPHA
 and spelled it "ED". Two derivations, one value."""
 
 DROPZONE_ALPHA_DARK: Final[int] = 0x33
@@ -370,9 +370,9 @@ DARK_THEME_COLORS: Final[dict[str, str]] = {
     
     # Text colors
     'text_primary': APP_TEXT,
-    'text_secondary': GREY_88,
-    'text_muted': GREY_88,
-    'text_disabled': GREY_55,
+    'text_secondary': GRAY_88,
+    'text_muted': GRAY_88,
+    'text_disabled': GRAY_55,
     'accent_hover': BRAND_GOLD_HOVER,
     'text_accent': BRAND_GOLD,
     'text_on_accent': TRUE_BLACK,
@@ -380,7 +380,7 @@ DARK_THEME_COLORS: Final[dict[str, str]] = {
     # Border colors
     'border_default': APP_BORDER,
     'border_focus': BRAND_GOLD,
-    'border_hover': GREY_44,
+    'border_hover': GRAY_44,
     'border_accent': BRAND_GOLD,
     'input_border': APP_BORDER,
     
@@ -401,7 +401,7 @@ DARK_THEME_COLORS: Final[dict[str, str]] = {
     'main_btn_border': APP_BORDER,
     'main_btn_hover_bg': APP_BORDER,
     'main_btn_hover_text': APP_TEXT,
-    'main_btn_pressed_bg': GREY_44,
+    'main_btn_pressed_bg': GRAY_44,
     'main_btn_pressed_text': TRUE_BLACK,
 
     # Accent button (gold border)
@@ -424,7 +424,7 @@ DARK_THEME_COLORS: Final[dict[str, str]] = {
     
     # Checkbox
     'checkbox_bg': APP_CARD,
-    'checkbox_border': GREY_55,
+    'checkbox_border': GRAY_55,
     'checkbox_checked_bg': BRAND_GOLD,
     'checkbox_checked_border': BRAND_GOLD,
     'checkbox_hover_border': BRAND_GOLD,
@@ -437,7 +437,7 @@ DARK_THEME_COLORS: Final[dict[str, str]] = {
     
     # Scrollbar
     'scrollbar_bg': APP_CARD,   # was #252525, see platform_btn_bg
-    'scrollbar_handle': GREY_44,
+    'scrollbar_handle': GRAY_44,
     'scrollbar_handle_hover': BRAND_GOLD,
     'scrollbar_border': APP_BORDER,
     
@@ -483,19 +483,19 @@ LIGHT_THEME_COLORS: Final[dict[str, str]] = {
     
     # Text colors
     'text_primary': TRUE_BLACK,
-    'text_secondary': GREY_66,
-    'text_muted': GREY_66,
+    'text_secondary': GRAY_66,
+    'text_muted': GRAY_66,
     'text_disabled': APP_TEXT_DIM,
     'accent_hover': BRAND_DARK_GOLD_DEEP,
     'text_accent': BRAND_DARK_GOLD_DEEP,
     'text_on_accent': WHITE,
     
     # Border colors
-    'border_default': GREY_CC,
+    'border_default': GRAY_CC,
     'border_focus': BRAND_DARK_GOLD,
     'border_hover': APP_TEXT_DIM,
     'border_accent': BRAND_DARK_GOLD,
-    'input_border': GREY_CC,
+    'input_border': GRAY_CC,
     
     # Button colors (dialog buttons - gold accent system)
     'dialog_btn_bg': WHITE,
@@ -504,17 +504,17 @@ LIGHT_THEME_COLORS: Final[dict[str, str]] = {
     'dialog_btn_text': TRUE_BLACK,
     'dialog_btn_hover_text': BRAND_DARK_GOLD_DEEP,
     'dialog_btn_pressed_text': WHITE,
-    'dialog_btn_border': GREY_CC,
+    'dialog_btn_border': GRAY_CC,
     'dialog_btn_hover_border': BRAND_DARK_GOLD,
 
     # Main window buttons - color inverse system (no brand gold)
     # Light: rest=#ffffff bg / hover=#333333 bg / pressed=#444444 bg
     'main_btn_bg': WHITE,
     'main_btn_text': TRUE_BLACK,
-    'main_btn_border': GREY_CC,
+    'main_btn_border': GRAY_CC,
     'main_btn_hover_bg': APP_BORDER,
     'main_btn_hover_text': TRUE_BLACK,
-    'main_btn_pressed_bg': GREY_44,
+    'main_btn_pressed_bg': GRAY_44,
     'main_btn_pressed_text': WHITE,
 
     # Accent button (gold border)
@@ -540,24 +540,24 @@ LIGHT_THEME_COLORS: Final[dict[str, str]] = {
     'checkbox_hover_border': BRAND_DARK_GOLD,
     
     # Tab widget
-    'tab_bg': GREY_E0,
+    'tab_bg': GRAY_E0,
     'tab_selected_bg': WHITE,
     'tab_hover_bg': APP_HOVER_LIGHT,
     'tab_indicator': BRAND_DARK_GOLD,
     
     # Scrollbar
-    'scrollbar_bg': GREY_E0,
+    'scrollbar_bg': GRAY_E0,
     'scrollbar_handle': APP_TEXT_DIM,
     'scrollbar_handle_hover': BRAND_DARK_GOLD,
-    'scrollbar_border': GREY_CC,
+    'scrollbar_border': GRAY_CC,
     
     # List/Table
     'list_bg': WHITE,
     'list_alt_bg': APP_SURFACE_LIGHT_2,   # was #f8f8f8, collapsed onto #fbfbfb
     'list_selected_bg': BRAND_DARK_GOLD,
     'list_hover_bg': APP_HOVER_LIGHT,
-    'list_header_bg': GREY_EE,   # was #f0f0f0, collapsed onto #eeeeee
-    'list_grid': GREY_DD,
+    'list_header_bg': GRAY_EE,   # was #f0f0f0, collapsed onto #eeeeee
+    'list_grid': GRAY_DD,
     
     # Dialog
     'dialog_bg': APP_SURFACE_LIGHT_3,
@@ -588,11 +588,11 @@ IMAGE_MODE_COLORS: Final[dict[str, str]] = {
     'scrollbar_bg': 'transparent',
     # RNV-COLLAPSE-505050 closed here, 2026-09-24. This read
     # rgba(80, 80, 80, 150) -- #505050 at 150 -- which the 2026-09-02
-    # ruling collapsed onto GREY_44 and which survived because the alpha
+    # ruling collapsed onto GRAY_44 and which survived because the alpha
     # form was written out and no sweep in the fleet decodes rgba().
     # Composites to #333333 on the image ground, where #505050 gave
     # #3a3a3a: a 2.26 CIEDE2000 step, rendered before it was ruled.
-    'scrollbar_handle': translucent(GREY_44, SCROLLBAR_HANDLE_ALPHA),
+    'scrollbar_handle': translucent(GRAY_44, SCROLLBAR_HANDLE_ALPHA),
     'scrollbar_handle_hover': BRAND_GOLD,
     'scrollbar_border': translucent(APP_BORDER, SCROLLBAR_BORDER_ALPHA),
     # RNV-NAMED-AND-USED (2026-10-04). The drop zone and the status bar: the
@@ -694,7 +694,7 @@ DEFAULT_CUSTOM_BG_COLOR: Final[str] = "#808080"  # app-owned
 """Default custom preview background color (neutral gray starting value)"""
 
 DEFAULT_CUSTOM_BG_RGB: Final[tuple[int, int, int]] = _to_rgb(DEFAULT_CUSTOM_BG_COLOR)
-"""The same starting grey as the tuple the background selector holds.
+"""The same starting gray as the tuple the background selector holds.
 RNV-NAMED-AND-USED (2026-10-04): the selector wrote (128, 128, 128) out
 beside the name above, which nothing read. It reads this."""
 
@@ -704,11 +704,11 @@ beside the name above, which nothing read. It reads this."""
 # exist". What a preview is composited onto and the fill of a size that is
 # missing were written out where they are used.
 # Each is named here at the value it had: NO PIXEL MOVES. One whose value is
-# a colour this file already names is LINKED to that name; one with a value
+# a color this file already names is LINKED to that name; one with a value
 # of its own holds it, and is this application's alone. PIL takes a tuple
 # for a ground, so the grounds are tuples.
 #
-# RNV-COLOUR-SYNC (2026-10-16), #48 A: the white and the black a preview is
+# RNV-COLOR-SYNC (2026-10-16), #48 A: the white and the black a preview is
 # shown on are DATA, not chrome, and the application's own, so a brand change
 # never alters a preview. The grounds were linked to WHITE and TRUE_BLACK
 # until then; they are made from these two now, at the values they had.
@@ -724,8 +724,8 @@ PREVIEW_CHECKER_LIGHT: Final[tuple[int, int, int]] = _to_rgb(PREVIEW_WHITE)
 """The transparency checkerboard's light square. Was (255, 255, 255): linked
 to WHITE until 16 October, made from PREVIEW_WHITE since."""
 
-PREVIEW_CHECKER_DARK: Final[tuple[int, int, int]] = _to_rgb(GREY_CC)
-"""Its dark square. Was (204, 204, 204), which is GREY_CC: linked."""
+PREVIEW_CHECKER_DARK: Final[tuple[int, int, int]] = _to_rgb(GRAY_CC)
+"""Its dark square. Was (204, 204, 204), which is GRAY_CC: linked."""
 
 PREVIEW_GROUND_WHITE: Final[tuple[int, int, int]] = _to_rgb(PREVIEW_WHITE)
 """The "White" preview background, and what an image is composited onto
@@ -737,11 +737,11 @@ PREVIEW_GROUND_BLACK: Final[tuple[int, int, int]] = _to_rgb(PREVIEW_BLACK)
 16 October, made from PREVIEW_BLACK since."""
 
 PREVIEW_MISSING_FILL: Final[str] = "#c8c8c8"  # app-owned
-"""The grey a size with no image of its own is previewed as. Was
+"""The gray a size with no image of its own is previewed as. Was
 (200, 200, 200, 255), which PIL reads this as. App-owned."""
 
 # ==================== Generated Web Files ====================
-# RNV-COLOUR-SYNC (2026-10-17), #56 A. The colours a favicon package's
+# RNV-COLOR-SYNC (2026-10-17), #56 A. The colors a favicon package's
 # web files declare were written out where the files are built, in
 # cli.py and core/icon_builder_core.py. They are DATA, a file's content,
 # and the application's own, so a brand move never changes what a
@@ -771,7 +771,7 @@ Windows tile (core/icon_builder_core.py). App-owned."""
 #     ui/preview_utils.py       ITU-R 601 luma > 128
 #
 # Neither is a contrast measurement, and they part company on saturated
-# colour, because 601 weights green 587/1000 where the mean weights it 333.
+# color, because 601 weights green 587/1000 where the mean weights it 333.
 # On pure green the mean calls it dark and puts WHITE on it at 1.37:1, where
 # the right answer is black at 15.30:1.
 #
@@ -781,12 +781,12 @@ Windows tile (core/icon_builder_core.py). App-owned."""
 # ratio does not, which is what lets swatch_edge() share the rule with
 # contrast_ink().
 #
-# The same maths as the surface ladder and the 4.5 floor. rnv-color-picker
+# The same math as the surface ladder and the 4.5 floor. rnv-color-picker
 # carries the identical block.
 
 
 def _channel(value: float) -> float:
-    """One sRGB channel, 0-255, linearised."""
+    """One sRGB channel, 0-255, linearized."""
     c = value / 255.0
     return c / 12.92 if c <= 0.03928 else ((c + 0.055) / 1.055) ** 2.4
 
@@ -809,7 +809,7 @@ def relative_luminance(color: "str | tuple[int, int, int]") -> float:
 
 def contrast_ratio(a: "str | tuple[int, int, int]",
                    b: "str | tuple[int, int, int]") -> float:
-    """WCAG contrast ratio between two colours, 1.0 to 21.0."""
+    """WCAG contrast ratio between two colors, 1.0 to 21.0."""
     la, lb = relative_luminance(a), relative_luminance(b)
     hi, lo = (la, lb) if la >= lb else (lb, la)
     return (hi + 0.05) / (lo + 0.05)
@@ -821,9 +821,9 @@ def better_on(background: "str | tuple[int, int, int]", *candidates: str) -> str
 
 
 def contrast_ink(background: "str | tuple[int, int, int]") -> str:
-    """Text colour for an arbitrary ground: WHITE or TRUE_BLACK.
+    """Text color for an arbitrary ground: WHITE or TRUE_BLACK.
 
-    For a colour the USER chose -- a swatch, a preview background. Not for
+    For a color the USER chose -- a swatch, a preview background. Not for
     brand surfaces: what sits on a brand gold is a ruling, not a measurement,
     and the two are only 0.08 apart on BRAND_DARK_GOLD.
     """
@@ -836,11 +836,11 @@ def prefers_dark_ink(background: "str | tuple[int, int, int]") -> bool:
 
 
 def swatch_edge(background: "str | tuple[int, int, int]") -> str:
-    """Outline for a swatch of an arbitrary colour: GREY_CC or APP_BORDER."""
-    return better_on(background, APP_BORDER, GREY_CC)
+    """Outline for a swatch of an arbitrary color: GRAY_CC or APP_BORDER."""
+    return better_on(background, APP_BORDER, GRAY_CC)
 
 # RNV-NAMED-AND-USED (2026-10-04): an alias for the running folder watcher's
-# colour stood here. Since 2026-09-03 the label reads the palettes'
+# color stood here. Since 2026-09-03 the label reads the palettes'
 # status_active, resolved per mode, and nothing read the alias.
 
 
@@ -859,7 +859,7 @@ __all__: list[str] = [
     'TRUE_BLACK',
     'WHITE',
     'APP_BORDER',
-    'GREY_CC',
+    'GRAY_CC',
     'relative_luminance',
     'contrast_ratio',
     'better_on',

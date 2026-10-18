@@ -116,14 +116,14 @@ from ui.colors               import (
     DARK_THEME_COLORS, LIGHT_THEME_COLORS, IMAGE_MODE_COLORS,
     get_theme_colors,
     DEFAULT_CUSTOM_BG_COLOR,
-    TRUE_BLACK, WHITE, APP_BORDER, GREY_CC, BRAND_BLACK, GREY_44,
+    TRUE_BLACK, WHITE, APP_BORDER, GRAY_CC, BRAND_BLACK, GRAY_44,
     contrast_ink, swatch_edge, contrast_ratio,
 )
-# RNV-COLOUR-SYNC, #53 A (2026-10-17): the colour values this suite needs that
-# are not the application's colours are named once, in tests/colour_values.py.
-from tests.colour_values     import (
+# RNV-COLOR-SYNC, #53 A (2026-10-17): the color values this suite needs that
+# are not the application's colors are named once, in tests/color_values.py.
+from tests.color_values     import (
     EXAMPLE_GROUND_WHITE, EXAMPLE_GROUND_BLACK, EXAMPLE_GROUND_DARK_GOLD,
-    EXAMPLE_GROUND_GREEN, EXAMPLE_GROUND_GREY_77,
+    EXAMPLE_GROUND_GREEN, EXAMPLE_GROUND_GRAY_77,
     EXAMPLE_HEX_BLACK, EXAMPLE_HEX_WHITE_UPPER, EXAMPLE_HEX_RED_UPPER,
     EXAMPLE_HEX_GOLD,
 )
@@ -144,22 +144,22 @@ from ui.image_adjustments        import (
 
 from PyQt6.QtGui import QPixmap as _QPixmap
 
-#: RNV-COLOUR-SYNC, #52 A (2026-10-17). Where each colour comes from, as
-#: brand_map.json says. The values are held by tests/test_colours_in_sync.py,
+#: RNV-COLOR-SYNC, #52 A (2026-10-17). Where each color comes from, as
+#: brand_map.json says. The values are held by tests/test_colors_in_sync.py,
 #: against the register at the pin; what this suite holds is the name each takes.
-BRAND_MAP = json.loads((Path(_FLAT) / "brand_map.json").read_text(encoding="utf-8"))["colours"]
+BRAND_MAP = json.loads((Path(_FLAT) / "brand_map.json").read_text(encoding="utf-8"))["colors"]
 
 # Pillow — used to create in-memory test images
 from PIL import Image as _Image
 
-# ANSI colour helpers
+# ANSI color helpers
 _G="\033[92m"; _R="\033[91m"; _Y="\033[93m"; _C="\033[96m"; _B="\033[1m"; _X="\033[0m"
 
 
 # ── Helpers ────────────────────────────────────────────────────────────────────
 
 def _make_rgba(w=64, h=64, color=(255, 0, 0, 255)) -> _Image.Image:
-    """Return a solid-colour RGBA PIL image."""
+    """Return a solid-color RGBA PIL image."""
     img = _Image.new("RGBA", (w, h), color)
     return img
 
@@ -199,7 +199,7 @@ class TestColors(unittest.TestCase):
 
     def test_brand_gold_value(self):
         # #52 A, 2026-10-17: where the value comes from. The value is held by
-        # tests/test_colours_in_sync.py, against the register at the pin.
+        # tests/test_colors_in_sync.py, against the register at the pin.
         self.assertEqual(BRAND_MAP["BRAND_GOLD"], "APP.accent")
 
     def test_brand_gold_dark_value(self):
@@ -254,11 +254,11 @@ class TestColors(unittest.TestCase):
         len() > 0 assertion could not have caught either of the two
         disagreeing brightness rules this replaced."""
         self.assertEqual(swatch_edge(EXAMPLE_GROUND_WHITE), APP_BORDER)
-        self.assertEqual(swatch_edge(EXAMPLE_GROUND_BLACK), GREY_CC)
+        self.assertEqual(swatch_edge(EXAMPLE_GROUND_BLACK), GRAY_CC)
         for ground in (EXAMPLE_GROUND_WHITE, EXAMPLE_GROUND_BLACK, EXAMPLE_GROUND_DARK_GOLD,
-                       EXAMPLE_GROUND_GREEN, EXAMPLE_GROUND_GREY_77):
+                       EXAMPLE_GROUND_GREEN, EXAMPLE_GROUND_GRAY_77):
             edge = swatch_edge(ground)
-            other = GREY_CC if edge == APP_BORDER else APP_BORDER
+            other = GRAY_CC if edge == APP_BORDER else APP_BORDER
             self.assertGreaterEqual(contrast_ratio(ground, edge),
                                     contrast_ratio(ground, other))
 
@@ -339,7 +339,7 @@ class TestColors(unittest.TestCase):
         self.assertEqual(DARK_THEME_COLORS['main_btn_hover_bg'], APP_BORDER)
 
     def test_dark_main_btn_pressed_bg(self):
-        self.assertEqual(DARK_THEME_COLORS['main_btn_pressed_bg'], GREY_44)
+        self.assertEqual(DARK_THEME_COLORS['main_btn_pressed_bg'], GRAY_44)
 
     def test_light_main_btn_rest_bg(self):
         self.assertEqual(LIGHT_THEME_COLORS['main_btn_bg'], WHITE)
@@ -348,7 +348,7 @@ class TestColors(unittest.TestCase):
         self.assertEqual(LIGHT_THEME_COLORS['main_btn_hover_bg'], APP_BORDER)
 
     def test_light_main_btn_pressed_bg(self):
-        self.assertEqual(LIGHT_THEME_COLORS['main_btn_pressed_bg'], GREY_44)
+        self.assertEqual(LIGHT_THEME_COLORS['main_btn_pressed_bg'], GRAY_44)
 
     # ── Image mode inherits dark base ─────────────────────────────────────────
     def test_image_mode_inherits_dark_text(self):
@@ -365,13 +365,13 @@ class TestColors(unittest.TestCase):
         # cannot parse, so QPalette painted the window opaque black; and
         # it failed on translucent(BRAND_BLACK, SCRIM_ALPHA), which is
         # transparent at alpha 237.
-        # Transparency is a property of the colour, so ask the colour.
+        # Transparency is a property of the color, so ask the color.
         from PyQt6.QtGui import QColor
-        colour = QColor(IMAGE_MODE_COLORS['window_bg'])
-        self.assertTrue(colour.isValid(),
+        color = QColor(IMAGE_MODE_COLORS['window_bg'])
+        self.assertTrue(color.isValid(),
                         f"{IMAGE_MODE_COLORS['window_bg']!r} is not a "
-                        f"colour QColor can read")
-        self.assertLess(colour.alpha(), 255)
+                        f"color QColor can read")
+        self.assertLess(color.alpha(), 255)
 
     def test_image_mode_scrollbar_bg_transparent(self):
         self.assertEqual(IMAGE_MODE_COLORS['scrollbar_bg'], 'transparent')
@@ -1725,7 +1725,7 @@ class TestEdgeCases(unittest.TestCase):
         self.assertLess(px[2], 50)    # B near 0
 
     def test_extract_dominant_solid_image_one_color(self):
-        """Solid red image should have red as its dominant colour."""
+        """Solid red image should have red as its dominant color."""
         src = _make_rgba(64, 64, (255, 0, 0, 255))
         colors = extract_dominant_colors(src, count=1)
         self.assertGreater(len(colors), 0)

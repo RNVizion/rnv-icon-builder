@@ -1,7 +1,7 @@
 """
 tests/test_named_and_used.py
 ============================
-RNV-NAMED-AND-USED, 2026-10-04. Every colour in the application is named,
+RNV-NAMED-AND-USED, 2026-10-04. Every color in the application is named,
 and every name is used.
 
 Ruled 2026-10-04: "As long as a color exist in the app it should be named
@@ -18,19 +18,19 @@ composited onto and the fill of a missing size.
 
 Three sweeps hold it, each over the application's own source:
 
-1. NAMED. No colour is written out in the code. Every spelling is read: hex,
-   rgb() and rgba(), a CSS colour name, QColor built from numbers, a Qt
-   global colour, a tuple or a list of channels, an alpha set as a number.
-   A colour is written once, in the colour module, under a name; everything
+1. NAMED. No color is written out in the code. Every spelling is read: hex,
+   rgb() and rgba(), a CSS color name, QColor built from numbers, a Qt
+   global color, a tuple or a list of channels, an alpha set as a number.
+   A color is written once, in the color module, under a name; everything
    else reads the name. What stays written is DATA, each entry with its
    reason, and the sweep fails for an entry that no longer matches anything.
-2. USED, the palettes. Every colour a palette holds is looked up by key
+2. USED, the palettes. Every color a palette holds is looked up by key
    somewhere in the application.
-3. USED, the constants. Every colour the colour module names is read
+3. USED, the constants. Every color the color module names is read
    somewhere in the application: by the palettes, by another constant, or by
    the code.
 
-Clear is not a colour: 'transparent', alpha 0 and Qt's transparent are how a
+Clear is not a color: 'transparent', alpha 0 and Qt's transparent are how a
 widget is told to paint nothing, and are left as written.
 """
 from __future__ import annotations
@@ -44,16 +44,16 @@ import pytest
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
 
-#: Where this application writes its colours: the one place a literal belongs.
-COLOUR_MODULES = ("ui/colors.py",)
+#: Where this application writes its colors: the one place a literal belongs.
+COLOR_MODULES = ("ui/colors.py",)
 #: Where its palettes are written: their own keys are not lookups.
 PALETTE_MODULES = ("ui/colors.py", "ui/theme_manager.py")
 SKIP_DIRS = {"tests", "build", "dist", "docs", "resources", "scripts", "snapshots", "__pycache__"}
 
 from ui.colors import DARK_THEME_COLORS, IMAGE_MODE_COLORS, LIGHT_THEME_COLORS, OS_SIM_COLORS  # noqa: E402
 from ui.theme_manager import ThemeManager  # noqa: E402
-# RNV-COLOUR-SYNC, #53 A (2026-10-17): the probe's colours, named once.
-from tests.colour_values import DATA_PROBE_CLEAR_RGBA, DATA_PROBE_HEX, DATA_PROBE_RGBA  # noqa: E402
+# RNV-COLOR-SYNC, #53 A (2026-10-17): the probe's colors, named once.
+from tests.color_values import DATA_PROBE_CLEAR_RGBA, DATA_PROBE_HEX, DATA_PROBE_RGBA  # noqa: E402
 
 PALETTES = {"DARK_THEME_COLORS": DARK_THEME_COLORS, "LIGHT_THEME_COLORS": LIGHT_THEME_COLORS,
             "IMAGE_MODE_COLORS": IMAGE_MODE_COLORS, "OS_SIM_COLORS": OS_SIM_COLORS}
@@ -67,8 +67,8 @@ MIN_CONSTANTS = 30
 #: a generated file, what a generated icon starts with and what a choice is
 #: called are not the application's look, and a brand move should not change them.
 DATA = {
-    # RNV-COLOUR-SYNC, #56 A (2026-10-17): the web manifest's two colours, in
-    # cli.py and core/icon_builder_core.py, and browserconfig.xml's tile colour
+    # RNV-COLOR-SYNC, #56 A (2026-10-17): the web manifest's two colors, in
+    # cli.py and core/icon_builder_core.py, and browserconfig.xml's tile color
     # stood here. They are named in ui/colors.py now, as the application's own
     # data, and both writers read the names.
     ("ui/settings_dialog.py", "(255, 255, 255, 255)"):
@@ -80,9 +80,9 @@ DATA = {
     ("ui/preview_utils.py", "Black"):
         "the label of a preview background choice: text shown to the person",
     ("utils/config.py", "white"):
-        "the name a preview background choice is stored under: an option, not a colour",
+        "the name a preview background choice is stored under: an option, not a color",
     ("utils/config.py", "black"):
-        "the name a preview background choice is stored under: an option, not a colour",
+        "the name a preview background choice is stored under: an option, not a color",
 }
 
 CSS_NAMES = frozenset("""aliceblue antiquewhite aqua aquamarine azure beige bisque black blanchedalmond blue
@@ -108,8 +108,8 @@ FUNC = re.compile(r"\b(?:rgba?|hsla?|hsva?)\(\s*[0-9.]+%?\s*,[^)]*\)", re.I)
 PROP = re.compile(r"(?:^|[;{\s\"'])((?:[a-z-]*color|background(?:-color)?|border(?:-[a-z]+)*|outline(?:-[a-z]+)*|"
                   r"fill|stroke))\s*[:=]\s*([^;{}<>]*)", re.I)
 WORD = re.compile(r"(?<![\w#.-])([a-z]+)(?![\w(-])", re.I)
-NOT_A_COLOUR = re.compile(r"margin|padding|spacing|size|offset|geometry|rect|pos|range|version|ratio|weight", re.I)
-A_COLOUR = re.compile(r"#(?:[0-9a-fA-F]{8}|[0-9a-fA-F]{6}|[0-9a-fA-F]{3})|rgba?\([^)]*\)")
+NOT_A_COLOR = re.compile(r"margin|padding|spacing|size|offset|geometry|rect|pos|range|version|ratio|weight", re.I)
+A_COLOR = re.compile(r"#(?:[0-9a-fA-F]{8}|[0-9a-fA-F]{6}|[0-9a-fA-F]{3})|rgba?\([^)]*\)")
 
 
 def _sources():
@@ -135,13 +135,13 @@ def _prose(tree) -> set:
 
 
 def _clear(literal: str) -> bool:
-    """rgba(..., 0) and QColor(..., 0): clear, not a colour."""
+    """rgba(..., 0) and QColor(..., 0): clear, not a color."""
     nums = re.findall(r"[0-9.]+", literal)
     return len(nums) == 4 and float(nums[3]) == 0
 
 
 def _written(rel: str, text: str) -> list:
-    """(line, kind, literal) for every colour this file writes out."""
+    """(line, kind, literal) for every color this file writes out."""
     tree = ast.parse(text)
     prose, out = _prose(tree), []
     parent = {}
@@ -168,9 +168,9 @@ def _written(rel: str, text: str) -> list:
         return ""
 
     def a_name_on_its_own(node, up) -> bool:
-        """A CSS colour name that is the whole string, where a colour is given:
+        """A CSS color name that is the whole string, where a color is given:
         handed to a call, chosen by an if, assigned, returned, a default or a
-        value in a table. A key, an index and a comparison are not a colour
+        value in a table. A key, an index and a comparison are not a color
         given to anything."""
         s = node.value
         if isinstance(up, (ast.Call, ast.keyword, ast.IfExp)):
@@ -196,7 +196,7 @@ def _written(rel: str, text: str) -> list:
                 for w in WORD.finditer(m.group(2)):
                     if w.group(1).lower() in CSS_NAMES:
                         out.append((node.lineno, "name", f"{m.group(1).lower()}: {w.group(1)}"))
-            # a colour name on its own: QColor("yellow"), fill="white", ink = "black"
+            # a color name on its own: QColor("yellow"), fill="white", ink = "black"
             if a_name_on_its_own(node, up):
                 out.append((node.lineno, "name", s))
         elif isinstance(node, ast.Call):
@@ -206,7 +206,7 @@ def _written(rel: str, text: str) -> list:
                 literal = ast.unparse(node)
                 if not _clear(literal):
                     out.append((node.lineno, "qcolor", literal))
-            # an alpha set as a number: colour.setAlpha(171). Clear and solid are not a choice of alpha.
+            # an alpha set as a number: color.setAlpha(171). Clear and solid are not a choice of alpha.
             elif name in ("setAlpha", "setAlphaF") and len(node.args) == 1 and isinstance(node.args[0], ast.Constant) \
                     and type(node.args[0].value) in (int, float) \
                     and node.args[0].value not in ((0, 255) if name == "setAlpha" else (0, 1)):
@@ -223,7 +223,7 @@ def _written(rel: str, text: str) -> list:
                 continue                                   # counted with its QColor(...)
             if len(node.elts) == 4 and node.elts[3].value == 0:
                 continue                                   # clear
-            if NOT_A_COLOUR.search(named_like(node)):
+            if NOT_A_COLOR.search(named_like(node)):
                 continue
             out.append((node.lineno, "list" if isinstance(node, ast.List) else "tuple", ast.unparse(node)))
     return out
@@ -233,10 +233,10 @@ QCOLOR_CALLS = ("QColor", "fromRgb", "fromRgbF", "qRgb", "qRgba")
 
 
 def _all_written() -> list:
-    """(rel, line, kind, literal) outside the colour module."""
+    """(rel, line, kind, literal) outside the color module."""
     out = []
     for rel, text in _sources():
-        if rel in COLOUR_MODULES:
+        if rel in COLOR_MODULES:
             continue
         out += [(rel, line, kind, literal) for line, kind, literal in _written(rel, text)]
     return out
@@ -255,13 +255,13 @@ def _data(rel: str, literal: str):
 def test_the_sweep_reads_the_application():
     files = [rel for rel, _text in _sources()]
     assert len(files) >= MIN_FILES, f"only {len(files)} files swept: the sweep has gone blind"
-    for rel in COLOUR_MODULES:
+    for rel in COLOR_MODULES:
         assert rel in files, f"{rel} is not among the files swept"
     assert not [f for f in files if f.startswith("tests/")], "the sweep reads the tests"
 
 
 def test_the_sweep_reads_every_spelling():
-    """Each spelling of a colour, in a line of the kind the application
+    """Each spelling of a color, in a line of the kind the application
     writes, is seen; clear, an index and a margin are not."""
     seen = {(kind, literal) for _line, kind, literal in _written("probe.py", (
         "from PyQt6.QtGui import QColor\n"
@@ -303,17 +303,17 @@ def test_the_sweep_reads_every_spelling():
 
 # ----------------------------------------------------------------- 1. named
 
-def test_no_colour_is_written_out_in_the_code():
+def test_no_color_is_written_out_in_the_code():
     stray = [f"{rel}:{line}  {literal}" for rel, line, _kind, literal in _all_written()
              if _data(rel, literal) is None]
     assert not stray, (
-        "a colour is written out where a name belongs. Name it in "
-        f"{COLOUR_MODULES[0]} and read the name; or, if it is data, add it to DATA "
+        "a color is written out where a name belongs. Name it in "
+        f"{COLOR_MODULES[0]} and read the name; or, if it is data, add it to DATA "
         "with its reason:\n  " + "\n  ".join(stray))
 
 
 def test_every_data_entry_still_covers_something():
-    """An exemption that outlives what it excused is a licence for the next
+    """An exemption that outlives what it excused is a license for the next
     literal written in that file."""
     used = {_data(rel, literal) for rel, _line, _kind, literal in _all_written()}
     stale = [f"{where}: {what}" for (where, what) in DATA if (where, what) not in used]
@@ -350,25 +350,25 @@ def _strings_the_application_reads() -> set:
     return out
 
 
-def test_every_colour_a_palette_holds_is_looked_up():
+def test_every_color_a_palette_holds_is_looked_up():
     read = _strings_the_application_reads()
     unread = sorted({f"{name}[{key!r}]" for name, palette in PALETTES.items() for key, value in palette.items()
-                     if isinstance(value, str) and (A_COLOUR.fullmatch(value) or value == "transparent")
+                     if isinstance(value, str) and (A_COLOR.fullmatch(value) or value == "transparent")
                      and key not in read})
     assert not unread, (
-        "palette entries nothing in the application looks up. A colour is kept "
+        "palette entries nothing in the application looks up. A color is kept "
         "for what uses it:\n  " + "\n  ".join(unread))
     assert sum(len(p) for p in PALETTES.values()) >= MIN_ENTRIES, "the palettes have gone missing"
 
 
 # --------------------------------------------------- 3. used: the constants
 
-def _colour_constants() -> dict:
+def _color_constants() -> dict:
     """NAME -> where it is defined, for every module-level constant of the
-    colour module whose value is a colour: a hex string, an rgb() string, or
+    color module whose value is a color: a hex string, an rgb() string, or
     channels under a name that says so."""
     out = {}
-    for rel in COLOUR_MODULES:
+    for rel in COLOR_MODULES:
         module = importlib.import_module(rel[:-3].replace("/", "."))
         tree = ast.parse((ROOT / rel).read_text(encoding="utf-8-sig"))
         for node in tree.body:
@@ -377,10 +377,10 @@ def _colour_constants() -> dict:
             if not isinstance(target, ast.Name) or not target.id.isupper():
                 continue
             value = getattr(module, target.id, None)
-            if isinstance(value, str) and A_COLOUR.fullmatch(value):
+            if isinstance(value, str) and A_COLOR.fullmatch(value):
                 out[target.id] = rel
             elif isinstance(value, tuple) and len(value) in (3, 4) and all(type(v) is int for v in value) \
-                    and re.search(r"RGB|COLOR|COLOUR|OVERLAY|GROUND|CHECKER", target.id):
+                    and re.search(r"RGB|COLOR|COLOR|OVERLAY|GROUND|CHECKER", target.id):
                 out[target.id] = rel
     return out
 
@@ -400,20 +400,20 @@ def _names_the_application_reads() -> dict:
     return counts
 
 
-def test_every_colour_constant_is_read():
-    constants = _colour_constants()
-    assert len(constants) >= MIN_CONSTANTS, f"only {len(constants)} colour constants found"
+def test_every_color_constant_is_read():
+    constants = _color_constants()
+    assert len(constants) >= MIN_CONSTANTS, f"only {len(constants)} color constants found"
     reads = _names_the_application_reads()
     unread = sorted(name for name in constants if not reads.get(name))
     assert not unread, (
-        "colour constants nothing in the application reads. A name is kept for "
+        "color constants nothing in the application reads. A name is kept for "
         "what uses it:\n  " + "\n  ".join(f"{name}  ({constants[name]})" for name in unread))
 
 
 def test_every_exported_name_exists():
-    """__all__ names what the colour module offers. A name it lists and does
+    """__all__ names what the color module offers. A name it lists and does
     not define makes `from module import *` fail."""
-    for rel in COLOUR_MODULES:
+    for rel in COLOR_MODULES:
         module = importlib.import_module(rel[:-3].replace("/", "."))
         missing = [n for n in getattr(module, "__all__", []) if not hasattr(module, n)]
         assert not missing, f"{rel} exports names it does not define: {missing}"
@@ -554,7 +554,7 @@ NOT_LOOKUPS = {
         "palette's",
 }
 
-#: An attribute the code reads that is spelled like a colour constant and is
+#: An attribute the code reads that is spelled like a color constant and is
 #: not one: (file, name) -> what it is. Left uncounted for the same reason.
 NOT_READS = dict()
 

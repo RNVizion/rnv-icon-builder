@@ -14,9 +14,9 @@ import os
 import pytest
 from PIL import Image
 
-# RNV-COLOUR-SYNC, #53 A (2026-10-17): the colour values this file needs that
-# are not the application's colours are named once, in tests/colour_values.py.
-from tests.colour_values import DATA_CUSTOM_BG_CHOICE
+# RNV-COLOR-SYNC, #53 A (2026-10-17): the color values this file needs that
+# are not the application's colors are named once, in tests/color_values.py.
+from tests.color_values import DATA_CUSTOM_BG_CHOICE
 
 
 # ══════════════════════════════════════════════════════════════════════════════
@@ -217,20 +217,20 @@ class TestThumbnailCache:
 
 # RNV-RESTYLE-ON-SWITCH
 # ══════════════════════════════════════════════════════════════════════════════
-# The preview background's custom-colour button follows the mode
+# The preview background's custom-color button follows the mode
 # ══════════════════════════════════════════════════════════════════════════════
 @pytest.mark.ui
 class TestBackgroundColorButtonFollowsTheMode:
     """RNV-RESTYLE-ON-SWITCH, ruling 3 of 2026-09-26. The Settings dialog's
     preview-background selector has a small button showing the custom
-    colour. Its edge was written from DARK_THEME_COLORS by name, so in light
-    mode it kept dark's GREY_55 edge while the combo beside it turned light;
+    color. Its edge was written from DARK_THEME_COLORS by name, so in light
+    mode it kept dark's GRAY_55 edge while the combo beside it turned light;
     the chart's read-back of every stylesheet the app sets found it there.
     The edge takes the mode apply_theme() was given now.
 
     The hover does not move: BRAND_GOLD in every mode, a reviewed and
     permanent bypass in tests/test_brand_contrast.py, because it is drawn
-    over the user's own colour rather than a themed surface."""
+    over the user's own color rather than a themed surface."""
 
     @staticmethod
     def _parts(widget):
@@ -238,7 +238,7 @@ class TestBackgroundColorButtonFollowsTheMode:
         plate, _, hover = sheet.partition("QPushButton:hover")
         return sheet, plate, hover
 
-    def test_each_mode_draws_the_button_in_its_own_colours(self, qapp):
+    def test_each_mode_draws_the_button_in_its_own_colors(self, qapp):
         from ui.colors import BRAND_GOLD, get_theme_colors
         from ui.preview_utils import BackgroundSelectorWidget
 
@@ -255,8 +255,8 @@ class TestBackgroundColorButtonFollowsTheMode:
         finally:
             widget.deleteLater()
 
-    def test_a_new_custom_colour_keeps_the_mode(self, qapp, monkeypatch):
-        """Choosing a colour repaints the button without being told the mode."""
+    def test_a_new_custom_color_keeps_the_mode(self, qapp, monkeypatch):
+        """Choosing a color repaints the button without being told the mode."""
         from PyQt6.QtGui import QColor
         from PyQt6.QtWidgets import QColorDialog
 

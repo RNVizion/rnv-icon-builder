@@ -2,10 +2,10 @@
 
 A palette entry used to be one of two things here -- a name, or a literal --
 and this file adds the third the application always had and never declared.
-RETIRED_SCRIM_RGBA is not a second colour beside BRAND_BLACK; it IS
+RETIRED_SCRIM_RGBA is not a second color beside BRAND_BLACK; it IS
 BRAND_BLACK, at 93%, and nothing related the two.
 
-WHY THAT MATTERED. RNV-COLLAPSE-505050 ruled RETIRED_HANDLE_GREY onto GREY_44 on
+WHY THAT MATTERED. RNV-COLLAPSE-505050 ruled RETIRED_HANDLE_GRAY onto GRAY_44 on
 2026-09-02. It went on painting here, and in three other applications, because
 the alpha form was written out as rgba() and every sweep in the fleet compares
 six-digit hex. A written-down derivative is orphaned the moment its source
@@ -28,15 +28,15 @@ from ui.colors import (DARK_THEME_COLORS as DARK,
                        IMAGE_MODE_COLORS as IMAGE,
                        OS_SIM_COLORS as OS_SIM,
                        translucent)
-# RNV-COLOUR-SYNC, #53 A (2026-10-17): the colour values this file needs that
-# are not the application's colours are named once, in tests/colour_values.py.
-from tests.colour_values import (
-    DATA_OS_SIM_CHROME_BLACK, DATA_OS_SIM_CHROME_GREY,
+# RNV-COLOR-SYNC, #53 A (2026-10-17): the color values this file needs that
+# are not the application's colors are named once, in tests/color_values.py.
+from tests.color_values import (
+    DATA_OS_SIM_CHROME_BLACK, DATA_OS_SIM_CHROME_GRAY,
     EXAMPLE_TRANSLUCENT_BASE, EXAMPLE_TRANSLUCENT_BASE_BARE,
     EXAMPLE_TRANSLUCENT_RESULT, EXAMPLE_TRANSLUCENT_UPPER_BASE,
     EXAMPLE_TRANSLUCENT_UPPER_RESULT,
     INVALID_EIGHT_DIGIT_BASE, INVALID_FIVE_DIGIT_BASE,
-    RETIRED_HANDLE_GREY,
+    RETIRED_HANDLE_GRAY,
 )
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
@@ -56,7 +56,7 @@ ALPHAS = {
     "SCROLLBAR_BORDER_ALPHA": (0x64, "100"),
 }
 
-#: every notation a colour can wear here, longest first so that
+#: every notation a color can wear here, longest first so that
 #: INVALID_EIGHT_DIGIT_UPPER is not also read as 1A1A1A and a six-digit hex is
 #: not also read as its first three digits.
 COMPOSED = re.compile(r"rgba?\(\s*\d{1,3}\s*,\s*\d{1,3}\s*,\s*\d{1,3}"
@@ -82,7 +82,7 @@ def _dicts(names):
 # ------------------------------------------------------------ guard the guard
 
 def test_translucent_composes_alpha_first():
-    """#AARRGGBB, not #RRGGBBAA. Taking the wrong end gives a real colour and
+    """#AARRGGBB, not #RRGGBBAA. Taking the wrong end gives a real color and
     the wrong one, which is the failure that does not look like a failure."""
     assert translucent(EXAMPLE_TRANSLUCENT_BASE, 0xED) == EXAMPLE_TRANSLUCENT_RESULT
     assert translucent(EXAMPLE_TRANSLUCENT_BASE_BARE, 0xED) == EXAMPLE_TRANSLUCENT_RESULT
@@ -173,7 +173,7 @@ def test_every_derived_entry_decomposes_to_its_base_and_its_alpha():
                 wrong.append(f"{where} is {got}, not #AARRGGBB")
                 continue
             if got[3:].lower() != want_base:
-                wrong.append(f"{where} is {got}, whose colour half is not "
+                wrong.append(f"{where} is {got}, whose color half is not "
                              f"{base.id} #{want_base}")
             if int(got[1:3], 16) != want_alpha:
                 wrong.append(f"{where} composites at {got[1:3]}, not "
@@ -220,17 +220,17 @@ def test_os_sim_holds_no_rnv_constant():
 
 
 def test_os_sim_still_paints_what_it_did():
-    """Unbinding must not have moved a colour. These are the six that were
+    """Unbinding must not have moved a color. These are the six that were
     named, with the values those names held."""
     # #53 A, 2026-10-17: the values, another system's chrome, are named in
-    # tests/colour_values.py. Read from OS_SIM_COLORS itself, this would compare
+    # tests/color_values.py. Read from OS_SIM_COLORS itself, this would compare
     # each entry with itself and could not fail.
-    assert OS_SIM["taskbar_border"] == DATA_OS_SIM_CHROME_GREY
+    assert OS_SIM["taskbar_border"] == DATA_OS_SIM_CHROME_GRAY
     assert OS_SIM["taskbar_text_light"] == DATA_OS_SIM_CHROME_BLACK
     assert OS_SIM["explorer_text"] == DATA_OS_SIM_CHROME_BLACK
-    assert OS_SIM["finder_text"] == DATA_OS_SIM_CHROME_GREY
-    assert OS_SIM["chrome_tab_title"] == DATA_OS_SIM_CHROME_GREY
-    assert OS_SIM["bookmarks_text"] == DATA_OS_SIM_CHROME_GREY
+    assert OS_SIM["finder_text"] == DATA_OS_SIM_CHROME_GRAY
+    assert OS_SIM["chrome_tab_title"] == DATA_OS_SIM_CHROME_GRAY
+    assert OS_SIM["bookmarks_text"] == DATA_OS_SIM_CHROME_GRAY
 
 
 # ------------------------------------------------- the bug deriving fixed
@@ -238,7 +238,7 @@ def test_os_sim_still_paints_what_it_did():
 def test_the_image_palette_values_are_readable_by_qcolor():
     """_apply_image_mode_palette() calls QColor() on these. QColor cannot
     parse rgba() -- it is a stylesheet notation -- and returns an INVALID
-    colour, which Qt renders as opaque black. Every input field in image mode
+    color, which Qt renders as opaque black. Every input field in image mode
     was black rather than the card at 93%.
 
     This is why the derived form is #AARRGGBB: it is the only spelling that
@@ -246,21 +246,21 @@ def test_the_image_palette_values_are_readable_by_qcolor():
     from PyQt6.QtGui import QColor
     for key in ("window_bg", "input_bg"):
         value = IMAGE[key]
-        colour = QColor(value)
-        assert colour.isValid(), (
+        color = QColor(value)
+        assert color.isValid(), (
             f"QColor({value!r}) is invalid, so QPalette gets opaque black")
-        assert colour.alpha() == 0xED, (
-            f"{key} composites at {colour.alpha()}, not SCRIM_ALPHA")
+        assert color.alpha() == 0xED, (
+            f"{key} composites at {color.alpha()}, not SCRIM_ALPHA")
 
 
-def test_the_scrollbar_handle_is_grey_44_and_not_the_collapsed_value():
+def test_the_scrollbar_handle_is_gray_44_and_not_the_collapsed_value():
     """RNV-COLLAPSE-505050, closed here on 2026-09-24. Ruled 2026-09-02,
     survived in four applications because the alpha form was written out."""
     handle = IMAGE["scrollbar_handle"]
-    assert handle == translucent(colors.GREY_44, colors.SCROLLBAR_HANDLE_ALPHA)
-    assert RETIRED_HANDLE_GREY.lstrip("#") not in handle.lower(), (
-        f"{handle} is still {RETIRED_HANDLE_GREY}")
-    assert handle[3:].lower() == colors.GREY_44.lstrip("#").lower()
+    assert handle == translucent(colors.GRAY_44, colors.SCROLLBAR_HANDLE_ALPHA)
+    assert RETIRED_HANDLE_GRAY.lstrip("#") not in handle.lower(), (
+        f"{handle} is still {RETIRED_HANDLE_GRAY}")
+    assert handle[3:].lower() == colors.GRAY_44.lstrip("#").lower()
 
 # RNV-DERIVE-ALPHA
 
@@ -294,7 +294,7 @@ def _bare_strings(tree: ast.AST) -> set[int]:
 
 
 def _lower8_values():
-    """(where, value) for every eight-digit hex string the colour modules
+    """(where, value) for every eight-digit hex string the color modules
     build -- their constants, the dicts they hold, and their classes' dicts
     -- as they EVALUATE, which is what a derived value is."""
     import importlib
@@ -344,7 +344,7 @@ def test_eight_digit_hex_is_lower_case():
     the start; this holds it there.
 
     Both halves: every eight-digit value the application BUILDS, as its
-    colour modules evaluate, and every eight-digit literal it WRITES in code.
+    color modules evaluate, and every eight-digit literal it WRITES in code.
     Docstrings are prose, and a sentence that names an upper-case value as
     history keeps its case."""
     built = list(_lower8_values())

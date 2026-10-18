@@ -71,7 +71,7 @@ All colors are defined in `ui/colors.py`:
   borders, selections. Carries white text at 4.5429:1.
 - `BRAND_DARK_GOLD_DEEP` (derived, `#7e6529`) — Light-mode gold TEXT.
   `BRAND_DARK_GOLD` clears 4.5:1 as text only against pure white, so gold
-  text on any grey surface uses this instead. Computed from
+  text on any gray surface uses this instead. Computed from
   `BRAND_DARK_GOLD`, never written down.
 - `DARK_THEME_COLORS` / `LIGHT_THEME_COLORS` / `IMAGE_MODE_COLORS` — Dictionaries keyed by semantic role (`window_bg`, `panel_bg`, `text_primary`, `button_hover_bg`, etc.)
 

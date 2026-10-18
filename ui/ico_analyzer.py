@@ -293,13 +293,13 @@ class IcoAnalyzerDialog(BaseDialog):
         Draw PNG in the mode's success text. BMP keeps the table's own.
         
         RNV-RULINGS-2026-10-05, item 1. The mark was Qt's dark green, set on the
-        cell and never drawn: the sheet's QTableWidget::item rule coloured
-        every cell, and a sheet wins over a cell's own colour. That rule no
+        cell and never drawn: the sheet's QTableWidget::item rule colored
+        every cell, and a sheet wins over a cell's own color. That rule no
         longer sets one (see _apply_theme), and the mark is the palette's
         status_active, which holds each mode's success text.
         
         Called when the table is filled and when the theme is applied, so
-        a mark made in one mode is not left in another's colour.
+        a mark made in one mode is not left in another's color.
         """
         mark = QColor(get_theme_colors(is_dark=self._dark_mode)['status_active'])
         for row in range(self.images_table.rowCount()):
@@ -555,9 +555,9 @@ class IcoAnalyzerDialog(BaseDialog):
                 height: 0px;
             }}
         """)
-        # RNV-RULINGS-2026-10-05, item 1. QTableWidget::item above sets no colour: a
-        # cell's own colour is drawn, and a cell without one takes the
-        # table's (QTableWidget's `color`, the same value). With a colour
+        # RNV-RULINGS-2026-10-05, item 1. QTableWidget::item above sets no color: a
+        # cell's own color is drawn, and a cell without one takes the
+        # table's (QTableWidget's `color`, the same value). With a color
         # there, the sheet won and the PNG mark was never drawn.
         self._mark_png_rows()
     

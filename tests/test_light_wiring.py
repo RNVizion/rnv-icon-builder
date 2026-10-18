@@ -18,9 +18,9 @@ from pathlib import Path
 import pytest
 
 from ui import colors as C
-# RNV-COLOUR-SYNC, #53 A (2026-10-17): the colour values this file needs that
-# are not the application's colours are named once, in tests/colour_values.py.
-from tests.colour_values import (DATA_OS_SIM_TASKBAR_LIGHT, RETIRED_LIGHT_HOVER_AND_HEADER,
+# RNV-COLOR-SYNC, #53 A (2026-10-17): the color values this file needs that
+# are not the application's colors are named once, in tests/color_values.py.
+from tests.color_values import (DATA_OS_SIM_TASKBAR_LIGHT, RETIRED_LIGHT_HOVER_AND_HEADER,
                                  RETIRED_LIGHT_LIST_ALT, RETIRED_LIGHT_PLATFORM_BG)
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -31,15 +31,15 @@ HEX = re.compile(r"#[0-9a-fA-F]{6}$")
 # (hex, key) -> the constant that key must resolve THROUGH, in source.
 # Narrowed to the splits this repository actually holds; the fleet's other
 # split keys are listed below and asserted absent.
-# #52 A, 2026-10-17: a live hex by its name in the colour file, a retired one
-# by its name in tests/colour_values.py.
+# #52 A, 2026-10-17: a live hex by its name in the color file, a retired one
+# by its name in tests/color_values.py.
 SPLIT = {(C.APP_PRESSED_LIGHT, 'pressed_bg'): 'APP_PRESSED_LIGHT',
          (RETIRED_LIGHT_HOVER_AND_HEADER, 'platform_btn_hover_bg'): 'APP_HOVER_LIGHT'}
 SPLIT_ABSENT = []
 # old hex -> new hex
-# #52 A, 2026-10-17: each rung by its name in the colour file.
-# RETIRED_LIGHT_HOVER_AND_HEADER went onto one grey in two roles, the hover
-# (APP_HOVER_LIGHT) and the list header (GREY_EE); the rung is the register's
+# #52 A, 2026-10-17: each rung by its name in the color file.
+# RETIRED_LIGHT_HOVER_AND_HEADER went onto one gray in two roles, the hover
+# (APP_HOVER_LIGHT) and the list header (GRAY_EE); the rung is the register's
 # hover plate.
 COLLAPSE = {RETIRED_LIGHT_PLATFORM_BG: C.APP_SURFACE_LIGHT_2,
             RETIRED_LIGHT_LIST_ALT: C.APP_SURFACE_LIGHT_2,
@@ -125,7 +125,7 @@ def test_the_split_puts_register_names_only_on_role_keys():
             if isinstance(v, ast.Name) and v.id == "APP_PRESSED_LIGHT":
                 assert key == "pressed_bg", (
                     f"{pal_name}[{key!r}] carries APP_PRESSED_LIGHT but is not a "
-                    f"pressed state; a static surface keeps GREY_E0")
+                    f"pressed state; a static surface keeps GRAY_E0")
 
 
 @pytest.mark.parametrize("old,new", sorted(COLLAPSE.items()))
@@ -162,8 +162,8 @@ def test_every_exemption_is_still_there_and_still_needed():
 
 
 def test_one_hex_one_name_unless_it_is_a_declared_split():
-    """A second constant for one colour is either a split with a stated role,
-    or a defect. This is what stops GREY_XX and APP_YY drifting into two
+    """A second constant for one color is either a split with a stated role,
+    or a defect. This is what stops GRAY_XX and APP_YY drifting into two
     names for one thing with nobody having decided that."""
     src = SOURCE.read_text(encoding="utf-8-sig")
     pat = re.compile(r"^([A-Z][A-Z0-9_]+):\s*Final\[str\]\s*=\s*['\"](#[0-9a-fA-F]{6})['\"]", re.M)
@@ -171,9 +171,9 @@ def test_one_hex_one_name_unless_it_is_a_declared_split():
     for name, hexv in pat.findall(src):
         by_hex.setdefault(hexv.lower(), []).append(name)
     allowed_pairs = {
-        frozenset({"APP_PRESSED_LIGHT", "GREY_E0"}),
-        frozenset({"APP_HOVER_LIGHT", "GREY_EE"}),
-        frozenset({"APP_TEXT", "GREY_DD"}),
+        frozenset({"APP_PRESSED_LIGHT", "GRAY_E0"}),
+        frozenset({"APP_HOVER_LIGHT", "GRAY_EE"}),
+        frozenset({"APP_TEXT", "GRAY_DD"}),
         # pre-existing, documented elsewhere in this module
         frozenset({"WHITE", "CONTRAST_DEMO_WHITE_BG"}),
         frozenset({"TRUE_BLACK", "CONTRAST_DEMO_BLACK_BG"}),
@@ -181,14 +181,14 @@ def test_one_hex_one_name_unless_it_is_a_declared_split():
         frozenset({"TRUE_BLACK", "SVG_EXPORT_STROKE"}),
         frozenset({"BRAND_BLACK", "APP_PANEL"}),
         frozenset({"APP_HOVER_LIGHT", "IMAGE_CANVAS_LIGHT"}),
-        # RNV-COLOUR-SYNC, #48 A (2026-10-16): the white and black a preview is
+        # RNV-COLOR-SYNC, #48 A (2026-10-16): the white and black a preview is
         # shown on are data, the application's own. Not a second name for
         # WHITE or TRUE_BLACK: a preview keeps its ground when the brand moves.
         frozenset({"WHITE", "PREVIEW_WHITE"}),
         frozenset({"TRUE_BLACK", "PREVIEW_BLACK"}),
-        # RNV-COLOUR-SYNC, #56 A (2026-10-17): what a generated web manifest
+        # RNV-COLOR-SYNC, #56 A (2026-10-17): what a generated web manifest
         # declares is a file's content, the application's own. Not a second
-        # name for WHITE: a generated file keeps its colours when the brand
+        # name for WHITE: a generated file keeps its colors when the brand
         # moves. The theme and the background are two roles in the manifest.
         frozenset({"WHITE", "WEB_MANIFEST_THEME_COLOR"}),
         frozenset({"WHITE", "WEB_MANIFEST_BACKGROUND_COLOR"}),
