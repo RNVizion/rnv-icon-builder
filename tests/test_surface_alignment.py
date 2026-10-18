@@ -1,20 +1,20 @@
 """
 Panel and input surfaces, and the edges that have to survive aligning them.
 
-RULED 2026-08-27. Light panels are #f5f5f5 in every app; dark input fields are
-#1a1a1a, which is what three of the five already used.
+RULED 2026-08-27. Light panels are APP_SURFACE_LIGHT_3 in every app; dark input
+fields are BRAND_BLACK, which is what three of the five already used.
 
 WHAT THE ALIGNMENT ACTUALLY DID TO THE EDGES, measured from the adjacency map
 rather than assumed:
 
   LIGHT   panel and card were the same colour here, so a card had no edge
-          against the panel it sat on. Moving the panel to #f5f5f5 CREATES
-          that edge.
+          against the panel it sat on. Moving the panel to APP_SURFACE_LIGHT_3
+          CREATES that edge.
 
   DARK    the input field was the same colour as the card, so a field sitting
-          on a card had no edge either. Moving it to #1a1a1a creates one --
+          on a card had no edge either. Moving it to BRAND_BLACK creates one --
           and makes it equal to the panel, which is how the three apps that
-          already used #1a1a1a have always drawn it: the input border is what
+          already used BRAND_BLACK have always drawn it: the input border is what
           separates a field from the panel, not a fill difference.
 
 That second one is the reason these tests exist. The alignment trades one
@@ -31,6 +31,7 @@ import pytest
 
 from ui.colors import (DARK_THEME_COLORS as DARK, IMAGE_MODE_COLORS as IMAGE,
                           LIGHT_THEME_COLORS as LIGHT)
+from ui.colors import APP_SURFACE_LIGHT_3, BRAND_BLACK
 
 FLAT = {"DARK": DARK, "LIGHT": LIGHT}
 
@@ -54,13 +55,15 @@ def test_both_flat_palettes_carry_the_surface_keys():
 
 
 def test_the_light_panel_is_the_agreed_surface():
-    assert LIGHT["panel_bg"] == "#f5f5f5", (
-        f"light panel is {LIGHT['panel_bg']}, not the #f5f5f5 all five apps use")
+    # RNV-COLOUR-SYNC, 2026-10-16: the agreed surface by name, where it was its
+    # hex code: the register's surface-light-3, which all five apps use.
+    assert LIGHT["panel_bg"] == APP_SURFACE_LIGHT_3, (
+        f"light panel is {LIGHT['panel_bg']}, not the {APP_SURFACE_LIGHT_3} all five apps use")
 
 
 def test_the_dark_input_is_the_agreed_surface():
-    assert DARK["input_bg"] == "#1a1a1a", (
-        f"dark input is {DARK['input_bg']}, not the #1a1a1a all five apps use")
+    assert DARK["input_bg"] == BRAND_BLACK, (
+        f"dark input is {DARK['input_bg']}, not the {BRAND_BLACK} all five apps use")
 
 
 def test_a_card_still_has_an_edge_against_its_panel():
@@ -90,6 +93,6 @@ def test_image_mode_was_left_alone():
     """Recorded rather than trusted: if image mode is aligned later, this test
     is the thing that has to be deleted on purpose."""
     assert "input_bg" in IMAGE
-    assert IMAGE["input_bg"] != "#1a1a1a", (
+    assert IMAGE["input_bg"] != BRAND_BLACK, (
         "image mode now uses the dark input surface. That was outside the "
         "2026-08-27 ruling -- if it is intended, delete this test and say so.")

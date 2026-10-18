@@ -14,6 +14,10 @@ import os
 import pytest
 from PIL import Image
 
+# RNV-COLOUR-SYNC, #53 A (2026-10-17): the colour values this file needs that
+# are not the application's colours are named once, in tests/colour_values.py.
+from tests.colour_values import DATA_CUSTOM_BG_CHOICE
+
 
 # ══════════════════════════════════════════════════════════════════════════════
 # 1. CHECKERBOARD PATTERN
@@ -220,7 +224,7 @@ class TestBackgroundColorButtonFollowsTheMode:
     """RNV-RESTYLE-ON-SWITCH, ruling 3 of 2026-09-26. The Settings dialog's
     preview-background selector has a small button showing the custom
     colour. Its edge was written from DARK_THEME_COLORS by name, so in light
-    mode it kept dark's #555555 edge while the combo beside it turned light;
+    mode it kept dark's GREY_55 edge while the combo beside it turned light;
     the chart's read-back of every stylesheet the app sets found it there.
     The edge takes the mode apply_theme() was given now.
 
@@ -266,7 +270,7 @@ class TestBackgroundColorButtonFollowsTheMode:
                                 staticmethod(lambda *a, **k: QColor(10, 200, 30)))
             widget._choose_color()
             sheet, plate, hover = self._parts(widget)
-            assert "background-color: #0ac81e;" in plate.lower(), sheet
+            assert f"background-color: {DATA_CUSTOM_BG_CHOICE};" in plate.lower(), sheet
             edge = get_theme_colors(is_dark=False)["text_disabled"]
             assert f"border: 2px solid {edge};" in plate, sheet
             assert f"border-color: {BRAND_GOLD};" in hover, sheet

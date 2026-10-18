@@ -52,6 +52,8 @@ SKIP_DIRS = {"tests", "build", "dist", "docs", "resources", "scripts", "snapshot
 
 from ui.colors import DARK_THEME_COLORS, IMAGE_MODE_COLORS, LIGHT_THEME_COLORS, OS_SIM_COLORS  # noqa: E402
 from ui.theme_manager import ThemeManager  # noqa: E402
+# RNV-COLOUR-SYNC, #53 A (2026-10-17): the probe's colours, named once.
+from tests.colour_values import DATA_PROBE_CLEAR_RGBA, DATA_PROBE_HEX, DATA_PROBE_RGBA  # noqa: E402
 
 PALETTES = {"DARK_THEME_COLORS": DARK_THEME_COLORS, "LIGHT_THEME_COLORS": LIGHT_THEME_COLORS,
             "IMAGE_MODE_COLORS": IMAGE_MODE_COLORS, "OS_SIM_COLORS": OS_SIM_COLORS}
@@ -65,12 +67,10 @@ MIN_CONSTANTS = 30
 #: a generated file, what a generated icon starts with and what a choice is
 #: called are not the application's look, and a brand move should not change them.
 DATA = {
-    ("cli.py", "#ffffff"):
-        "the theme and background colour a generated web manifest declares: a file's content",
-    ("core/icon_builder_core.py", "#ffffff"):
-        "the same two colours, in the manifest the application itself writes: a file's content",
-    ("core/icon_builder_core.py", "#da532c"):
-        "the tile colour a generated browserconfig.xml declares: a file's content",
+    # RNV-COLOUR-SYNC, #56 A (2026-10-17): the web manifest's two colours, in
+    # cli.py and core/icon_builder_core.py, and browserconfig.xml's tile colour
+    # stood here. They are named in ui/colors.py now, as the application's own
+    # data, and both writers read the names.
     ("ui/settings_dialog.py", "(255, 255, 255, 255)"):
         "the fill a generated icon starts with: image content, and the person's to change",
     ("ui/settings_dialog.py", "(0, 0, 0, 255)"):
@@ -266,8 +266,8 @@ def test_the_sweep_reads_every_spelling():
     seen = {(kind, literal) for _line, kind, literal in _written("probe.py", (
         "from PyQt6.QtGui import QColor\n"
         "from PyQt6.QtCore import Qt\n"
-        "a = 'background-color: #ffcccc; border: 2px solid red;'\n"
-        "b = f'color: rgba(255, 255, 255, 230); padding: {4}px'\n"
+        f"a = 'background-color: {DATA_PROBE_HEX}; border: 2px solid red;'\n"
+        f"b = f'color: {DATA_PROBE_RGBA}; padding: {{4}}px'\n"
         "c = QColor(128, 128, 128)\n"
         "d = Qt.GlobalColor.darkGreen\n"
         "e = QColor('yellow')\n"
@@ -277,7 +277,7 @@ def test_the_sweep_reads_every_spelling():
         "g = {'ground': 'black'}\n"
         "h = Image.new('RGB', (8, 8), 'Gray')\n"
         "c.setAlpha(171)\n"))}
-    assert seen == {("hex", "#ffcccc"), ("name", "border: red"), ("func", "rgba(255, 255, 255, 230)"),
+    assert seen == {("hex", DATA_PROBE_HEX), ("name", "border: red"), ("func", DATA_PROBE_RGBA),
                     ("qcolor", "QColor(128, 128, 128)"), ("global", "Qt.GlobalColor.darkGreen"),
                     ("name", "yellow"), ("tuple", "(0, 0, 0)"), ("tuple", "(255, 255, 255)"),
                     ("list", "[200, 200, 200]"), ("name", "white"), ("name", "black"), ("name", "Gray"),
@@ -285,7 +285,7 @@ def test_the_sweep_reads_every_spelling():
     quiet = _written("probe.py", (
         "from PyQt6.QtGui import QColor\n"
         "from PyQt6.QtCore import Qt\n"
-        "a = 'background: transparent; border: none; color: rgba(0, 0, 0, 0);'\n"
+        f"a = 'background: transparent; border: none; color: {DATA_PROBE_CLEAR_RGBA};'\n"
         "b = QColor(0, 0, 0, 0)\n"
         "b.setAlpha(0)\n"
         "b.setAlpha(255)\n"
@@ -293,7 +293,7 @@ def test_the_sweep_reads_every_spelling():
         "d = [int(h[i:i + 2], 16) for i in (0, 2, 4)]\n"
         "margins = (10, 10, 10, 10)\n"
         "sizes = [16, 32, 48]\n"
-        "'''a bare string is prose: color: red, #ffcccc'''\n"
+        f"'''a bare string is prose: color: red, {DATA_PROBE_HEX}'''\n"
         "if d in (5, 10, 20) or d == (0, 0, 0) or a == 'red':\n"
         "    pass\n"
         "for size in [16, 32, 48]:\n"

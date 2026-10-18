@@ -1,0 +1,100 @@
+{
+  "about": "Where each colour in ui/colors.py comes from. A string is a name in rnv-brand (TABLE.key, or one of its own constants, in engine/brand.py); an object is a value this application owns, with the reason. Edit this file, then run: python tools/sync_colors.py",
+  "app": "RNV Icon Builder",
+  "colour_file": "ui/colors.py",
+  "palettes": [
+    {
+      "file": "ui/colors.py",
+      "dict": "DARK_THEME_COLORS"
+    },
+    {
+      "file": "ui/colors.py",
+      "dict": "LIGHT_THEME_COLORS"
+    },
+    {
+      "file": "ui/colors.py",
+      "dict": "IMAGE_MODE_COLORS"
+    }
+  ],
+  "notes": [
+    "OS_SIM_COLORS, the colours of other systems' chrome -- a Windows taskbar, a macOS Finder, a browser's tabs -- which the preview imitates. They are the other systems' colours, not this application's."
+  ],
+  "colours": {
+    "BRAND_GOLD": "APP.accent",
+    "BRAND_DARK_GOLD": "APP.accent-light-mode",
+    "TRUE_BLACK": "PERMANENT.black",
+    "WHITE": "PERMANENT.white",
+    "BRAND_BLACK": "APP.panel",
+    "APP_CARD": "APP.card",
+    "STATUS_SUCCESS_TEXT": "STATUS.success-text",
+    "STATUS_SUCCESS_TEXT_LIGHT": "STATUS.success-text-light",
+    "APP_BORDER": "APP.border",
+    "APP_TEXT": "APP.text",
+    "APP_TEXT_DIM": "APP.text-dim",
+    "APP_PANEL_HOVER": "APP.panel-hover",
+    "APP_HOVER_LIGHT": "APP.hover-light",
+    "APP_SURFACE_LIGHT_3": "APP.surface-light-3",
+    "APP_SURFACE_LIGHT_2": "APP.surface-light-2",
+    "APP_PRESSED_LIGHT": "APP.pressed-light",
+    "GREY_E0": {
+      "app": "#e0e0e0",
+      "why": "grey(14) on the ramp. Static light surfaces that share pressed-light's hex without being a pressed state."
+    },
+    "GREY_EE": {
+      "app": "#eeeeee",
+      "why": "grey(14) on the ramp. Static light surfaces that share hover-light's hex without being a hover."
+    },
+    "GREY_DD": {
+      "app": "#dddddd",
+      "why": "grey(13) on the ramp. Edges and grid lines that share APP text's hex without being ink."
+    },
+    "GREY_66": {
+      "app": "#666666",
+      "why": "grey(6) on the register's ink grid, which the register states as a rule and does not name. Secondary and muted text on light."
+    },
+    "GREY_88": {
+      "app": "#888888",
+      "why": "grey(8) on the register's ink grid, which the register states as a rule and does not name. Muted text on dark; a scrollbar handle's hover on light."
+    },
+    "GREY_55": {
+      "app": "#555555",
+      "why": "grey(5) on the register's ink grid, which the register states as a rule and does not name. Disabled text and a checkbox edge on dark."
+    },
+    "GREY_44": {
+      "app": "#444444",
+      "why": "grey(4) on the register's ink grid, which the register states as a rule and does not name. The pressed plate and the scrollbar handle."
+    },
+    "GREY_CC": {
+      "app": "#cccccc",
+      "why": "grey(12) on the register's ink grid, which the register states as a rule and does not name. The light edge a swatch takes on a dark ground."
+    },
+    "DEFAULT_CUSTOM_BG_COLOR": {
+      "app": "#808080",
+      "why": "Data: the neutral grey a custom preview background starts as."
+    },
+    "PREVIEW_WHITE": {
+      "app": "#ffffff",
+      "why": "Data, not chrome: the white a preview is shown on. A brand change does not alter a preview (#48 A)."
+    },
+    "PREVIEW_BLACK": {
+      "app": "#000000",
+      "why": "Data, not chrome: the black preview background."
+    },
+    "PREVIEW_MISSING_FILL": {
+      "app": "#c8c8c8",
+      "why": "The grey a size with no image of its own is previewed as."
+    },
+    "WEB_MANIFEST_THEME_COLOR": {
+      "app": "#ffffff",
+      "why": "Data, not chrome: the theme_color a generated site.webmanifest declares, a file's content. A brand change does not alter a generated file (#56 A)."
+    },
+    "WEB_MANIFEST_BACKGROUND_COLOR": {
+      "app": "#ffffff",
+      "why": "Data, not chrome: the background_color a generated site.webmanifest declares, a file's content (#56 A)."
+    },
+    "BROWSERCONFIG_TILE_COLOR": {
+      "app": "#da532c",
+      "why": "Data, not chrome: the TileColor a generated browserconfig.xml declares, a file's content (#56 A)."
+    }
+  }
+}

@@ -16,6 +16,15 @@ import tokenize
 from pathlib import Path
 
 from ui import colors
+# RNV-COLOUR-SYNC, #53 A (2026-10-17): the colour values this file needs that
+# are not the application's colours are named once, in tests/colour_values.py.
+from tests.colour_values import (
+    EXAMPLE_GROUND_BLACK, EXAMPLE_GROUND_BLUE, EXAMPLE_GROUND_DARK_GOLD,
+    EXAMPLE_GROUND_GOLD, EXAMPLE_GROUND_GREEN, EXAMPLE_GROUND_GREEN_SHORT,
+    EXAMPLE_GROUND_GREY_10, EXAMPLE_GROUND_GREY_77, EXAMPLE_GROUND_GREY_80,
+    EXAMPLE_GROUND_OLIVE, EXAMPLE_GROUND_TEAL, EXAMPLE_GROUND_WHITE,
+    EXAMPLE_GROUND_YELLOW,
+)
 
 ROOT = Path(__file__).resolve().parent.parent
 RETIRED = ('CONTRAST_ON_DARK', 'CONTRAST_ON_LIGHT', 'SWATCH_BORDER_ON_DARK', 'SWATCH_BORDER_ON_LIGHT')
@@ -51,10 +60,10 @@ def _sources():
 
 
 def test_the_rule_is_a_real_contrast_measurement():
-    assert colors.contrast_ink("#ffffff") == colors.TRUE_BLACK
-    assert colors.contrast_ink("#000000") == colors.WHITE
-    assert round(colors.contrast_ratio("#ffffff", "#000000"), 2) == 21.0
-    assert round(colors.contrast_ratio("#777777", "#777777"), 2) == 1.0
+    assert colors.contrast_ink(EXAMPLE_GROUND_WHITE) == colors.TRUE_BLACK
+    assert colors.contrast_ink(EXAMPLE_GROUND_BLACK) == colors.WHITE
+    assert round(colors.contrast_ratio(EXAMPLE_GROUND_WHITE, EXAMPLE_GROUND_BLACK), 2) == 21.0
+    assert round(colors.contrast_ratio(EXAMPLE_GROUND_GREY_77, EXAMPLE_GROUND_GREY_77), 2) == 1.0
 
 
 def test_the_rule_gets_saturated_colour_right():
@@ -70,7 +79,8 @@ def test_the_two_call_sites_now_agree():
     """settings_dialog picked an edge and preview_utils picked an ink, and on
     a saturated ground they disagreed about which way the ground faced. They
     cannot any more: both ask the same function."""
-    for ground in ("#00ff00", "#ffff00", "#20b0b0", "#808080", "#101010"):
+    for ground in (EXAMPLE_GROUND_GREEN, EXAMPLE_GROUND_YELLOW, EXAMPLE_GROUND_TEAL,
+                   EXAMPLE_GROUND_GREY_80, EXAMPLE_GROUND_GREY_10):
         dark_ink = colors.contrast_ink(ground) == colors.TRUE_BLACK
         dark_edge = colors.swatch_edge(ground) == colors.APP_BORDER
         assert dark_ink == dark_edge, (
@@ -78,14 +88,15 @@ def test_the_two_call_sites_now_agree():
 
 
 def test_it_takes_a_hex_string_or_an_rgb_triple():
-    assert colors.contrast_ink("#00ff00") == colors.contrast_ink((0, 255, 0))
-    assert colors.contrast_ink("#0f0") == colors.contrast_ink("#00ff00")
+    assert colors.contrast_ink(EXAMPLE_GROUND_GREEN) == colors.contrast_ink((0, 255, 0))
+    assert colors.contrast_ink(EXAMPLE_GROUND_GREEN_SHORT) == colors.contrast_ink(EXAMPLE_GROUND_GREEN)
 
 
 def test_the_edge_rule_shares_the_ink_rule():
-    assert colors.swatch_edge("#ffffff") == colors.APP_BORDER
-    assert colors.swatch_edge("#000000") == colors.GREY_CC
-    for ground in ("#ffffff", "#000000", "#8c7337", "#00ff00", "#777777"):
+    assert colors.swatch_edge(EXAMPLE_GROUND_WHITE) == colors.APP_BORDER
+    assert colors.swatch_edge(EXAMPLE_GROUND_BLACK) == colors.GREY_CC
+    for ground in (EXAMPLE_GROUND_WHITE, EXAMPLE_GROUND_BLACK, EXAMPLE_GROUND_DARK_GOLD,
+                   EXAMPLE_GROUND_GREEN, EXAMPLE_GROUND_GREY_77):
         edge = colors.swatch_edge(ground)
         other = colors.GREY_CC if edge == colors.APP_BORDER else colors.APP_BORDER
         assert colors.contrast_ratio(ground, edge) >= \
@@ -125,8 +136,9 @@ def test_the_retired_names_are_gone():
 
 
 def test_no_three_digit_hex_in_the_palette():
-    """One of the retired constants was "#ccc". The census reads six-digit
-    hexes, so a three-digit one is a value the chart cannot see."""
+    """One of the retired constants spelled GREY_CC in three digits. The census
+    reads six-digit hexes, so a three-digit one is a value the chart cannot
+    see."""
     src = (ROOT / "ui" / "colors.py").read_text(encoding="utf-8-sig")
     hits = re.findall(r"""['"]#[0-9a-fA-F]{3}['"]""", src)
     assert not hits, f"three-digit hexes are back: {hits}"
@@ -136,7 +148,8 @@ def test_the_rule_matches_the_pickers():
     """Two applications, one block. If they drift, the fleet has two rules
     again and the drift will be invisible until a swatch looks wrong in one
     app and right in the other."""
-    for ground in ("#ffffff", "#000000", "#808080", "#00ff00", "#d2bc93",
-                   "#8c7337", "#20b0b0", "#9a9a30", "#3060d0"):
+    for ground in (EXAMPLE_GROUND_WHITE, EXAMPLE_GROUND_BLACK, EXAMPLE_GROUND_GREY_80,
+                   EXAMPLE_GROUND_GREEN, EXAMPLE_GROUND_GOLD, EXAMPLE_GROUND_DARK_GOLD,
+                   EXAMPLE_GROUND_TEAL, EXAMPLE_GROUND_OLIVE, EXAMPLE_GROUND_BLUE):
         want_black = colors.relative_luminance(ground) > 0.1791287
         assert (colors.contrast_ink(ground) == colors.TRUE_BLACK) == want_black

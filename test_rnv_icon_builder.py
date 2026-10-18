@@ -116,8 +116,16 @@ from ui.colors               import (
     DARK_THEME_COLORS, LIGHT_THEME_COLORS, IMAGE_MODE_COLORS,
     get_theme_colors,
     DEFAULT_CUSTOM_BG_COLOR,
-    TRUE_BLACK, WHITE, APP_BORDER, GREY_CC,
+    TRUE_BLACK, WHITE, APP_BORDER, GREY_CC, BRAND_BLACK, GREY_44,
     contrast_ink, swatch_edge, contrast_ratio,
+)
+# RNV-COLOUR-SYNC, #53 A (2026-10-17): the colour values this suite needs that
+# are not the application's colours are named once, in tests/colour_values.py.
+from tests.colour_values     import (
+    EXAMPLE_GROUND_WHITE, EXAMPLE_GROUND_BLACK, EXAMPLE_GROUND_DARK_GOLD,
+    EXAMPLE_GROUND_GREEN, EXAMPLE_GROUND_GREY_77,
+    EXAMPLE_HEX_BLACK, EXAMPLE_HEX_WHITE_UPPER, EXAMPLE_HEX_RED_UPPER,
+    EXAMPLE_HEX_GOLD,
 )
 from ui.theme_manager        import ThemeManager
 from ui.preview_utils        import (
@@ -135,6 +143,11 @@ from ui.image_adjustments        import (
 )
 
 from PyQt6.QtGui import QPixmap as _QPixmap
+
+#: RNV-COLOUR-SYNC, #52 A (2026-10-17). Where each colour comes from, as
+#: brand_map.json says. The values are held by tests/test_colours_in_sync.py,
+#: against the register at the pin; what this suite holds is the name each takes.
+BRAND_MAP = json.loads((Path(_FLAT) / "brand_map.json").read_text(encoding="utf-8"))["colours"]
 
 # Pillow — used to create in-memory test images
 from PIL import Image as _Image
@@ -185,10 +198,13 @@ class TestColors(unittest.TestCase):
         self.assertRegex(BRAND_DARK_GOLD, r'^#[0-9a-fA-F]{6}$')
 
     def test_brand_gold_value(self):
-        self.assertEqual(BRAND_GOLD.lower(), "#d2bc93")
+        # #52 A, 2026-10-17: where the value comes from. The value is held by
+        # tests/test_colours_in_sync.py, against the register at the pin.
+        self.assertEqual(BRAND_MAP["BRAND_GOLD"], "APP.accent")
 
     def test_brand_gold_dark_value(self):
-        self.assertEqual(BRAND_DARK_GOLD.lower(), "#8c7337")
+        # #52 A, 2026-10-17: as above.
+        self.assertEqual(BRAND_MAP["BRAND_DARK_GOLD"], "APP.accent-light-mode")
 
     # LOCK EXCEPTION, ruled 2026-10-04 (RNV-NAMED-AND-USED). The two golds
     # as integer triples were constants nothing in the application read,
@@ -218,11 +234,11 @@ class TestColors(unittest.TestCase):
         """RNV-INK-RULE: the pair used to be two constants named for the
         ground they sat on. The question is now asked, not answered in
         advance, so the test asks it too."""
-        self.assertEqual(contrast_ink("#ffffff"), TRUE_BLACK)
+        self.assertEqual(contrast_ink(EXAMPLE_GROUND_WHITE), TRUE_BLACK)
         self.assertEqual(contrast_ink((0, 255, 0)), TRUE_BLACK)
 
     def test_contrast_ink_picks_white_on_a_dark_ground(self):
-        self.assertEqual(contrast_ink("#000000"), WHITE)
+        self.assertEqual(contrast_ink(EXAMPLE_GROUND_BLACK), WHITE)
         self.assertEqual(contrast_ink((0, 0, 128)), WHITE)
 
     def test_status_active_color_nonempty(self):
@@ -237,9 +253,10 @@ class TestColors(unittest.TestCase):
         """The same question with a different pair of candidates. A
         len() > 0 assertion could not have caught either of the two
         disagreeing brightness rules this replaced."""
-        self.assertEqual(swatch_edge("#ffffff"), APP_BORDER)
-        self.assertEqual(swatch_edge("#000000"), GREY_CC)
-        for ground in ("#ffffff", "#000000", "#8c7337", "#00ff00", "#777777"):
+        self.assertEqual(swatch_edge(EXAMPLE_GROUND_WHITE), APP_BORDER)
+        self.assertEqual(swatch_edge(EXAMPLE_GROUND_BLACK), GREY_CC)
+        for ground in (EXAMPLE_GROUND_WHITE, EXAMPLE_GROUND_BLACK, EXAMPLE_GROUND_DARK_GOLD,
+                       EXAMPLE_GROUND_GREEN, EXAMPLE_GROUND_GREY_77):
             edge = swatch_edge(ground)
             other = GREY_CC if edge == APP_BORDER else APP_BORDER
             self.assertGreaterEqual(contrast_ratio(ground, edge),
@@ -316,22 +333,22 @@ class TestColors(unittest.TestCase):
 
     # ── Main button inverse system ─────────────────────────────────────────────
     def test_dark_main_btn_rest_bg(self):
-        self.assertEqual(DARK_THEME_COLORS['main_btn_bg'], '#1a1a1a')
+        self.assertEqual(DARK_THEME_COLORS['main_btn_bg'], BRAND_BLACK)
 
     def test_dark_main_btn_hover_bg(self):
-        self.assertEqual(DARK_THEME_COLORS['main_btn_hover_bg'], '#333333')
+        self.assertEqual(DARK_THEME_COLORS['main_btn_hover_bg'], APP_BORDER)
 
     def test_dark_main_btn_pressed_bg(self):
-        self.assertEqual(DARK_THEME_COLORS['main_btn_pressed_bg'], '#444444')
+        self.assertEqual(DARK_THEME_COLORS['main_btn_pressed_bg'], GREY_44)
 
     def test_light_main_btn_rest_bg(self):
-        self.assertEqual(LIGHT_THEME_COLORS['main_btn_bg'], '#ffffff')
+        self.assertEqual(LIGHT_THEME_COLORS['main_btn_bg'], WHITE)
 
     def test_light_main_btn_hover_bg(self):
-        self.assertEqual(LIGHT_THEME_COLORS['main_btn_hover_bg'], '#333333')
+        self.assertEqual(LIGHT_THEME_COLORS['main_btn_hover_bg'], APP_BORDER)
 
     def test_light_main_btn_pressed_bg(self):
-        self.assertEqual(LIGHT_THEME_COLORS['main_btn_pressed_bg'], '#444444')
+        self.assertEqual(LIGHT_THEME_COLORS['main_btn_pressed_bg'], GREY_44)
 
     # ── Image mode inherits dark base ─────────────────────────────────────────
     def test_image_mode_inherits_dark_text(self):
@@ -344,9 +361,10 @@ class TestColors(unittest.TestCase):
         # read as drift.
         #
         # It read assertIn('rgba', window_bg) -- the SPELLING, not the
-        # property. It passed on 'rgba(26, 26, 26, 0.93)', which QColor
+        # property. It passed on RETIRED_SCRIM_RGBA, which QColor
         # cannot parse, so QPalette painted the window opaque black; and
-        # it failed on '#ed1a1a1a', which is transparent at alpha 237.
+        # it failed on translucent(BRAND_BLACK, SCRIM_ALPHA), which is
+        # transparent at alpha 237.
         # Transparency is a property of the colour, so ask the colour.
         from PyQt6.QtGui import QColor
         colour = QColor(IMAGE_MODE_COLORS['window_bg'])
@@ -486,10 +504,10 @@ class TestThemeManager(unittest.TestCase):
         self.assertNotIn(BRAND_GOLD.lower(), self.tm.DARK_THEME.get('main_btn_hover_bg', '').lower())
 
     def test_dark_theme_main_btn_pressed_text_is_black(self):
-        self.assertEqual(self.tm.DARK_THEME['main_btn_pressed_text'], '#000000')
+        self.assertEqual(self.tm.DARK_THEME['main_btn_pressed_text'], TRUE_BLACK)
 
     def test_light_theme_main_btn_pressed_text_is_white(self):
-        self.assertEqual(self.tm.LIGHT_THEME['main_btn_pressed_text'], '#ffffff')
+        self.assertEqual(self.tm.LIGHT_THEME['main_btn_pressed_text'], WHITE)
 
 
 # ══════════════════════════════════════════════════════════════════════════════
@@ -819,25 +837,25 @@ class TestPreviewUtils(unittest.TestCase):
 
     # ── color_to_hex / hex_to_color ────────────────────────────────────────────
     def test_color_to_hex_black(self):
-        self.assertEqual(color_to_hex((0, 0, 0)), '#000000')
+        self.assertEqual(color_to_hex((0, 0, 0)), EXAMPLE_HEX_BLACK)
 
     def test_color_to_hex_white(self):
-        self.assertEqual(color_to_hex((255, 255, 255)), '#FFFFFF')
+        self.assertEqual(color_to_hex((255, 255, 255)), EXAMPLE_HEX_WHITE_UPPER)
 
     def test_color_to_hex_red(self):
-        self.assertEqual(color_to_hex((255, 0, 0)), '#FF0000')
+        self.assertEqual(color_to_hex((255, 0, 0)), EXAMPLE_HEX_RED_UPPER)
 
     def test_color_to_hex_brand_gold(self):
-        self.assertEqual(color_to_hex((210, 188, 147)).lower(), '#d2bc93')
+        self.assertEqual(color_to_hex((210, 188, 147)).lower(), EXAMPLE_HEX_GOLD)
 
     def test_hex_to_color_black(self):
-        self.assertEqual(hex_to_color('#000000'), (0, 0, 0))
+        self.assertEqual(hex_to_color(EXAMPLE_HEX_BLACK), (0, 0, 0))
 
     def test_hex_to_color_white(self):
-        self.assertEqual(hex_to_color('#FFFFFF'), (255, 255, 255))
+        self.assertEqual(hex_to_color(EXAMPLE_HEX_WHITE_UPPER), (255, 255, 255))
 
     def test_hex_to_color_uppercase(self):
-        self.assertEqual(hex_to_color('#FF0000'), (255, 0, 0))
+        self.assertEqual(hex_to_color(EXAMPLE_HEX_RED_UPPER), (255, 0, 0))
 
     def test_roundtrip_hex_color(self):
         for c in [(0, 0, 0), (255, 255, 255), (128, 64, 200), (210, 188, 147)]:
@@ -1671,7 +1689,7 @@ class TestEdgeCases(unittest.TestCase):
         )
 
     def test_both_themes_hover_bg_same(self):
-        """Dark and light both use #333333 as main button hover."""
+        """Dark and light both use APP_BORDER as main button hover."""
         self.assertEqual(
             DARK_THEME_COLORS['main_btn_hover_bg'],
             LIGHT_THEME_COLORS['main_btn_hover_bg']

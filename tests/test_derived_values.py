@@ -2,10 +2,10 @@
 
 A palette entry used to be one of two things here -- a name, or a literal --
 and this file adds the third the application always had and never declared.
-rgba(26, 26, 26, 0.93) is not a second colour beside BRAND_BLACK; it IS
+RETIRED_SCRIM_RGBA is not a second colour beside BRAND_BLACK; it IS
 BRAND_BLACK, at 93%, and nothing related the two.
 
-WHY THAT MATTERED. RNV-COLLAPSE-505050 ruled #505050 onto GREY_44 on
+WHY THAT MATTERED. RNV-COLLAPSE-505050 ruled RETIRED_HANDLE_GREY onto GREY_44 on
 2026-09-02. It went on painting here, and in three other applications, because
 the alpha form was written out as rgba() and every sweep in the fleet compares
 six-digit hex. A written-down derivative is orphaned the moment its source
@@ -28,6 +28,16 @@ from ui.colors import (DARK_THEME_COLORS as DARK,
                        IMAGE_MODE_COLORS as IMAGE,
                        OS_SIM_COLORS as OS_SIM,
                        translucent)
+# RNV-COLOUR-SYNC, #53 A (2026-10-17): the colour values this file needs that
+# are not the application's colours are named once, in tests/colour_values.py.
+from tests.colour_values import (
+    DATA_OS_SIM_CHROME_BLACK, DATA_OS_SIM_CHROME_GREY,
+    EXAMPLE_TRANSLUCENT_BASE, EXAMPLE_TRANSLUCENT_BASE_BARE,
+    EXAMPLE_TRANSLUCENT_RESULT, EXAMPLE_TRANSLUCENT_UPPER_BASE,
+    EXAMPLE_TRANSLUCENT_UPPER_RESULT,
+    INVALID_EIGHT_DIGIT_BASE, INVALID_FIVE_DIGIT_BASE,
+    RETIRED_HANDLE_GREY,
+)
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
 SRC = ROOT / "ui" / "colors.py"
@@ -46,8 +56,9 @@ ALPHAS = {
     "SCROLLBAR_BORDER_ALPHA": (0x64, "100"),
 }
 
-#: every notation a colour can wear here, longest first so that #ED1A1A1A is
-#: not also read as 1A1A1A and #333333 is not also read as #333.
+#: every notation a colour can wear here, longest first so that
+#: INVALID_EIGHT_DIGIT_UPPER is not also read as 1A1A1A and a six-digit hex is
+#: not also read as its first three digits.
 COMPOSED = re.compile(r"rgba?\(\s*\d{1,3}\s*,\s*\d{1,3}\s*,\s*\d{1,3}"
                       r"\s*(?:,\s*[0-9.]+\s*)?\)")
 HEX8 = re.compile(r"#[0-9a-fA-F]{8}\b")
@@ -73,20 +84,20 @@ def _dicts(names):
 def test_translucent_composes_alpha_first():
     """#AARRGGBB, not #RRGGBBAA. Taking the wrong end gives a real colour and
     the wrong one, which is the failure that does not look like a failure."""
-    assert translucent("#1a1a1a", 0xED) == "#ed1a1a1a"
-    assert translucent("1a1a1a", 0xED) == "#ed1a1a1a"
-    assert translucent("#D2BC93", 0x33) == "#33d2bc93"
+    assert translucent(EXAMPLE_TRANSLUCENT_BASE, 0xED) == EXAMPLE_TRANSLUCENT_RESULT
+    assert translucent(EXAMPLE_TRANSLUCENT_BASE_BARE, 0xED) == EXAMPLE_TRANSLUCENT_RESULT
+    assert translucent(EXAMPLE_TRANSLUCENT_UPPER_BASE, 0x33) == EXAMPLE_TRANSLUCENT_UPPER_RESULT
 
 
 def test_translucent_refuses_what_it_cannot_compose():
     for bad in (-1, 256, 999):
         try:
-            translucent("#1a1a1a", bad)
+            translucent(EXAMPLE_TRANSLUCENT_BASE, bad)
         except ValueError:
             pass
         else:
             raise AssertionError(f"alpha {bad} was accepted")
-    for bad in ("#1a1a1", "#1a1a1a1a", "nonsense"):
+    for bad in (INVALID_FIVE_DIGIT_BASE, INVALID_EIGHT_DIGIT_BASE, "nonsense"):
         try:
             translucent(bad, 0xED)
         except ValueError:
@@ -194,7 +205,7 @@ def test_os_sim_holds_no_rnv_constant():
     doing unrelated jobs must stay separate; binding them couples things that
     should move independently.
 
-    #333333 being a plausible tab title is a coincidence, not a wiring."""
+    APP_BORDER being a plausible tab title is a coincidence, not a wiring."""
     bound = []
     for _name, node in _dicts(("OS_SIM_COLORS",)).items():
         for key, value in zip(node.keys, node.values):
@@ -211,12 +222,15 @@ def test_os_sim_holds_no_rnv_constant():
 def test_os_sim_still_paints_what_it_did():
     """Unbinding must not have moved a colour. These are the six that were
     named, with the values those names held."""
-    assert OS_SIM["taskbar_border"] == "#333333"
-    assert OS_SIM["taskbar_text_light"] == "#000000"
-    assert OS_SIM["explorer_text"] == "#000000"
-    assert OS_SIM["finder_text"] == "#333333"
-    assert OS_SIM["chrome_tab_title"] == "#333333"
-    assert OS_SIM["bookmarks_text"] == "#333333"
+    # #53 A, 2026-10-17: the values, another system's chrome, are named in
+    # tests/colour_values.py. Read from OS_SIM_COLORS itself, this would compare
+    # each entry with itself and could not fail.
+    assert OS_SIM["taskbar_border"] == DATA_OS_SIM_CHROME_GREY
+    assert OS_SIM["taskbar_text_light"] == DATA_OS_SIM_CHROME_BLACK
+    assert OS_SIM["explorer_text"] == DATA_OS_SIM_CHROME_BLACK
+    assert OS_SIM["finder_text"] == DATA_OS_SIM_CHROME_GREY
+    assert OS_SIM["chrome_tab_title"] == DATA_OS_SIM_CHROME_GREY
+    assert OS_SIM["bookmarks_text"] == DATA_OS_SIM_CHROME_GREY
 
 
 # ------------------------------------------------- the bug deriving fixed
@@ -244,7 +258,8 @@ def test_the_scrollbar_handle_is_grey_44_and_not_the_collapsed_value():
     survived in four applications because the alpha form was written out."""
     handle = IMAGE["scrollbar_handle"]
     assert handle == translucent(colors.GREY_44, colors.SCROLLBAR_HANDLE_ALPHA)
-    assert "505050" not in handle.lower(), f"{handle} is still #505050"
+    assert RETIRED_HANDLE_GREY.lstrip("#") not in handle.lower(), (
+        f"{handle} is still {RETIRED_HANDLE_GREY}")
     assert handle[3:].lower() == colors.GREY_44.lstrip("#").lower()
 
 # RNV-DERIVE-ALPHA
@@ -323,7 +338,8 @@ def _lower8_trees():
 def test_eight_digit_hex_is_lower_case():
     """RNV-LOWER-EIGHT, 2026-09-25. The register writes hex in lower case --
     Notation, ruled 2026-08-15, Brand Book decision #19 -- and on 2026-09-25
-    Chris ruled that eight digits are hex too: #ed1a1a1a, never #ED1A1A1A.
+    Chris ruled that eight digits are hex too: EXAMPLE_TRANSLUCENT_RESULT, never
+    INVALID_EIGHT_DIGIT_UPPER.
     Qt reads either case. This application's helper wrote lower case from
     the start; this holds it there.
 

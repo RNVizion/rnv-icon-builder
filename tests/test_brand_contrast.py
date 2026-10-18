@@ -4,9 +4,9 @@ RNV Icon Builder — Brand contrast and derivation guards
 RNV-GOLD-GUARD-FILE-NAMES-RETIRED-VALUES-BY-DESIGN
 
 That marker tells any value-sweeping tool to skip this file. Its whole
-purpose is to name retired colours -- #b19145, (177, 145, 69) -- and
+purpose is to name retired colours -- RETIRED_APP_GOLD, (177, 145, 69) -- and
 assert they never come back. A sweep that rewrites those mentions turns
-the guard into "#8c7337 must never equal #8c7337", which passes forever
+the guard into "BRAND_DARK_GOLD must never equal BRAND_DARK_GOLD", which passes forever
 and protects nothing. Use and mention are different things, and the file
 that states a rule about a value must never be searched for that value.
 
@@ -44,6 +44,12 @@ from pathlib import Path
 import pytest
 
 from ui import colors as C
+# RNV-COLOUR-SYNC, #53 A (2026-10-17): the colour values this file needs that
+# are not the application's colours are named once, in tests/colour_values.py.
+from tests.colour_values import (
+    EXAMPLE_CLAMP_BLACK, EXAMPLE_CLAMP_WHITE, EXAMPLE_LIGHTEN_BASE,
+    RETIRED_APP_GOLD, RETIRED_LIGHT_HOVER_AND_HEADER, RETIRED_LIGHT_PLATFORM_BG,
+)
 
 
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
@@ -150,10 +156,10 @@ def test_deep_gold_tracks_its_source() -> None:
 
 
 @pytest.mark.parametrize("const,rgb", [
-    ("WHITE", "PREVIEW_CHECKER_LIGHT"),
+    ("PREVIEW_WHITE", "PREVIEW_CHECKER_LIGHT"),
     ("GREY_CC", "PREVIEW_CHECKER_DARK"),
-    ("WHITE", "PREVIEW_GROUND_WHITE"),
-    ("TRUE_BLACK", "PREVIEW_GROUND_BLACK"),
+    ("PREVIEW_WHITE", "PREVIEW_GROUND_WHITE"),
+    ("PREVIEW_BLACK", "PREVIEW_GROUND_BLACK"),
     ("DEFAULT_CUSTOM_BG_COLOR", "DEFAULT_CUSTOM_BG_RGB"),
 ])
 def test_rgb_tuple_matches_its_hex(const: str, rgb: str) -> None:
@@ -168,7 +174,7 @@ def test_rgb_tuple_matches_its_hex(const: str, rgb: str) -> None:
 
 
 def test_lighten_preserves_hue_by_shifting_channels_uniformly() -> None:
-    base = "#8c7337"
+    base = EXAMPLE_LIGHTEN_BASE
     out = C.lighten(base, -14)
     br, bg_, bb = C._to_rgb(base)
     orr, og, ob = C._to_rgb(out)
@@ -176,8 +182,8 @@ def test_lighten_preserves_hue_by_shifting_channels_uniformly() -> None:
 
 
 def test_lighten_clamps_instead_of_wrapping() -> None:
-    assert C.lighten("#ffffff", 40) == "#ffffff"
-    assert C.lighten("#000000", -40) == "#000000"
+    assert C.lighten(EXAMPLE_CLAMP_WHITE, 40) == EXAMPLE_CLAMP_WHITE
+    assert C.lighten(EXAMPLE_CLAMP_BLACK, -40) == EXAMPLE_CLAMP_BLACK
 
 
 # ══════════════════════════════════════════════════════════════════════════
@@ -187,12 +193,16 @@ def test_lighten_clamps_instead_of_wrapping() -> None:
 # Pairs that render below the floor on purpose, each with the reason.
 # Both halves of this dict are asserted -- see the module docstring.
 ACCEPTED: dict[tuple[str, str], str] = {
-    ("#000000", "#333333"):
+    # RNV-COLOUR-SYNC, 2026-10-16: the other six by the constants the rule
+    # draws, as the accent's was, where each was written as two hex codes, so
+    # an exemption follows the brand. The context preview's tab reads tab_bg,
+    # which is GREY_E0 in light, not the pressed plate it shares a hex with.
+    (C.TRUE_BLACK.lower(), C.APP_BORDER.lower()):
         "main-window button hover. The main window uses a white/near-black "
         "inverse scheme in which the text stays black while the background "
         "darkens; this is the app's deliberate design, not an oversight, "
         "and it is separate from the gold dialog-button scheme.",
-    ("#000000", "#444444"):
+    (C.TRUE_BLACK.lower(), C.GREY_44.lower()):
         "main-window button pressed, same inverse scheme.",
     # RNV-ACCENT-READ-2026-10-16: named, where it was written as two hex codes,
     # so the exemption follows the accent.
@@ -200,18 +210,19 @@ ACCEPTED: dict[tuple[str, str], str] = {
         "BRAND_GOLD as a list-item fill with white text. BRAND_GOLD is a "
         "registered value and is not in scope for the dark-gold alignment. "
         "Recorded here so it stays visible rather than forgotten.",
-    ("#aaaaaa", "#f5f5f5"):
+    (C.APP_TEXT_DIM.lower(), C.APP_SURFACE_LIGHT_3.lower()):
         "disabled control text. WCAG 1.4.3 exempts disabled controls. Re-keyed "
-        "from #ffffff on 2026-08-27 when the light panel moved to #f5f5f5 to "
+        f"from {C.WHITE} on 2026-08-27 when the light panel moved to "
+        f"{C.APP_SURFACE_LIGHT_3} to "
         "match the other four apps -- the same text on the same control, one "
         "step of ground away.",
-    ("#555555", "#1a1a1a"):
+    (C.GREY_55.lower(), C.BRAND_BLACK.lower()):
         "disabled control text, dark theme. Same exemption.",
-    ("#666666", "#e0e0e0"):
+    (C.GREY_66.lower(), C.GREY_E0.lower()):
         "OS-simulation chrome in context_preview.py, which reproduces "
         "platform UI so users can preview an icon in situ. It must match "
         "the platform, not the brand.",
-    ("#888888", "#2a2a2a"):
+    (C.GREY_88.lower(), C.APP_CARD.lower()):
         "OS-simulation chrome, dark. Same reason.",
 }
 
@@ -372,11 +383,15 @@ def test_every_exemption_still_applies() -> None:
 # gold light enough to carry white text at 4.5:1 is too light to BE text
 # on anything but pure white. The luminance bands do not overlap.
 
-LIGHT_SURFACES = ["#ffffff", "#fafafa", "#f5f5f5", "#f0f0f0", "#eeeeee"]
+# RNV-COLOUR-SYNC, 2026-10-16: the grounds the app draws, by name; and, still
+# measured, the two light surfaces collapsed onto them, RETIRED_LIGHT_PLATFORM_BG
+# and RETIRED_LIGHT_HOVER_AND_HEADER, by their names in tests/colour_values.py.
+LIGHT_SURFACES = [C.WHITE, RETIRED_LIGHT_PLATFORM_BG, C.APP_SURFACE_LIGHT_3,
+                  RETIRED_LIGHT_HOVER_AND_HEADER, C.APP_HOVER_LIGHT]
 
 
 def test_fill_gold_carries_white_text() -> None:
-    assert contrast_ratio("#ffffff", C.BRAND_DARK_GOLD) >= TEXT_FLOOR
+    assert contrast_ratio(C.WHITE, C.BRAND_DARK_GOLD) >= TEXT_FLOOR
 
 
 def test_text_gold_clears_every_light_surface() -> None:
@@ -441,12 +456,11 @@ def test_main_button_scheme_holds_no_gold(palette_name: str) -> None:
 
 
 def test_retired_app_gold_is_gone() -> None:
-    """#b19145 was an app-local approximation of the brand dark gold. It
-    carried white text at 2.9976:1. Nothing should reintroduce it."""
+    """Nothing should reintroduce RETIRED_APP_GOLD."""
     for palette in (C.LIGHT_THEME_COLORS, C.DARK_THEME_COLORS,
                     C.IMAGE_MODE_COLORS):
         assert not [k for k, v in palette.items()
-                    if isinstance(v, str) and v.lower() == "#b19145"]
+                    if isinstance(v, str) and v.lower() == RETIRED_APP_GOLD]
 
 
 # ---------------------------------------------------------------------------
@@ -535,7 +549,7 @@ KNOWN_GOLDS = {
 def test_at_most_two_brand_golds_per_palette(name):
     """At most the registered gold and one derivative.
 
-    AT MOST, not exactly. This repo's dark palettes need only #d2bc93 -- hover
+    AT MOST, not exactly. This repo's dark palettes need only BRAND_GOLD -- hover
     text and the pressed fill both take the accent, so there is no role for a
     dark derivative and none is minted. Spending a derivative you do not need
     is how an orphan gets created; requiring one would force that.

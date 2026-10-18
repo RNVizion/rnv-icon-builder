@@ -180,6 +180,8 @@ RNV_Icon_Builder/
 ├── RNV_Icon_Builder.spec      # PyInstaller build spec
 ├── pyproject.toml             # Package metadata & entry points
 ├── requirements.txt           # Runtime dependencies
+├── brand_map.json             # Where each colour comes from: rnv-brand or the app
+├── COLORS.md                  # This app's colour chart, written by the sync
 ├── README.md                  # This file
 ├── LICENSE                    # MIT license
 ├── .gitignore
@@ -190,6 +192,7 @@ RNV_Icon_Builder/
 │
 ├── .github/
 │   └── workflows/
+│       ├── brand-sync.yml     # Daily: colours from rnv-brand; a pull request only if one moved
 │       ├── tests-linux.yml    # CI: Ubuntu, Python 3.10–3.13, xvfb
 │       └── tests-windows.yml  # CI: Windows, Python 3.10–3.13
 │
@@ -240,13 +243,17 @@ RNV_Icon_Builder/
 │   ├── pixmap_cache.py        # QPixmap caching layer
 │   ├── signal_manager.py      # Qt signal connection tracking
 │   └── async_file_ops.py      # Non-blocking file operations
+├── tools/
+│   └── sync_colors.py         # Writes the colours in ui/colors.py, and COLORS.md
 ├── tests/
 │   ├── requirements-dev.txt   # Test-only dependencies
 │   ├── conftest.py            # Shared fixtures + Qt/font/theme bootstrapping
 │   ├── snapshots.json         # Syrupy snapshot baselines
+│   ├── colour_values.py       # Every colour value a test needs that is not the app's, named once
 │   ├── test_application.py    # Main window lifecycle, theme, public API
 │   ├── test_benchmarks.py     # pytest-benchmark performance tests
 │   ├── test_cli.py            # CLI subprocess tests (parallel-mode coverage)
+│   ├── test_colour_values.py  # No colour value written in a test outside colour_values.py
 │   ├── test_error_handler.py  # Error handler & validation
 │   ├── test_folder_watcher.py # Folder watcher behaviors
 │   ├── test_image_processor.py

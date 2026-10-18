@@ -1007,6 +1007,13 @@ class IconBuilderCore:
                 generated_files.append(filename)
             
             # 5. Generate site.webmanifest
+            # RNV-COLOUR-SYNC, #56 A (2026-10-17): the colours the manifest and
+            # browserconfig.xml declare are named in ui/colors.py, the
+            # application's own data. Imported here, as image_processor imports
+            # from ui, so importing this module does not load the ui package.
+            from ui.colors import (WEB_MANIFEST_THEME_COLOR,
+                                   WEB_MANIFEST_BACKGROUND_COLOR,
+                                   BROWSERCONFIG_TILE_COLOR)
             manifest = {
                 "name": site_name,
                 "short_name": site_name,
@@ -1022,8 +1029,8 @@ class IconBuilderCore:
                         "type": "image/png"
                     }
                 ],
-                "theme_color": "#ffffff",
-                "background_color": "#ffffff",
+                "theme_color": WEB_MANIFEST_THEME_COLOR,
+                "background_color": WEB_MANIFEST_BACKGROUND_COLOR,
                 "display": "standalone"
             }
             
@@ -1033,12 +1040,12 @@ class IconBuilderCore:
             generated_files.append("site.webmanifest")
             
             # 6. Generate browserconfig.xml (for IE/Edge)
-            browserconfig = '''<?xml version="1.0" encoding="utf-8"?>
+            browserconfig = f'''<?xml version="1.0" encoding="utf-8"?>
 <browserconfig>
     <msapplication>
         <tile>
             <square150x150logo src="/mstile-150x150.png"/>
-            <TileColor>#da532c</TileColor>
+            <TileColor>{BROWSERCONFIG_TILE_COLOR}</TileColor>
         </tile>
     </msapplication>
 </browserconfig>'''

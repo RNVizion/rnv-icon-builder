@@ -26,6 +26,8 @@ RNV_Icon_Builder/
 ├── test_rnv_icon_builder.py    ← Original 471-test unittest suite (root)
 ├── tests/
 │   ├── conftest.py             ← Shared fixtures + path bootstrap
+│   ├── colour_values.py        ← Every colour value a test needs that is not the app's
+│   ├── test_colour_values.py   ← Guard: no colour value written anywhere else in tests
 │   ├── test_application.py     ← Application-level (Phase 3)
 │   ├── test_ui_interactions.py ← Dialogs / widgets via qtbot (Phase 4)
 │   ├── test_workers.py         ← BatchProcessor / FolderWatcher signals (Phase 5)

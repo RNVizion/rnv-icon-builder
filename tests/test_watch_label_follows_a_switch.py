@@ -7,8 +7,9 @@ in its own mode's status_active, and follows a switch.
 RNV-STATUS-FAMILY moved the label off STATUS_ACTIVE_COLOR, a constant, onto
 the palette's status_active key -- read with get_theme_colors() and no mode,
 which is the default palette: dark's. A dialog in light drew dark's value,
-#ad85a3 on #f5f5f5, 2.89:1 -- under the 4.5:1 text floor the family was
-walked to clear, and under 3:1; light's own, #825d79, reads 5.08:1 there.
+STATUS_SUCCESS_TEXT on APP_SURFACE_LIGHT_3, 2.89:1 -- under the 4.5:1 text
+floor the family was walked to clear, and under 3:1; light's own,
+STATUS_SUCCESS_TEXT_LIGHT, reads 5.08:1 there.
 And the label's sheet was set once, when watching started, so a switch
 with the dialog open kept the mode it was set in.
 
@@ -61,8 +62,8 @@ def _contrast(a: QColor, b: QColor) -> float:
 def _ground(dlg, label) -> QColor:
     """The ground under the label as the dialog draws it: the commonest pixel
     of the dialog's own grab over the label's rectangle. Not label.grab(),
-    which fills with the label's palette -- #000000 in dark, where the
-    dialog draws #1a1a1a."""
+    which fills with the label's palette -- TRUE_BLACK in dark, where the
+    dialog draws BRAND_BLACK."""
     img = dlg.grab(QRect(label.mapTo(dlg, QPoint(0, 0)), label.size())).toImage()
     counts = collections.Counter(img.pixelColor(x, y).name()
                                  for y in range(img.height()) for x in range(img.width()))

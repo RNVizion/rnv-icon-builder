@@ -1,18 +1,21 @@
 """The orphaned 'error' key stays gone.
 
-It held #dc3545 in every palette and nothing drew it. An unread wrong value
+It held RETIRED_ERROR_RED in every palette and nothing drew it. An unread wrong value
 is still a wrong value waiting for a reader -- and a palette key that exists
 is an invitation to use it, which is how a colour nobody ruled ends up on
 screen.
 
 This app renders no error text at all, so there is nothing to replace it
 with. If one is ever needed, take the derived value the family ruled --
-lighten('#dc3545', -20) for light grounds -- rather than reviving this.
+lighten(RETIRED_ERROR_RED, -20) for light grounds -- rather than reviving this.
 """
 
 import pytest
 
 from ui import colors
+# RNV-COLOUR-SYNC, #53 A (2026-10-17): the colour values this file needs that
+# are not the application's colours are named once, in tests/colour_values.py.
+from tests.colour_values import RETIRED_ERROR_RED
 
 PALETTES = ("DARK_THEME_COLORS", "LIGHT_THEME_COLORS", "IMAGE_MODE_COLORS")
 
@@ -46,16 +49,16 @@ def test_that_check_is_actually_looking():
         palette = getattr(colors, name)
         assert len(palette) > 40, f"{name} has only {len(palette)} keys"
         assert "window_bg" in palette, f"{name} does not look like a palette"
-    planted = {"error": "#dc3545"}
+    planted = {"error": RETIRED_ERROR_RED}
     assert "error" in planted, \
         "the membership check no longer detects a known offender"
 
 
 def test_no_palette_still_carries_the_value_under_another_name():
-    """Deleting the key is not the same as removing the value. If #dc3545
+    """Deleting the key is not the same as removing the value. If RETIRED_ERROR_RED
     reappears on some other key it is back on screen under a new name, which
     is exactly how a retired colour survives a rename sweep."""
-    retired = "#dc3545"
+    retired = RETIRED_ERROR_RED
     for name in PALETTES:
         offenders = [k for k, v in getattr(colors, name).items()
                      if isinstance(v, str) and v.lower() == retired]

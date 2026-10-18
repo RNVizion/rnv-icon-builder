@@ -9,22 +9,32 @@ register owns the value and an application must not have a second opinion.
 This guard is the thing that stops the second opinion coming back.
 
 REWRITTEN, NOT PATCHED, on 2026-09-03. Three of the assertions here pinned
-#28a745 and #ffc107 by hex and explained at length why those were THE green
-and THE amber. Changing the hex inside a docstring that argues for it would
-have left the argument standing for a value that lost it: the green collapsed
-with Bootstrap's red under deuteranopia, and the amber could not clear a 3:1
-fill floor on any light ground. What replaced them, and why, is below.
+RETIRED_BOOTSTRAP_GREEN and RETIRED_BOOTSTRAP_AMBER by hex and explained at
+length why those were THE green and THE amber. Changing the hex inside a
+docstring that argues for it would have left the argument standing for a
+value that lost it; tests/colour_values.py says why each lost. What replaced
+them, and why, is below.
 """
 from __future__ import annotations
 
 import io
+import json
 import re
 import tokenize
 from pathlib import Path
 
 from ui import colors
+# RNV-COLOUR-SYNC, #53 A (2026-10-17): the colour values this file needs that
+# are not the application's colours are named once, in tests/colour_values.py.
+from tests.colour_values import (REGISTER_GOLD_TEXT_GROUND_FLOOR, RETIRED_BOOTSTRAP_AMBER,
+                                 RETIRED_BOOTSTRAP_GREEN, RETIRED_MATERIAL_GREEN)
 
 ROOT = Path(__file__).resolve().parent.parent
+
+#: RNV-COLOUR-SYNC, 2026-10-16. Where each colour comes from, as brand_map.json
+#: says. The values are held by tests/test_colours_in_sync.py, against the
+#: register at the pin; what this file holds is the name each one takes.
+BRAND_MAP = json.loads((ROOT / "brand_map.json").read_text(encoding="utf-8"))["colours"]
 
 
 def _code_only(text: str) -> str:
@@ -36,7 +46,8 @@ def _code_only(text: str) -> str:
     about what changed, which is the opposite of what the provenance is for.
 
     Why it is fussier than it looks: an earlier version dropped every STRING
-    token. In Python a colour value IS a string literal -- `X = "#926c89"` --
+    token. In Python a colour value IS a string literal -- the way
+    tests/colour_values.py writes REGISTER_STATUS_SUCCESS --
     so that version removed the uses along with the mentions and the sweep
     could never find anything. It passed on every input, including a file that
     had just put a retired value back. This file's own guard-the-guard is what
@@ -97,25 +108,20 @@ def _contrast(a, b):
 TEXT_FLOOR = 4.5
 FILL_FLOOR = 3.0
 
-# #4caf50 was Material's green, held here for the watcher where the register
-# published a different one; ruled onto the register's on 2026-09-02. The
-# other two are Bootstrap's, retired by the register on 2026-09-03.
-STRAYS = {
-    "#4caf50": "Material's green, ruled out on 2026-09-02",
-    "#28a745": "Bootstrap's green, retired -- it and Bootstrap's red were one "
-               "olive under deuteranopia, about 4 apart",
-    "#ffc107": "Bootstrap's amber, retired -- 1.63 on #ffffff against a 3:1 "
-               "fill floor",
-}
+# #57 A, 2026-10-17: the retired status values, by name. What each was, and
+# when and why it went, is said once, beside it, in tests/colour_values.py.
+STRAYS = (RETIRED_MATERIAL_GREEN, RETIRED_BOOTSTRAP_GREEN, RETIRED_BOOTSTRAP_AMBER)
 
 # RNV-NAMED-AND-USED, 2026-10-04: the two this application draws. It draws
 # one status colour, the folder watcher's label, as text in dark and in
 # light. The family's two fills and the warning's two text values were held
 # here too; nothing in the application read them, and they went. The
 # register holds the family.
+# RNV-COLOUR-SYNC, 2026-10-16: each by the register name brand_map.json
+# writes it from, where it was its hex code.
 REGISTERED = {
-    "STATUS_SUCCESS_TEXT": "#ad85a3",
-    "STATUS_SUCCESS_TEXT_LIGHT": "#825d79",
+    "STATUS_SUCCESS_TEXT": "STATUS.success-text",
+    "STATUS_SUCCESS_TEXT_LIGHT": "STATUS.success-text-light",
 }
 
 
@@ -130,9 +136,12 @@ def test_the_status_values_are_the_register_s():
     """Not "some purple" -- THE one. An application that picks its own status
     colour has an opinion about what success means, which is the register's
     job. Pinned by value: a test asserting only that these differ from each
-    other would pass on two wrong colours."""
+    other would pass on two wrong colours.
+
+    RNV-COLOUR-SYNC, 2026-10-16: pinned by the register name brand_map.json
+    writes each from; tests/test_colours_in_sync.py holds the value."""
     for name, value in REGISTERED.items():
-        assert getattr(colors, name) == value, name
+        assert BRAND_MAP[name] == value, name
 
 
 # RNV-NAMED-AND-USED, 2026-10-04: a test stood here on the arithmetic of the
@@ -144,28 +153,32 @@ def test_the_status_values_are_the_register_s():
 def test_the_text_variants_carry_text_on_their_own_ground():
     """RNV-STATUS-LIGHT-FLOOR -- READ BEFORE ADDING GROUNDS.
 
-    The light pair is checked on #ffffff and #f5f5f5 only. They do NOT reach
-    the lighter registered rungs: on APP hover-light #eeeeee they read 4.25
-    and 4.24, on GOLD_TEXT_GROUND_FLOOR #e8e8e8 4.02, on pressed-light
-    #e0e0e0 3.74. The cause is in the register's own rule, which walks the
-    light variants against #f5f5f5 as "the worst light ground" -- rev 27 put
-    three rungs below it. Both were walked to the FIRST step that clears, so
-    there is no margin.
+    The light pair is checked on WHITE and APP_SURFACE_LIGHT_3 only. They do
+    NOT reach the lighter registered rungs: on APP_HOVER_LIGHT they read 4.25
+    and 4.24, on REGISTER_GOLD_TEXT_GROUND_FLOOR 4.02, on APP_PRESSED_LIGHT
+    3.74. The cause is in the register's own rule, which walks the light
+    variants against APP_SURFACE_LIGHT_3 as "the worst light ground" -- rev 27
+    put three rungs below it. Both were walked to the FIRST step that clears,
+    so there is no margin.
 
     This is an open question with the brand chat, not a loosened test. If the
-    register re-walks against #e8e8e8 the answers are #825d79 and #8e5e2b,
-    each moving less than its own 8.40 threshold; the fix here is to add the
-    darker rungs back and update REGISTERED.
+    register re-walks against REGISTER_GOLD_TEXT_GROUND_FLOOR the answers are
+    STATUS_SUCCESS_TEXT_LIGHT and REGISTER_STATUS_WARNING_TEXT_LIGHT, each
+    moving less than its own 8.40 threshold; the fix here is to add the darker
+    rungs back and update REGISTERED.
     """
     for name in ("STATUS_SUCCESS_TEXT",):
-        for ground in ("#1a1a1a", "#2a2a2a"):
+        for ground in (colors.BRAND_BLACK, colors.APP_CARD):
             ratio = _contrast(getattr(colors, name), ground)
             assert ratio >= TEXT_FLOOR, f"{name} on {ground} = {ratio:.4f}"
     for name in ("STATUS_SUCCESS_TEXT_LIGHT",):
         # Restored at rev 31: the re-walked pair reaches all four rungs.
-        # #e0e0e0 is deliberately absent -- BRAND_DARK_GOLD_DEEP fails
+        # APP_PRESSED_LIGHT is deliberately absent -- BRAND_DARK_GOLD_DEEP fails
         # there too, so it is the boundary for every brand text family.
-        for ground in ("#ffffff", "#f5f5f5", "#eeeeee", "#e8e8e8"):
+        # RNV-COLOUR-SYNC, 2026-10-16: the grounds by name, and the register's
+        # floor, REGISTER_GOLD_TEXT_GROUND_FLOOR, from tests/colour_values.py.
+        for ground in (colors.WHITE, colors.APP_SURFACE_LIGHT_3,
+                       colors.APP_HOVER_LIGHT, REGISTER_GOLD_TEXT_GROUND_FLOOR):
             ratio = _contrast(getattr(colors, name), ground)
             assert ratio >= TEXT_FLOOR, f"{name} on {ground} = {ratio:.4f}"
 
@@ -185,7 +198,7 @@ def test_status_active_resolves_per_mode():
 
     -- TEXT, from a module-level constant, in a dialog that runs in dark,
     light and image mode. No single value is legal on all three grounds: the
-    dark text variant reads 5.52 on #1a1a1a and 3.15 on #ffffff. Same shape as
+    dark text variant reads 5.52 on BRAND_BLACK and 3.15 on WHITE. Same shape as
     the CONTRAST_ON_DARK finding: the answer is resolving per mode, not a
     better constant.
     """
@@ -215,7 +228,9 @@ def test_the_watch_label_reads_the_theme_rather_than_a_constant():
 def test_status_active_is_legal_in_every_mode_it_is_painted_in():
     """The end-to-end assertion. A per-mode key that resolves to an illegal
     value in one mode has moved the bug rather than fixed it."""
-    grounds = {"dark": "#1a1a1a", "light": "#f5f5f5", "image": "#1a1a1a"}
+    # RNV-COLOUR-SYNC, 2026-10-16: the dialog's ground in each mode, by name.
+    grounds = {"dark": colors.BRAND_BLACK, "light": colors.APP_SURFACE_LIGHT_3,
+               "image": colors.BRAND_BLACK}
     for mode, ground in grounds.items():
         value = _palettes()[mode]["status_active"]
         ratio = _contrast(value, ground)
@@ -230,15 +245,21 @@ def test_status_active_is_legal_in_every_mode_it_is_painted_in():
 def test_the_family_matches_the_rest_of_the_fleet():
     """The whole point of the ruling. Written as the literals the other
     applications hold, so this fails if either side drifts rather than only
-    if this one does."""
-    assert colors.STATUS_SUCCESS_TEXT == "#ad85a3"
-    assert colors.STATUS_SUCCESS_TEXT_LIGHT == "#825d79"
+    if this one does.
+
+    RNV-COLOUR-SYNC, 2026-10-16: exact in tests/test_colours_in_sync.py, against
+    the register at the pin; here, by the names brand_map.json takes them from,
+    which the other applications take them from too."""
+    assert BRAND_MAP["STATUS_SUCCESS_TEXT"] == "STATUS.success-text"
+    assert BRAND_MAP["STATUS_SUCCESS_TEXT_LIGHT"] == "STATUS.success-text-light"
 
 
 SWEPT = ("ui/colors.py", "ui/settings_dialog.py")
 # the success text: a value ui/colors.py holds. It was the success fill's
-# until RNV-NAMED-AND-USED, 2026-10-04, when the fill went.
-LIVE_VALUE = "#ad85a3"
+# until RNV-NAMED-AND-USED, 2026-10-04, when the fill went. RNV-COLOUR-SYNC,
+# 2026-10-16: read from the constant, where it was written out; the sync
+# writes it into ui/colors.py as a literal, which is what the sweep must see.
+LIVE_VALUE = colors.STATUS_SUCCESS_TEXT
 
 
 def test_this_guard_can_still_see():

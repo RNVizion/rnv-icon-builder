@@ -1,18 +1,23 @@
-"""#252525 no longer exists in this application. RNV-COLLAPSE-GUARD
+"""RETIRED_DARK_STRAY_GREY no longer exists in this application. RNV-COLLAPSE-GUARD
 
-Ruled 2026-09-02: #252525 collapses onto APP_CARD #2a2a2a. The value was on
-neither the surface ladder nor the ink grid, and its neighbours were not a
-visible step away. This guard pins the ruling in both directions: the keys
-hold the new value, and they hold it THROUGH the constant.
+Ruled 2026-09-02: RETIRED_DARK_STRAY_GREY collapses onto APP_CARD. This guard
+pins the ruling in both directions: the keys hold the new value, and they
+hold it THROUGH the constant.
 """
 from __future__ import annotations
 
 import re
 from pathlib import Path
 
+from tests.colour_values import RETIRED_DARK_STRAY_GREY
+
 ROOT = Path(__file__).resolve().parent.parent
-OLD_HEX = "#252525"
-NEW_HEX = "#2a2a2a"
+#: RNV-COLOUR-SYNC, #53 A (2026-10-17): named once, in tests/colour_values.py,
+#: which carries this guard's marker because it quotes the value to forbid it.
+OLD_HEX = RETIRED_DARK_STRAY_GREY
+#: RNV-COLOUR-SYNC, 2026-10-16: the value the keys were ruled onto is read
+#: from CONST, where it was written here as NEW_HEX, its hex code, so a brand
+#: move needs no edit here.
 CONST = "APP_CARD"
 KEYS = ['platform_btn_bg', 'scrollbar_bg', 'list_alt_bg']
 EXPECT = {'dark': ['platform_btn_bg', 'scrollbar_bg', 'list_alt_bg'], 'image': ['platform_btn_bg', 'list_alt_bg']}
@@ -24,12 +29,19 @@ def _palettes():
     return P
 
 
+def _new_value():
+    """The constant the keys were ruled onto, as the value it holds."""
+    from ui import colors
+    return getattr(colors, CONST)
+
+
 def test_the_ruled_keys_hold_the_new_value():
+    new = _new_value()
     for mode, keys in EXPECT.items():
         palette = _palettes()[mode]
         for key in keys:
-            assert palette[key] == NEW_HEX, (
-                f"{mode}[{key}] is {palette[key]}, ruled onto {NEW_HEX}")
+            assert palette[key] == new, (
+                f"{mode}[{key}] is {palette[key]}, ruled onto {CONST} {new}")
 
 
 def test_the_old_value_is_gone_from_every_palette():
@@ -49,8 +61,8 @@ def test_the_keys_are_wired_through_the_constant_not_rewritten():
 
 def test_the_old_value_is_not_written_anywhere_in_source():
     """A sweep for the literal AS A STRING -- quoted. The palette file records
-    "was #252525" in a comment beside each ruled key, and that mention is the
-    provenance, not a use. The first version of this test matched the bare
+    that each ruled key was RETIRED_DARK_STRAY_GREY, in a comment beside it, and
+    that mention is the provenance, not a use. The first version of this test matched the bare
     text and failed on its own script's comment: use versus mention, again.
     Excludes this guard and the delivery script, which quote the value in
     order to forbid it."""

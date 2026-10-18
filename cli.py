@@ -592,6 +592,10 @@ def export_favicon_package(
         print_msg(f"Failed to create favicon.ico: {message}", is_error=True)
     
     # Create site.webmanifest
+    # RNV-COLOUR-SYNC, #56 A (2026-10-17): the colours it declares are named in
+    # ui/colors.py, the application's own data. Imported where the file is
+    # written, so a run that writes no manifest does not load the ui package.
+    from ui.colors import WEB_MANIFEST_THEME_COLOR, WEB_MANIFEST_BACKGROUND_COLOR
     manifest = {
         "name": "",
         "short_name": "",
@@ -603,8 +607,8 @@ def export_favicon_package(
             }
             for size in FAVICON_SIZES
         ],
-        "theme_color": "#ffffff",
-        "background_color": "#ffffff",
+        "theme_color": WEB_MANIFEST_THEME_COLOR,
+        "background_color": WEB_MANIFEST_BACKGROUND_COLOR,
         "display": "standalone"
     }
     

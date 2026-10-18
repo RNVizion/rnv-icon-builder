@@ -1,34 +1,40 @@
 """The dark ladder's top rung and the light plate, both now registered.
 
 WHAT THIS PASS DID. rnv-brand rev 22 registered the two ends of the dark
-surface ladder -- APP["canvas"] #0a0a0a and APP["panel-hover"] #3a3a3a -- and
-rev 23 registered APP["hover-light"] #eeeeee. Both were app-owned here. This
-app holds panel-hover and hover-light; it has no canvas surface. Neither value
-changed: the pass changes provenance and spelling, not pixels.
+surface ladder -- APP["canvas"] (REGISTER_APP_CANVAS) and APP["panel-hover"]
+(APP_PANEL_HOVER) -- and rev 23 registered APP["hover-light"]
+(APP_HOVER_LIGHT). Both were app-owned here. This app holds panel-hover and
+hover-light; it has no canvas surface. Neither value changed: the pass changes
+provenance and spelling, not pixels.
 
 WHY THE LADDER WAS NOT "TWO-THIRDS SPECIFIED". The register originally said it
-was, because APP["border"] #333333 is not #3a3a3a and so looked like a missing
-rung. It is not a rung at all -- #333333 is grey(3) on the INK grid, which
-governs inks and EDGES, and a border is an edge. The ladder was complete when
-the question was first asked; it was measured against the wrong family.
+was, because APP["border"] (APP_BORDER) is not APP_PANEL_HOVER and so looked
+like a missing rung. It is not a rung at all -- APP_BORDER is grey(3) on the
+INK grid, which governs inks and EDGES, and a border is an edge. The ladder
+was complete when the question was first asked; it was measured against the
+wrong family.
 
     BRAND_BLACK + n * 0x10,  n in -1..+2
-    #0a0a0a canvas   #1a1a1a panel   #2a2a2a card   #3a3a3a panel-hover
+    REGISTER_APP_CANVAS   BRAND_BLACK   APP_CARD   APP_PANEL_HOVER
+    canvas                panel         card       panel-hover
 
-WHY THE PLATE IS #eeeeee AND NOT #e8e8e8. #e8e8e8 is the ground
-BRAND_DARK_GOLD_DEEP is calibrated against: the smallest uniform step that
-clears it is -14, and -13 gives 4.4675 and fails. Registering it as the hover
-would have put every hover in the app on the one value the gold cannot afford
-to lose, with 0.0334 of margin. A boundary is not a plate. #eeeeee is grey(14),
-one step inside, and gold reads 4.7875 on it. The margin is asserted below
-rather than described, because a comment cannot fail.
+WHY THE PLATE IS APP_HOVER_LIGHT AND NOT REGISTER_GOLD_TEXT_GROUND_FLOOR.
+REGISTER_GOLD_TEXT_GROUND_FLOOR is the ground BRAND_DARK_GOLD_DEEP is
+calibrated against: the smallest uniform step that clears it is -14, and -13
+gives 4.4675 and fails. Registering it as the hover would have put every hover
+in the app on the one value the gold cannot afford to lose, with 0.0334 of
+margin. A boundary is not a plate. APP_HOVER_LIGHT is grey(14), one step
+inside, and gold reads 4.7875 on it. The margin is asserted below rather than
+described, because a comment cannot fail.
 
-#e8e8e8 keeps everything else it had -- registered, the published gold-as-text
-boundary, the binding ground. It is simply not the hover.
+REGISTER_GOLD_TEXT_GROUND_FLOOR keeps everything else it had -- registered,
+the published gold-as-text boundary, the binding ground. It is simply not the
+hover.
 """
 from __future__ import annotations
 
 import ast
+import json
 import pathlib
 
 import pytest
@@ -37,17 +43,26 @@ from ui import colors
 from ui.colors import (DARK_THEME_COLORS as DARK,
                        IMAGE_MODE_COLORS as IMAGE,
                        LIGHT_THEME_COLORS as LIGHT)
+# RNV-COLOUR-SYNC, #53 A (2026-10-17): the colour values this file needs that
+# are not the application's colours are named once, in tests/colour_values.py.
+from tests.colour_values import REGISTER_GOLD_TEXT_GROUND_FLOOR
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
 SRC = ROOT / 'ui/colors.py'
+
+#: RNV-COLOUR-SYNC, 2026-10-16. Where each colour comes from, as brand_map.json
+#: says. The values are held by tests/test_colours_in_sync.py, against the
+#: register at the pin; what this file holds is the name each one takes.
+BRAND_MAP = json.loads((ROOT / "brand_map.json").read_text(encoding="utf-8"))["colours"]
 
 GRID_STEP = 0x11
 LADDER_STEP = 0x10
 TEXT_FLOOR = 4.5
 
-#: Constant name -> the register key it mirrors, and the value both hold.
-NEW = {'APP_PANEL_HOVER': ('panel-hover', '#3a3a3a'),
-       'APP_HOVER_LIGHT': ('hover-light', '#eeeeee')}
+#: Constant name -> the register key it mirrors. RNV-COLOUR-SYNC, 2026-10-16:
+#: the value both held was written here too; it is written from the register now.
+NEW = {'APP_PANEL_HOVER': 'panel-hover',
+       'APP_HOVER_LIGHT': 'hover-light'}
 
 #: palette dict name -> the keys in it that must now name the constant.
 WIRED = {
@@ -67,7 +82,7 @@ PALETTES = {'DARK_THEME_COLORS': DARK, 'IMAGE_MODE_COLORS': IMAGE,
              'LIGHT_THEME_COLORS': LIGHT}
 
 #: The value the plate is NOT, and the reason the distinction is worth a test.
-BOUNDARY = '#e8e8e8'
+BOUNDARY = REGISTER_GOLD_TEXT_GROUND_FLOOR
 
 
 def grey(n: int) -> str:
@@ -127,13 +142,15 @@ def test_the_wiring_map_is_not_empty():
 
 def test_the_new_constants_hold_the_registered_values():
     """The local half of the mirror. Runs everywhere, including where
-    engine.brand is not importable -- which is exactly why it is not optional."""
-    drift = {n: getattr(colors, n) for n, (_, v) in NEW.items()
-             if getattr(colors, n) != v}
+    engine.brand is not importable -- which is exactly why it is not optional.
+
+    RNV-COLOUR-SYNC, 2026-10-16: it held each value written out. It holds now
+    that brand_map.json takes each from its APP key; the value is written from
+    there, and tests/test_colours_in_sync.py holds it."""
+    drift = {n: BRAND_MAP.get(n) for n, key in NEW.items()
+             if BRAND_MAP.get(n) != f'APP.{key}'}
     assert not drift, (
-        f'these constants no longer hold their registered values: {drift}\n'
-        f'If the brand moved, update this file in the same commit that updates '
-        f'ui/colors.py -- never one without the other.')
+        f'brand_map.json does not take these from their APP keys: {drift}')
 
 
 def test_the_new_constants_match_rnv_brand():
@@ -142,7 +159,7 @@ def test_the_new_constants_match_rnv_brand():
         'engine.brand',
         reason='rnv-brand not importable here; the local pin is doing the work')
     drift = []
-    for name, (key, _) in NEW.items():
+    for name, key in NEW.items():
         theirs, mine = brand.APP[key], getattr(colors, name)
         if mine.lower() != theirs.lower():
             drift.append(f'{name}: ours {mine}, theirs APP[{key!r}] {theirs}')
@@ -173,7 +190,7 @@ def test_the_dark_rungs_are_exact_steps_on_the_ladder():
 
 
 def test_the_border_is_an_edge_and_not_a_rung():
-    """The distinction that made the ladder look incomplete. #333333 is grey(3)
+    """The distinction that made the ladder look incomplete. APP_BORDER is grey(3)
     on the ink grid, which governs inks and edges; it was never a surface."""
     assert colors.APP_BORDER == grey(3)
     base = int(colors.BRAND_BLACK.lstrip('#'), 16)
@@ -184,7 +201,7 @@ def test_the_border_is_an_edge_and_not_a_rung():
 # ------------------------------------------------------------------- the plate
 
 def test_the_plate_is_a_step_on_the_ink_grid():
-    assert colors.APP_HOVER_LIGHT == grey(14) == '#eeeeee'
+    assert colors.APP_HOVER_LIGHT == grey(14)
 
 
 def test_the_plate_carries_gold_with_room_to_spare():
@@ -255,7 +272,7 @@ def test_the_resolved_values_are_the_constants():
 def test_no_literal_of_either_value_survives_in_any_palette():
     """Completeness. The two checks above prove the keys we listed are wired;
     this proves we did not miss one."""
-    values = {v for _, v in NEW.values()}
+    values = {getattr(colors, n).lower() for n in NEW}
     survivors = []
     for dict_name in PALETTES:
         node = _dict_node(dict_name)

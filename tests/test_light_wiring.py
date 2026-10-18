@@ -18,6 +18,10 @@ from pathlib import Path
 import pytest
 
 from ui import colors as C
+# RNV-COLOUR-SYNC, #53 A (2026-10-17): the colour values this file needs that
+# are not the application's colours are named once, in tests/colour_values.py.
+from tests.colour_values import (DATA_OS_SIM_TASKBAR_LIGHT, RETIRED_LIGHT_HOVER_AND_HEADER,
+                                 RETIRED_LIGHT_LIST_ALT, RETIRED_LIGHT_PLATFORM_BG)
 
 ROOT = Path(__file__).resolve().parent.parent
 SOURCE = ROOT / 'ui/colors.py'
@@ -27,10 +31,19 @@ HEX = re.compile(r"#[0-9a-fA-F]{6}$")
 # (hex, key) -> the constant that key must resolve THROUGH, in source.
 # Narrowed to the splits this repository actually holds; the fleet's other
 # split keys are listed below and asserted absent.
-SPLIT = {('#e0e0e0', 'pressed_bg'): 'APP_PRESSED_LIGHT', ('#f0f0f0', 'platform_btn_hover_bg'): 'APP_HOVER_LIGHT'}
+# #52 A, 2026-10-17: a live hex by its name in the colour file, a retired one
+# by its name in tests/colour_values.py.
+SPLIT = {(C.APP_PRESSED_LIGHT, 'pressed_bg'): 'APP_PRESSED_LIGHT',
+         (RETIRED_LIGHT_HOVER_AND_HEADER, 'platform_btn_hover_bg'): 'APP_HOVER_LIGHT'}
 SPLIT_ABSENT = []
 # old hex -> new hex
-COLLAPSE = {'#fafafa': '#fbfbfb', '#f8f8f8': '#fbfbfb', '#f0f0f0': '#eeeeee'}
+# #52 A, 2026-10-17: each rung by its name in the colour file.
+# RETIRED_LIGHT_HOVER_AND_HEADER went onto one grey in two roles, the hover
+# (APP_HOVER_LIGHT) and the list header (GREY_EE); the rung is the register's
+# hover plate.
+COLLAPSE = {RETIRED_LIGHT_PLATFORM_BG: C.APP_SURFACE_LIGHT_2,
+            RETIRED_LIGHT_LIST_ALT: C.APP_SURFACE_LIGHT_2,
+            RETIRED_LIGHT_HOVER_AND_HEADER: C.APP_HOVER_LIGHT}
 # Hexes that legitimately carry two constant names here, with the role each
 # one plays. A pair listed here is a decision on the record; anything else
 # sharing a hex is a duplicate until someone says otherwise.
@@ -39,7 +52,8 @@ EXTRA_ALLOWED_PAIRS = ()
 # Each one is a value this application does not own -- platform chrome, a file
 # format's fixed background -- and the sweep below subtracts them by exact text
 # so that removing one is a visible edit, not a silent widening.
-STRAY_EXEMPT = ("    'taskbar_light_bg':          '#f0f0f0',",)
+# #57 A, 2026-10-17: the line's text, built from the name, so the two cannot drift.
+STRAY_EXEMPT = (f"    'taskbar_light_bg':          '{DATA_OS_SIM_TASKBAR_LIGHT}',",)
 
 
 def _palette_dicts():
@@ -167,6 +181,18 @@ def test_one_hex_one_name_unless_it_is_a_declared_split():
         frozenset({"TRUE_BLACK", "SVG_EXPORT_STROKE"}),
         frozenset({"BRAND_BLACK", "APP_PANEL"}),
         frozenset({"APP_HOVER_LIGHT", "IMAGE_CANVAS_LIGHT"}),
+        # RNV-COLOUR-SYNC, #48 A (2026-10-16): the white and black a preview is
+        # shown on are data, the application's own. Not a second name for
+        # WHITE or TRUE_BLACK: a preview keeps its ground when the brand moves.
+        frozenset({"WHITE", "PREVIEW_WHITE"}),
+        frozenset({"TRUE_BLACK", "PREVIEW_BLACK"}),
+        # RNV-COLOUR-SYNC, #56 A (2026-10-17): what a generated web manifest
+        # declares is a file's content, the application's own. Not a second
+        # name for WHITE: a generated file keeps its colours when the brand
+        # moves. The theme and the background are two roles in the manifest.
+        frozenset({"WHITE", "WEB_MANIFEST_THEME_COLOR"}),
+        frozenset({"WHITE", "WEB_MANIFEST_BACKGROUND_COLOR"}),
+        frozenset({"WEB_MANIFEST_THEME_COLOR", "WEB_MANIFEST_BACKGROUND_COLOR"}),
     }
     allowed_pairs |= {frozenset(p) for p in EXTRA_ALLOWED_PAIRS}
     for hexv, names in by_hex.items():

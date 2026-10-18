@@ -2,6 +2,13 @@
 RNV Icon Builder - Color Definitions
 Centralized color palette for consistent branding.
 """
+# RNV-COLOUR-SYNC (2026-10-16). Every colour value below whose line ends
+# "# brand: <name>" or "# app-owned" is written by tools/sync_colors.py from
+# brand_map.json: a brand name's value from rnv-brand at the commit pinned in
+# tests/requirements-dev.txt, an app-owned value from the map, with its reason.
+# To change one, change the map and run `python tools/sync_colors.py`. A value
+# edited here is put back by the next sync, and tests/test_colours_in_sync.py
+# fails until then. COLORS.md is the chart of them.
 
 from __future__ import annotations
 from typing import Final
@@ -61,13 +68,13 @@ def translucent(hex_color: str, alpha: int) -> str:
 
 
 
-BRAND_GOLD: Final[str] = "#d2bc93"
+BRAND_GOLD: Final[str] = "#d2bc93"  # brand: APP.accent
 """Primary brand gold - use for hover states, highlights, tooltips, accents.
 
 Registered brand value.
 """
 
-BRAND_DARK_GOLD: Final[str] = "#8c7337"
+BRAND_DARK_GOLD: Final[str] = "#8c7337"  # brand: APP.accent-light-mode
 """Brand dark gold - light-mode FILLS, borders and pressed states.
 
 Registered brand value. Carries white text at 4.5429:1. It is a fill
@@ -112,18 +119,18 @@ a fill.
 # literals; rewiring those is the grey-ramp derivation pass, and doing it here
 # would have mixed a mechanical substitution into a value change.
 
-TRUE_BLACK: Final[str] = "#000000"
+TRUE_BLACK: Final[str] = "#000000"  # brand: PERMANENT.black
 """engine/brand.py TRUE_BLACK, and APP["window"]. Primary text in light mode,
 and the label on a pressed control in dark. grey(0)."""
 
-WHITE: Final[str] = "#ffffff"
+WHITE: Final[str] = "#ffffff"  # brand: PERMANENT.white
 """engine/brand.py WHITE. Control surface in light mode. grey(15)."""
 
-BRAND_BLACK: Final[str] = "#1a1a1a"
+BRAND_BLACK: Final[str] = "#1a1a1a"  # brand: APP.panel
 """engine/brand.py BRAND_BLACK, and APP["panel"]. Charcoal; a permanent.
 Not on the ink grid (n = 1.53) and not required to be -- it is a surface."""
 
-APP_CARD: Final[str] = "#2a2a2a"
+APP_CARD: Final[str] = "#2a2a2a"  # brand: APP.card
 """engine/brand.py APP["card"]. A surface, not on the grid (n = 2.47)."""
 
 # RNV-NAMED-AND-USED (2026-10-04): the family's two fills, success and
@@ -132,7 +139,7 @@ APP_CARD: Final[str] = "#2a2a2a"
 # folder watcher's label, as TEXT; nothing read the fills or the warning
 # text, so it carries none of them. The register holds the family.
 
-STATUS_SUCCESS_TEXT: Final[str] = "#ad85a3"
+STATUS_SUCCESS_TEXT: Final[str] = "#ad85a3"  # brand: STATUS.success-text
 """MIRRORS the register's STATUS["success-text"].
 TEXT on a dark ground: 4.55 on APP card #2a2a2a.
 
@@ -143,7 +150,7 @@ rule held live becomes an edit anyone can make, and retuning it would silently
 change what a warning looks like in five applications.
 """
 
-STATUS_SUCCESS_TEXT_LIGHT: Final[str] = "#825d79"
+STATUS_SUCCESS_TEXT_LIGHT: Final[str] = "#825d79"  # brand: STATUS.success-text-light
 """MIRRORS the register's STATUS["success-text-light"]. TEXT on a light
 ground: 4.52 on #f5f5f5, this application's light dialog background.
 
@@ -173,10 +180,10 @@ invisible only because the two keys are unused. Light now carries its own
 siblings, so the keys are legal on arrival if they are ever wired up.
 """
 
-APP_BORDER: Final[str] = "#333333"
+APP_BORDER: Final[str] = "#333333"  # brand: APP.border
 """engine/brand.py APP["border"]. grey(3). An edge, so the grid governs it."""
 
-APP_TEXT: Final[str] = "#dddddd"
+APP_TEXT: Final[str] = "#dddddd"  # brand: APP.text
 """engine/brand.py APP["text"]. grey(13). Primary ink in dark and image mode.
 
 MOVED FROM #e0e0e0 ON 2026-08-28, with the brand rather than after it.
@@ -187,10 +194,10 @@ Contrast falls 0.21 to 0.45 and the floor afterwards is 7.17:1 on the pressed
 plate #444444, the darkest ground it is ever drawn on.
 """
 
-APP_TEXT_DIM: Final[str] = "#aaaaaa"
+APP_TEXT_DIM: Final[str] = "#aaaaaa"  # brand: APP.text-dim
 """engine/brand.py APP["text-dim"]. grey(10)."""
 
-APP_PANEL_HOVER: Final[str] = "#3a3a3a"
+APP_PANEL_HOVER: Final[str] = "#3a3a3a"  # brand: APP.panel-hover
 """engine/brand.py APP["panel-hover"]. The dark interaction plate.
 
 REGISTERED 2026-08-29 in rnv-brand rev 22, and app-owned here until then. The
@@ -205,7 +212,7 @@ border is an edge. The ladder was complete when the question was first asked.
 This app holds three of the four; it has no canvas surface.
 """
 
-APP_HOVER_LIGHT: Final[str] = "#eeeeee"
+APP_HOVER_LIGHT: Final[str] = "#eeeeee"  # brand: APP.hover-light
 """engine/brand.py APP["hover-light"]. grey(14). The light interaction plate.
 
 REGISTERED 2026-08-29 as #e8e8e8 and MOVED to #eeeeee on 2026-08-30 in rev 23,
@@ -226,7 +233,7 @@ boundary, the binding ground. It is simply not the hover.
 # palettes already carried as literals. Nothing here is a new colour.
 # Registered values take the register's key; ramp greys take their byte.
 
-APP_SURFACE_LIGHT_3: Final[str] = "#f5f5f5"
+APP_SURFACE_LIGHT_3: Final[str] = "#f5f5f5"  # brand: APP.surface-light-3
 """engine/brand.py APP["surface-light-3"]. The light window and panel
 ground -- what a dialog sits on in light mode.
 
@@ -236,7 +243,7 @@ rev 27 as the third rung of the light surface ladder; named here under
 the register's key, the way APP_PANEL_HOVER and APP_HOVER_LIGHT are.
 Every key that carries it is a surface, so it is not split."""
 
-APP_SURFACE_LIGHT_2: Final[str] = "#fbfbfb"
+APP_SURFACE_LIGHT_2: Final[str] = "#fbfbfb"  # brand: APP.surface-light-2
 """engine/brand.py APP["surface-light-2"]. One rung above the panel ground.
 
 RNV-LIGHT-WIRING (2026-09-06): new to this application. It arrives
@@ -245,7 +252,7 @@ because two strays collapse onto it -- #f8f8f8 and #fafafa, which sat
 ruling as #252525 onto the card: a value a fraction of a step from a
 registered one is that one, misspelled."""
 
-APP_PRESSED_LIGHT: Final[str] = "#e0e0e0"
+APP_PRESSED_LIGHT: Final[str] = "#e0e0e0"  # brand: APP.pressed-light
 """engine/brand.py APP["pressed-light"]. The light PRESSED plate -- an
 interaction state, which is why this name goes only on `pressed_bg`.
 
@@ -255,39 +262,39 @@ ramp-step name GREY_E0 below. Wiring a resting ground to a pressed
 state would claim a role for it on the strength of a shared hex --
 the same ruling rnv-text-transformer made for GREY_EE / APP_HOVER_LIGHT."""
 
-GREY_E0: Final[str] = "#e0e0e0"
+GREY_E0: Final[str] = "#e0e0e0"  # app-owned
 """grey(14) on the ramp, #e0e0e0. Static surfaces that share a hex with
 APP_PRESSED_LIGHT without being a pressed state. See the split note
 there. Named by its byte, like every other ramp step."""
 
-GREY_EE: Final[str] = "#eeeeee"
+GREY_EE: Final[str] = "#eeeeee"  # app-owned
 """grey(14) on the ramp, #eeeeee. Static surfaces that share a hex with
 APP_HOVER_LIGHT without being a hover: a list header, a scroll ground.
 Same split rnv-text-transformer ruled for its diff headers."""
 
-GREY_DD: Final[str] = "#dddddd"
+GREY_DD: Final[str] = "#dddddd"  # app-owned
 """grey(13) on the ramp, #dddddd. Edges and grid lines that share a hex
 with APP_TEXT without being text. The register's APP["text"] is ink;
 a gridline is not, and moving the ink should not move the grid."""
 
-GREY_66: Final[str] = "#666666"
+GREY_66: Final[str] = "#666666"  # app-owned
 """grey(6) on the ramp, #666666. Secondary and muted text on light."""
 
-GREY_88: Final[str] = "#888888"
+GREY_88: Final[str] = "#888888"  # app-owned
 """grey(8) on the ramp, #888888. Muted text on dark, a scrollbar handle
 hover on light."""
 
-GREY_55: Final[str] = "#555555"
+GREY_55: Final[str] = "#555555"  # app-owned
 """grey(5) on the ramp, #555555. Disabled text and a checkbox edge on dark."""
 
-GREY_44: Final[str] = "#444444"
+GREY_44: Final[str] = "#444444"  # app-owned
 """grey(4) on the ramp, #444444. The pressed plate and the scrollbar
 handle on dark."""
 
 # RNV-LIGHT-WIRING (2026-09-06): moved up from below the
 # palettes, unchanged. It now has palette callers, and a
 # name defined after its use is a NameError at import.
-GREY_CC: Final[str] = "#cccccc"
+GREY_CC: Final[str] = "#cccccc"  # app-owned
 """Grey cc. The light edge swatch_edge() reaches for on a dark ground.
 
 RNV-INK-RULE (2026-09-02). It used to be three digits under a role name,
@@ -683,7 +690,7 @@ widget that read the entry above -- (32, 32, 32), (240, 240, 240),
 
 # ==================== Standalone Color Constants ====================
 
-DEFAULT_CUSTOM_BG_COLOR: Final[str] = "#808080"
+DEFAULT_CUSTOM_BG_COLOR: Final[str] = "#808080"  # app-owned
 """Default custom preview background color (neutral gray starting value)"""
 
 DEFAULT_CUSTOM_BG_RGB: Final[tuple[int, int, int]] = _to_rgb(DEFAULT_CUSTOM_BG_COLOR)
@@ -700,23 +707,60 @@ beside the name above, which nothing read. It reads this."""
 # a colour this file already names is LINKED to that name; one with a value
 # of its own holds it, and is this application's alone. PIL takes a tuple
 # for a ground, so the grounds are tuples.
+#
+# RNV-COLOUR-SYNC (2026-10-16), #48 A: the white and the black a preview is
+# shown on are DATA, not chrome, and the application's own, so a brand change
+# never alters a preview. The grounds were linked to WHITE and TRUE_BLACK
+# until then; they are made from these two now, at the values they had.
 
-PREVIEW_CHECKER_LIGHT: Final[tuple[int, int, int]] = _to_rgb(WHITE)
-"""The transparency checkerboard's light square. Was (255, 255, 255): linked."""
+PREVIEW_WHITE: Final[str] = "#ffffff"  # app-owned
+"""The white a preview is shown on: the checkerboard's light square and the
+"White" background. The application's own (#48 A)."""
+
+PREVIEW_BLACK: Final[str] = "#000000"  # app-owned
+"""The "Black" preview background. The application's own (#48 A)."""
+
+PREVIEW_CHECKER_LIGHT: Final[tuple[int, int, int]] = _to_rgb(PREVIEW_WHITE)
+"""The transparency checkerboard's light square. Was (255, 255, 255): linked
+to WHITE until 16 October, made from PREVIEW_WHITE since."""
 
 PREVIEW_CHECKER_DARK: Final[tuple[int, int, int]] = _to_rgb(GREY_CC)
 """Its dark square. Was (204, 204, 204), which is GREY_CC: linked."""
 
-PREVIEW_GROUND_WHITE: Final[tuple[int, int, int]] = _to_rgb(WHITE)
+PREVIEW_GROUND_WHITE: Final[tuple[int, int, int]] = _to_rgb(PREVIEW_WHITE)
 """The "White" preview background, and what an image is composited onto
-when no ground is given. Was (255, 255, 255): linked."""
+when no ground is given. Was (255, 255, 255): linked to WHITE until 16
+October, made from PREVIEW_WHITE since."""
 
-PREVIEW_GROUND_BLACK: Final[tuple[int, int, int]] = _to_rgb(TRUE_BLACK)
-"""The "Black" preview background. Was (0, 0, 0): linked."""
+PREVIEW_GROUND_BLACK: Final[tuple[int, int, int]] = _to_rgb(PREVIEW_BLACK)
+"""The "Black" preview background. Was (0, 0, 0): linked to TRUE_BLACK until
+16 October, made from PREVIEW_BLACK since."""
 
-PREVIEW_MISSING_FILL: Final[str] = "#c8c8c8"
+PREVIEW_MISSING_FILL: Final[str] = "#c8c8c8"  # app-owned
 """The grey a size with no image of its own is previewed as. Was
 (200, 200, 200, 255), which PIL reads this as. App-owned."""
+
+# ==================== Generated Web Files ====================
+# RNV-COLOUR-SYNC (2026-10-17), #56 A. The colours a favicon package's
+# web files declare were written out where the files are built, in
+# cli.py and core/icon_builder_core.py. They are DATA, a file's content,
+# and the application's own, so a brand move never changes what a
+# generated file declares. Named at the values they had: no generated
+# byte moves. Both writers read these names.
+
+WEB_MANIFEST_THEME_COLOR: Final[str] = "#ffffff"  # app-owned
+"""The theme_color a generated site.webmanifest declares (cli.py and
+core/icon_builder_core.py). Data, not chrome: it shares #ffffff with WHITE
+without being the brand's white. App-owned."""
+
+WEB_MANIFEST_BACKGROUND_COLOR: Final[str] = "#ffffff"  # app-owned
+"""The background_color a generated site.webmanifest declares, beside
+WEB_MANIFEST_THEME_COLOR. A separate role in the manifest: the splash
+ground, not the browser's tint. App-owned."""
+
+BROWSERCONFIG_TILE_COLOR: Final[str] = "#da532c"  # app-owned
+"""The <TileColor> a generated browserconfig.xml declares for a pinned
+Windows tile (core/icon_builder_core.py). App-owned."""
 
 # ── Which ink goes on this ground ──
 #
