@@ -55,6 +55,9 @@ venv.bak/
 # Editor / IDE
 # ─────────────────────────────────────────────────────────────────────
 .vscode/
+# Visual Studio's own state, Copilot's indexes among it: never committed
+# (#70 A, 2026-10-19).
+.vs/
 .idea/
 *.swp
 *.swo
