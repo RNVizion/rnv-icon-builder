@@ -201,9 +201,11 @@ ACCEPTED: dict[tuple[str, str], str] = {
         "main-window button hover. The main window uses a white/near-black "
         "inverse scheme in which the text stays black while the background "
         "darkens; this is the app's deliberate design, not an oversight, "
-        "and it is separate from the gold dialog-button scheme.",
+        "and it is separate from the gold dialog-button scheme."
+        " Ruled 2026-09-01 (claude/ruling-interaction-contrast.md); #74 A: the main button only.",
     (C.TRUE_BLACK.lower(), C.GRAY_44.lower()):
-        "main-window button pressed, same inverse scheme.",
+        "main-window button pressed, same inverse scheme."
+        " Ruled 2026-09-01 (claude/ruling-interaction-contrast.md); #74 A: the main button only.",
     # RNV-ACCENT-READ-2026-10-16: named, where it was written as two hex codes,
     # so the exemption follows the accent.
     (C.WHITE.lower(), C.BRAND_GOLD.lower()):
