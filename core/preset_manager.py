@@ -19,6 +19,7 @@ from datetime import datetime
 
 from utils.config import ICON_SIZES, USER_DATA_DIR
 from utils.logger import Logger, get_logger_instance
+from utils.atomic_write import atomic_write_json
 
 # Setup logger for this module
 logger: Logger = get_logger_instance(__name__)
@@ -214,8 +215,7 @@ class PresetManager:
                 'last_modified': datetime.now().isoformat()
             }
             
-            with open(PRESETS_FILE, 'w', encoding='utf-8') as f:
-                json.dump(data, f, indent=2)
+            atomic_write_json(PRESETS_FILE, data, indent=2)
             
             logger.debug(f"Saved {len(custom_presets)} custom preset(s)")
             return True

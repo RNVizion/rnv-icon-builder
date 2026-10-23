@@ -18,6 +18,7 @@ from typing import Any
 
 from utils.config import RECENT_FILES_PATH, MAX_RECENT_FILES
 from utils.logger import Logger, get_logger_instance
+from utils.atomic_write import atomic_write_json
 
 # Setup logger for this module
 logger: Logger = get_logger_instance(__name__)
@@ -82,8 +83,7 @@ class RecentFilesManager:
                 'last_updated': datetime.now().isoformat()
             }
             
-            with open(RECENT_FILES_PATH, 'w', encoding='utf-8') as f:
-                json.dump(data, f, indent=2)
+            atomic_write_json(RECENT_FILES_PATH, data, indent=2)
             
             logger.debug("Recent files history saved")
         except Exception as e:

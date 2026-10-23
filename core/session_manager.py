@@ -23,6 +23,7 @@ from PyQt6.QtCore import QObject, QTimer, pyqtSignal
 from utils.config import USER_DATA_DIR
 from utils.logger import Logger, get_logger_instance
 from utils.async_file_ops import write_async
+from utils.atomic_write import atomic_write_json, atomic_write_text
 
 if TYPE_CHECKING:
     from PIL import Image
@@ -224,8 +225,7 @@ class SessionManager(QObject):
                 return True
             else:
                 # Synchronous write for manual save
-                with open(SESSION_AUTO_SAVE_PATH, 'w', encoding='utf-8') as f:
-                    json.dump(data, f, indent=2)
+                atomic_write_json(SESSION_AUTO_SAVE_PATH, data, indent=2)
                 
                 self._on_save_complete(state)
                 return True
@@ -265,8 +265,7 @@ class SessionManager(QObject):
     def _set_recovery_flag(self) -> None:
         """Set flag indicating app is running (for crash detection)."""
         try:
-            with open(RECOVERY_FLAG_PATH, 'w') as f:
-                f.write(str(time.time()))
+            atomic_write_text(RECOVERY_FLAG_PATH, str(time.time()))
         except Exception as e:
             logger.debug(f"Could not set recovery flag: {e}")
     

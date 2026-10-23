@@ -25,6 +25,7 @@ from PIL import Image
 from utils.config import ICON_SIZES, USER_DATA_DIR, AUTO_SAVE_PATH, LAST_SESSION_PATH
 from utils.logger import Logger, get_logger_instance
 from utils.file_utils import FileUtils
+from utils.atomic_write import atomic_write_json
 
 # Setup logger for this module
 logger: Logger = get_logger_instance(__name__)
@@ -373,8 +374,7 @@ class ProjectManager:
             # Ensure directory exists
             Path(file_path).parent.mkdir(parents=True, exist_ok=True)
             
-            with open(file_path, 'w', encoding='utf-8') as f:
-                json.dump(data, f, indent=2)
+            atomic_write_json(file_path, data, indent=2)
             
             logger.success(f"Saved project: {file_path}")
             return True

@@ -40,6 +40,7 @@ from PyQt6.QtCore import QObject, QThread, pyqtSignal
 
 from utils.logger import Logger, get_logger_instance
 from utils.file_utils import FileUtils
+from utils.atomic_write import atomic_write_bytes, atomic_write_json, atomic_write_text
 
 # Setup logger
 logger: Logger = get_logger_instance(__name__)
@@ -140,25 +141,26 @@ class FileWriterThread(QThread):
         else:
             return FileFormat.BINARY
     
+    # The three writers are atomic (#83 A): the file is the old one or the new
+    # one, never a mixture, and no temporary file is left on failure.
+    
     def _write_json(self) -> None:
         """Write data as JSON."""
-        with open(self.filepath, 'w', encoding=self.encoding) as f:
-            json.dump(self.data, f, indent=2, ensure_ascii=False)
+        atomic_write_text(self.filepath, json.dumps(self.data, indent=2, ensure_ascii=False),
+                          encoding=self.encoding)
     
     def _write_text(self) -> None:
         """Write data as text."""
-        with open(self.filepath, 'w', encoding=self.encoding) as f:
-            f.write(str(self.data))
+        atomic_write_text(self.filepath, str(self.data), encoding=self.encoding)
     
     def _write_binary(self) -> None:
         """Write data as binary."""
-        with open(self.filepath, 'wb') as f:
-            if isinstance(self.data, bytes):
-                f.write(self.data)
-            elif isinstance(self.data, str):
-                f.write(self.data.encode(self.encoding))
-            else:
-                raise ValueError(f"Cannot write {type(self.data)} as binary")
+        if isinstance(self.data, bytes):
+            atomic_write_bytes(self.filepath, self.data)
+        elif isinstance(self.data, str):
+            atomic_write_bytes(self.filepath, self.data.encode(self.encoding))
+        else:
+            raise ValueError(f"Cannot write {type(self.data)} as binary")
 
 
 class FileReaderThread(QThread):

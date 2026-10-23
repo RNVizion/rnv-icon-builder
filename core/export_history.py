@@ -19,6 +19,7 @@ from dataclasses import dataclass, field, asdict
 
 from utils.config import USER_DATA_DIR
 from utils.logger import Logger, get_logger_instance
+from utils.atomic_write import atomic_write_json
 
 # Setup logger for this module
 logger: Logger = get_logger_instance(__name__)
@@ -172,8 +173,7 @@ class ExportHistory:
             
             data = [entry.to_dict() for entry in self._entries]
             
-            with open(EXPORT_HISTORY_PATH, 'w', encoding='utf-8') as f:
-                json.dump(data, f, indent=2)
+            atomic_write_json(EXPORT_HISTORY_PATH, data, indent=2)
             
             logger.debug(f"Saved {len(self._entries)} export history entries")
             
