@@ -14,10 +14,12 @@ Usage:
     python run_tests.py --report     # regenerate report from existing data
     python run_tests.py --summary    # report with --skip-covered (gaps only)
     python run_tests.py --html       # also write HTML report to htmlcov/
+    python run_tests.py --fail-under=66  # exit non-zero if total coverage < 66%
     python run_tests.py --benchmark  # run only benchmarks (no coverage)
     python run_tests.py --no-merge   # debug: leave both .coverage.* files
 
-Exit code is non-zero if either suite has failures.
+Exit code is non-zero if either suite has failures, or, with --fail-under=N,
+if the total coverage is under N percent. CI passes --html --fail-under=N.
 
 ────────────────────────────────────────────────────────────────────────────
 NOTE: The unittest suite runs via `-m unittest` rather than as a script.
@@ -206,8 +208,13 @@ def merge_data_files() -> int:
     return subprocess.call([*COVERAGE, "combine", *parts], cwd=ROOT)
 
 
-def print_report(summary: bool = False, html: bool = False) -> int:
-    """Print combined report. summary=True hides 100%-covered files."""
+def print_report(summary: bool = False, html: bool = False,
+                 fail_under: str | None = None) -> int:
+    """Print combined report. summary=True hides 100%-covered files.
+
+    fail_under: a percentage; the report then exits non-zero (coverage's
+    own --fail-under) when the total is under it.
+    """
     print()
     print("=" * 72)
     print("  Coverage report" + ("  (--skip-covered)" if summary else ""))
@@ -216,6 +223,8 @@ def print_report(summary: bool = False, html: bool = False) -> int:
     cmd = [*COVERAGE, "report", "-m"]
     if summary:
         cmd.append("--skip-covered")
+    if fail_under is not None:
+        cmd.append(f"--fail-under={fail_under}")
     rc = subprocess.call(cmd, cwd=ROOT)
 
     # Archive the full report to a text file for diffing across runs.
@@ -240,6 +249,9 @@ def main() -> int:
     args = set(sys.argv[1:])
     summary = "--summary" in args
     html = "--html" in args
+    # --fail-under=N: the coverage floor CI holds (see the workflows).
+    fail_under = next((a.partition("=")[2] for a in sys.argv[1:]
+                       if a.startswith("--fail-under=")), None)
 
     # Benchmark-only mode: skip suites + coverage, run timing.
     if "--benchmark" in args:
@@ -247,7 +259,7 @@ def main() -> int:
 
     # Report-only mode: skip both suites, just regenerate from existing data.
     if "--report" in args:
-        return print_report(summary=summary, html=html)
+        return print_report(summary=summary, html=html, fail_under=fail_under)
 
     # Clean up stale .coverage.* orphans from prior runs (subprocess
     # parallel-mode files that weren't merged) so we only combine THIS
@@ -264,13 +276,18 @@ def main() -> int:
 
     rc1 = run_unittest_suite()
     rc2 = run_pytest_suite()
+    rc3 = 0
 
     if "--no-merge" not in args:
         merge_data_files()
-        print_report(summary=summary, html=html)
+        report_rc = print_report(summary=summary, html=html, fail_under=fail_under)
+        # The report's own exit code counts only when a floor was asked for,
+        # so a run without --fail-under exits as it always did.
+        if fail_under is not None:
+            rc3 = report_rc
 
-    # Non-zero exit if either suite failed — useful for CI gates.
-    return max(rc1, rc2)
+    # Non-zero exit if either suite failed, or coverage is under the floor.
+    return max(rc1, rc2, rc3)
 
 
 if __name__ == "__main__":

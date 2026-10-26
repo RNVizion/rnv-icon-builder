@@ -61,10 +61,7 @@ PROJECTS_DIR: Final[Path] = USER_DATA_DIR / "projects"
 PROJECT_FILE_EXTENSION: Final[str] = ".rnvicon"
 """File extension for project files"""
 
-# Auto-save and session
-AUTO_SAVE_PATH: Final[Path] = USER_DATA_DIR / "autosave.rnvicon"
-"""Path to auto-save project file"""
-
+# Session
 LAST_SESSION_PATH: Final[Path] = USER_DATA_DIR / "last_session.rnvicon"
 """Path to last session project file"""
 
@@ -524,7 +521,7 @@ __all__: list[str] = [
     
     # Workflow automation paths
     'PRESETS_DIR', 'PRESETS_FILE_PATH', 'PROJECTS_DIR', 'PROJECT_FILE_EXTENSION',
-    'AUTO_SAVE_PATH', 'LAST_SESSION_PATH', 'WATCH_CONFIG_PATH', 'SETTINGS_PATH',
+    'LAST_SESSION_PATH', 'WATCH_CONFIG_PATH', 'SETTINGS_PATH',
     
     # Window config
     'MIN_WINDOW_WIDTH', 'MIN_WINDOW_HEIGHT', 'DEFAULT_WINDOW_WIDTH', 'DEFAULT_WINDOW_HEIGHT',

@@ -1,6 +1,6 @@
 [build-system]
 requires = ["setuptools>=68.0", "wheel"]
-build-backend = "setuptools.backends._legacy:_Backend"
+build-backend = "setuptools.build_meta"
 
 [project]
 name = "rnv-icon-builder"
@@ -31,19 +31,30 @@ dependencies = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/RNVizion/RNV_Icon_Builder"
-Repository = "https://github.com/RNVizion/RNV_Icon_Builder"
-Issues = "https://github.com/RNVizion/RNV_Icon_Builder/issues"
+Homepage = "https://github.com/RNVizion/rnv-icon-builder"
+Repository = "https://github.com/RNVizion/rnv-icon-builder"
+Issues = "https://github.com/RNVizion/rnv-icon-builder/issues"
 
 [project.scripts]
 rnv-icon-builder = "RNV_Icon_Builder:main"
 rnv-icon-cli = "cli:main"
 
-[tool.setuptools.packages.find]
-include = ["core*", "ui*", "utils*"]
+# The two entry points above live in root modules, not in a package, so
+# they are named here; without them the installed commands cannot import.
+[tool.setuptools]
+py-modules = ["RNV_Icon_Builder", "cli"]
 
+[tool.setuptools.packages.find]
+include = ["core*", "ui*", "utils*", "resources*"]
+
+# resources/ and its folders are found as packages (namespace packages: they
+# have no __init__.py), so their files install beside core/, ui/ and utils/,
+# where utils/config.py looks for them (BASE_DIR is the parent of utils/).
+# Package data is matched inside each package: the old "resources/**/*"
+# pattern under "*" matched nothing. tests/test_install_resources.py holds this.
 [tool.setuptools.package-data]
-"*" = ["resources/**/*"]
+"*" = ["py.typed"]
+resources = ["**/*"]
 
 # ── Dependency coherence (RNV-DEPENDENCY-COHERENCE, 2026-09-07) ────
 # The declarations in this file and in requirements.txt had drifted

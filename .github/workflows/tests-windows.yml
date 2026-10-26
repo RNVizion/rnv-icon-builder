@@ -54,7 +54,11 @@ jobs:
           pip install -r tests/requirements-dev.txt
 
       - name: Run test suite
-        run: python run_tests.py
+        # --html writes htmlcov/ for the upload below. --fail-under=66 fails
+        # the run if total coverage falls under 66%: a few points under the
+        # lower platform's total when it was set (68.63% in the committed
+        # Windows coverage_report.txt, about 72% on Linux).
+        run: python run_tests.py --html --fail-under=66
 
       - name: Upload coverage HTML report
         if: matrix.python-version == '3.13' && always()

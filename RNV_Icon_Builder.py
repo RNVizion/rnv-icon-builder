@@ -7,7 +7,6 @@ Version: 3.0 (Phase 8 - Quality of Life & Polish)
 
 Changes in v3.0:
 - Auto-save session with crash recovery
-- Quick actions toolbar (customizable)
 - Tooltips toggle (F11)
 - Session recovery on startup
 
@@ -96,6 +95,9 @@ from __future__ import annotations
 import sys
 import os
 import io
+# Settings that do what they say (#95 A): json and hashlib tell auto-save whether a project changed
+import json
+import hashlib
 import logging
 from typing import Any, TYPE_CHECKING
 
@@ -131,7 +133,7 @@ from utils.font_loader import load_embedded_font
 from utils.logger import setup_logger, Logger, get_logger_instance
 from utils.error_handler import ErrorHandler, ErrorCategory, exception_handler
 from utils.dialog_helper import DialogHelper, DialogResult
-from utils.file_utils import FileUtils
+from utils.file_utils import FileUtils, DEFAULT_FILENAME_TEMPLATE
 from core.image_processor import ImageProcessor
 from core.icon_builder_core import IconBuilderCore
 from core.recent_files import RecentFilesManager
@@ -163,6 +165,8 @@ from ui.ico_analyzer import IcoAnalyzerDialog
 from ui.context_preview import ContextPreviewDialog
 # Phase 8: About Dialog
 from ui.about_dialog import AboutDialog
+# The metadata panel, beside the thumbnails (#96 A)
+from ui.metadata_panel import MetadataPanel
 
 # Setup logger for main application
 logger: Logger = get_logger_instance(__name__)
@@ -341,9 +345,23 @@ class IconBuilderApp(QMainWindow):
         self.preview_images: dict[int, tuple[Image.Image, str]] = {}
         """Stores (image, tag) tuples for each size for preview functionality"""
         
+        # Session recovery: the sizes each loaded file supplied, oldest load first
+        self._source_files: dict[str, set[int]] = {}
+        """Absolute file path -> the sizes it supplied; the session saves these paths"""
+        
         # Phase 3: Filename template
-        self._filename_template: str = "icon_{size}"
-        """Template for output filenames with placeholders"""
+        self._filename_template: str = DEFAULT_FILENAME_TEMPLATE
+        """Template that names the files Export PNG Set writes"""
+        
+        # Session settings, kept in settings.json: restore the last session at
+        # startup, and auto-save an open project on a timer
+        session_settings = self.session_manager.load_settings()
+        self._restore_session_enabled: bool = session_settings['restore_session']
+        self._auto_save_project_enabled: bool = session_settings['auto_save']
+        self._saved_project_signature: str | None = None
+        """What the open project's file holds, to tell whether auto-save has work"""
+        self._project_auto_save_timer: QTimer = QTimer(self)
+        self._project_auto_save_timer.timeout.connect(self._auto_save_project)
         
         # Phase 6: Preview Enhancement settings
         self._preview_background: str = DEFAULT_PREVIEW_BACKGROUND
@@ -408,7 +426,7 @@ class IconBuilderApp(QMainWindow):
             layout: Parent layout to add drop zone to
         """
         logger.debug("Setting up drop zone")
-        self.drop_label = QLabel("Drag & drop PNG/ICO/SVG files here\n(or use Ctrl+O to select files)")
+        self.drop_label = QLabel("Drag & drop PNG/ICO/SVG files or a folder here\n(or use Ctrl+O to select files)")
         self.drop_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.drop_label.setMinimumHeight(DROP_ZONE_MIN_HEIGHT)
         self.setAcceptDrops(True)
@@ -518,6 +536,13 @@ class IconBuilderApp(QMainWindow):
                 project_manager=self.project_manager,
                 export_history=self.export_history
             )
+            # Show the stored session settings and the template's {name}
+            # before the signals are connected, so they are not a change
+            self.settings_dialog.set_session_settings({
+                'restore_session': self._restore_session_enabled,
+                'auto_save': self._auto_save_project_enabled,
+            })
+            self.settings_dialog.set_template_name(self._template_base_name())
             # Connect all settings dialog signals
             self._connect_settings_dialog_signals()
             logger.debug("Settings dialog created")
@@ -865,18 +890,8 @@ class IconBuilderApp(QMainWindow):
             return
         
         # Scan the folder for files
-        recursive = self.recursive_checkbox.isChecked()
-        logger.debug(f"Scanning folder (recursive={recursive}): {folder_path}")
         self._show_status_message(f"Scanning folder...")
-        
-        files: list[str] = []
-        for root_dir, _, fnames in os.walk(folder_path):
-            for f in fnames:
-                if any(f.lower().endswith(ext) for ext in SUPPORTED_EXTENSIONS):
-                    files.append(os.path.join(root_dir, f))
-            
-            if not recursive:
-                break
+        files = self._scan_folder(folder_path)
         
         if files:
             logger.info(f"Found {len(files)} image file(s) in folder")
@@ -1212,11 +1227,11 @@ class IconBuilderApp(QMainWindow):
         if self.preset_manager.save_preset(preset_name, sizes, autofill, png_compression):
             self._show_status_message(f"Saved preset: {preset_name}")
             
-            # Refresh preset list in dialog
+            # Refresh preset list in dialog. The dialog reads the list from its
+            # own preset manager and takes no argument (#94 A): passing the
+            # names raised a TypeError inside the slot, and Qt aborted the app.
             if self.settings_dialog:
-                self.settings_dialog.update_preset_list(
-                    self.preset_manager.list_preset_names()
-                )
+                self.settings_dialog.update_preset_list()
         else:
             self._show_status_message(f"Failed to save preset: {preset_name}")
     
@@ -1239,11 +1254,9 @@ class IconBuilderApp(QMainWindow):
         if self.preset_manager.delete_preset(preset_name):
             self._show_status_message(f"Deleted preset: {preset_name}")
             
-            # Refresh preset list in dialog
+            # Refresh preset list in dialog (no argument; see _on_preset_save)
             if self.settings_dialog:
-                self.settings_dialog.update_preset_list(
-                    self.preset_manager.list_preset_names()
-                )
+                self.settings_dialog.update_preset_list()
         else:
             self._show_status_message(f"Cannot delete preset: {preset_name}")
     
@@ -1265,6 +1278,8 @@ class IconBuilderApp(QMainWindow):
         
         # Clear current state
         self.image_processor.clear_images()
+        self._source_files.clear()
+        self.selected_size = None
         self.update_file_listbox()
         self.clear_preview()
         self._update_status_bar()
@@ -1273,6 +1288,7 @@ class IconBuilderApp(QMainWindow):
         self._current_project = self.project_manager.create_new_project("Untitled")
         self._current_project_path = None
         self._project_modified = False
+        self._saved_project_signature = None
         
         self._show_status_message("New project created")
     
@@ -1310,6 +1326,7 @@ class IconBuilderApp(QMainWindow):
             self._current_project_path = file_path
             self._current_project = project
             self._project_modified = False
+            self._saved_project_signature = self._project_signature(project)
             self._show_status_message(f"Project saved: {os.path.basename(file_path)}")
             logger.success(f"Project saved to {file_path}")
         else:
@@ -1355,8 +1372,31 @@ class IconBuilderApp(QMainWindow):
             )
             return
         
+        self._apply_project(project)
+        
+        # Update tracking
+        self._current_project = project
+        self._current_project_path = file_path
+        self._project_modified = False
+        self._saved_project_signature = self._project_signature(
+            self._create_project_from_current_state())
+        
+        self._show_status_message(f"Loaded project: {project.name}")
+        logger.success(f"Project loaded from {file_path}")
+    
+    def _apply_project(self, project: Project) -> int:
+        """
+        Replace the loaded images and options with a project's.
+        
+        Shared by loading a project and restoring the last session.
+        
+        Returns:
+            The number of sizes restored
+        """
         # Clear current state
         self.image_processor.clear_images()
+        self._source_files.clear()
+        self.selected_size = None
         
         # Restore images. project.images is dict[int, ProjectImage]; each
         # ProjectImage knows how to materialize itself into a PIL.Image via
@@ -1368,6 +1408,10 @@ class IconBuilderApp(QMainWindow):
                     img = project_image.to_pil_image()
                     if img is not None:
                         self.image_processor.detected_images[size] = img
+                        # The file the size came from, when the project names one
+                        if project_image.source_path:
+                            path = os.path.abspath(project_image.source_path)
+                            self._source_files.setdefault(path, set()).add(size)
                     else:
                         logger.warning(
                             f"Failed to restore image {size}: "
@@ -1387,18 +1431,14 @@ class IconBuilderApp(QMainWindow):
             self.autofill_checkbox.setChecked(settings.autofill)
             self.png_compression_checkbox.setChecked(settings.png_compression)
         
-        # Update tracking
-        self._current_project = project
-        self._current_project_path = file_path
-        self._project_modified = False
-        
         # Update UI
         self.update_file_listbox()
         self.update_preview()
         self._update_status_bar()
+        self._update_file_size_estimate()
+        self._update_template_name()
         
-        self._show_status_message(f"Loaded project: {project.name}")
-        logger.success(f"Project loaded from {file_path}")
+        return len(self.image_processor.detected_images)
     
     def _create_project_from_current_state(self):
         """Create a Project object from current application state."""
@@ -1424,6 +1464,7 @@ class IconBuilderApp(QMainWindow):
                 encoded = base64.b64encode(buffer.getvalue()).decode('ascii')
                 images[size] = ProjectImage(
                     size=size,
+                    source_path=self._source_file_for_size(size) or "",
                     embedded_data=encoded,
                     is_embedded=True,
                     is_autofilled=False,
@@ -1441,62 +1482,125 @@ class IconBuilderApp(QMainWindow):
 
         return Project(name=name, settings=settings, images=images)
     
-    def _on_session_settings_changed(self, restore_session: bool, auto_save: bool) -> None:
-        """Handle session settings change from settings dialog."""
-        logger.debug(f"Session settings: restore={restore_session}, auto_save={auto_save}")
-        # Settings are stored in the dialog and will be applied on next startup
+    @staticmethod
+    def _project_signature(project: Project) -> str:
+        """A digest of what a project holds: its images and build options.
+        
+        Two projects with the same signature would write the same content,
+        apart from the timestamps, so auto-save skips a project that has not
+        changed since it was saved or loaded.
+        """
+        content = {
+            'settings': project.settings.to_dict(),
+            'images': {str(size): image.embedded_data
+                       for size, image in sorted(project.images.items())},
+        }
+        return hashlib.sha256(json.dumps(content, sort_keys=True).encode('utf-8')).hexdigest()
     
-    # ==================== Phase 5: Startup Session Restore ====================
+    def _on_session_settings_changed(self, restore_session: bool, auto_save: bool) -> None:
+        """Apply and store the session settings from the settings dialog (#95 A).
+        
+        They are kept in settings.json, because the restore takes effect at
+        the next startup.
+        """
+        logger.debug(f"Session settings: restore={restore_session}, auto_save={auto_save}")
+        self._restore_session_enabled = restore_session
+        self._auto_save_project_enabled = auto_save
+        self.session_manager.save_settings(restore_session, auto_save)
+        
+        if auto_save:
+            self._start_project_auto_save()
+        else:
+            self._project_auto_save_timer.stop()
+        
+        self._show_status_message(
+            f"Restore last session: {'on' if restore_session else 'off'} \u00b7 "
+            f"Auto-save project: {'on' if auto_save else 'off'}"
+        )
+    
+    # ==================== Session Restore and Project Auto-Save (#95 A) ====================
+    
+    def _start_project_auto_save(self) -> None:
+        """Run the project auto-save on the session auto-save's interval."""
+        from utils.config import AUTO_SAVE_INTERVAL_SECONDS
+        self._project_auto_save_timer.start(AUTO_SAVE_INTERVAL_SECONDS * 1000)
+    
+    def _auto_save_project(self) -> bool:
+        """
+        Save the open project to its .rnvicon file, if it has changed.
+        
+        Runs on the auto-save timer while "Auto-save project periodically" is
+        on. A project that has never been saved has no file, so it is left
+        alone; so is one whose content matches what was last saved or loaded.
+        
+        Returns:
+            True if the project was written
+        """
+        if not self._auto_save_project_enabled or not self._current_project_path:
+            return False
+        
+        project = self._create_project_from_current_state()
+        signature = self._project_signature(project)
+        if signature == self._saved_project_signature:
+            return False
+        
+        project.file_path = self._current_project_path
+        if not self.project_manager.auto_save(project):
+            self._show_status_message("Project auto-save failed")
+            return False
+        
+        self._current_project = project
+        self._project_modified = False
+        self._saved_project_signature = signature
+        self._show_status_message(
+            f"Project auto-saved: {os.path.basename(self._current_project_path)}")
+        logger.info(f"Project auto-saved to {self._current_project_path}")
+        return True
+    
+    def _save_last_session(self) -> None:
+        """
+        Keep the session for the next startup, or drop it (on close).
+        
+        With "Restore last session on startup" on and images loaded, the
+        images (embedded) and options go to last_session.rnvicon. Otherwise
+        any kept session is removed, so the next start begins empty.
+        """
+        if self._restore_session_enabled and self.image_processor.detected_images:
+            project = self._create_project_from_current_state()
+            if self.project_manager.save_last_session(project):
+                logger.info("Last session kept for the next start")
+        else:
+            self.project_manager.clear_last_session()
     
     def _check_session_restore(self) -> None:
-        """Check for session to restore on startup."""
-        # Check if auto-save exists
-        if not self.project_manager.load_auto_save():
+        """Restore the last session at startup when the setting is on.
+        
+        Runs only when no crash recovery was offered: the recovery offer
+        comes first after a crash.
+        """
+        if not self._restore_session_enabled:
             return
-        
-        # Check if restore is enabled (from settings)
-        # For now, just show a dialog asking if user wants to restore
-        result = DialogHelper.confirm(
-            self,
-            "A previous session was found. Would you like to restore it?",
-            "Restore Session",
-            default_yes=True
-        )
-        
-        if result:
-            self._restore_last_session()
+        if not self.project_manager.has_last_session():
+            return
+        self._restore_last_session()
     
     def _restore_last_session(self) -> None:
-        """Restore the last auto-saved session."""
-        project = self.project_manager.load_auto_save()
+        """Load the session kept at the last close, without asking."""
+        project = self.project_manager.load_last_session()
         if not project:
             return
         
-        # Restore images
-        if project.images:
-            for size, img_data in project.images.items():
-                try:
-                    import io
-                    from PIL import Image
-                    img = Image.open(io.BytesIO(img_data))
-                    self.image_processor.detected_images[size] = img
-                except Exception as e:
-                    logger.warning(f"Failed to restore image {size}: {e}")
+        count = self._apply_project(project)
         
-        # Restore settings
-        if project.settings:
-            if 'autofill' in project.settings:
-                self.autofill_checkbox.setChecked(project.settings['autofill'])
-            if 'png_compression' in project.settings:
-                self.png_compression_checkbox.setChecked(project.settings['png_compression'])
+        # The images are back, but not as the project file they may have come
+        # from: a save asks where, and auto-save waits until then.
+        self._current_project = project
+        self._current_project_path = None
+        self._project_modified = False
+        self._saved_project_signature = None
         
-        # Update UI
-        self.update_file_listbox()
-        self.update_preview()
-        self._update_status_bar()
-        
-        self._show_status_message("Previous session restored")
-        logger.success("Session restored from auto-save")
+        self._show_status_message(f"Last session restored: {count} size(s)")
+        logger.success("Last session restored")
 
     # ==================== Phase 6: Preview Enhancement Handlers ====================
     
@@ -1681,6 +1785,10 @@ class IconBuilderApp(QMainWindow):
         interval_ms = AUTO_SAVE_INTERVAL_SECONDS * 1000
         self.session_manager.start_auto_save(interval_ms)
         
+        # The open project's auto-save runs on the same interval, when on
+        if self._auto_save_project_enabled:
+            self._start_project_auto_save()
+        
         logger.debug("Auto-save enabled")
     
     def _get_session_state(self) -> SessionState:
@@ -1690,13 +1798,12 @@ class IconBuilderApp(QMainWindow):
         Returns:
             SessionState object with current app state
         """
-        # Get list of loaded file paths
-        loaded_files = []
-        if hasattr(self, 'file_listbox'):
-            for i in range(self.file_listbox.count()):
-                item = self.file_listbox.item(i)
-                if item:
-                    loaded_files.append(item.text())
+        # Get the paths of the files the loaded sizes came from, in load order.
+        # This used to read the file list's labels ("256x256 \u2713"), so a
+        # recovered session loaded no files.
+        present = set(self.image_processor.get_detected_images())
+        loaded_files = [path for path, sizes in self._source_files.items()
+                        if sizes & present]
         
         # Get selected sizes
         selected_sizes = self.get_selected_sizes() if hasattr(self, 'get_selected_sizes') else []
@@ -1723,19 +1830,26 @@ class IconBuilderApp(QMainWindow):
         )
     
     def _check_session_recovery(self) -> None:
-        """Check for crash recovery on startup."""
+        """Check for crash recovery on startup.
+        
+        After a crash, the offer to recover comes first and is the only
+        thing that happens, whether it is accepted or declined. With no crash
+        to recover, the last session is restored if that setting is on.
+        """
         if not self.session_manager.has_recovery():
+            self._check_session_restore()
             return
         
         state = self.session_manager.get_recovery_state()
         if not state:
+            self._check_session_restore()
             return
         
         # Show recovery dialog
         result = DialogHelper.confirm(
             self,
             f"A previous session was found from {state.formatted_time}.\n\n"
-            f"Files: {len(state.loaded_files)}\n"
+            f"Files: {len(self._recoverable_files(state))}\n"
             f"Sizes: {len(state.selected_sizes)}\n\n"
             "Would you like to recover this session?",
             "Recover Session"
@@ -1748,6 +1862,22 @@ class IconBuilderApp(QMainWindow):
             self.session_manager.clear_recovery()
             logger.info("Session recovery declined")
     
+    @staticmethod
+    def _recoverable_files(state: SessionState) -> list[str]:
+        """
+        The session's files that can be loaded again.
+        
+        Only an existing image file named by an absolute path counts. A session
+        saved by an earlier version holds the file list's labels, such as
+        "256x256 \u2713"; those, and files moved or deleted since, are skipped.
+        """
+        if not isinstance(state.loaded_files, list):
+            return []
+        return [f for f in state.loaded_files
+                if isinstance(f, str) and os.path.isabs(f)
+                and os.path.splitext(f)[1].lower() in SUPPORTED_EXTENSIONS
+                and os.path.isfile(f)]
+    
     def _restore_session_state(self, state: SessionState) -> None:
         """
         Restore a session state.
@@ -1755,8 +1885,6 @@ class IconBuilderApp(QMainWindow):
         Args:
             state: SessionState to restore
         """
-        from pathlib import Path
-        
         # Restore window geometry
         if state.window_geometry:
             geo = state.window_geometry
@@ -1765,11 +1893,10 @@ class IconBuilderApp(QMainWindow):
             if geo.get('width') and geo.get('height'):
                 self.resize(geo['width'], geo['height'])
         
-        # Load files
-        if state.loaded_files:
-            existing_files = [f for f in state.loaded_files if Path(f).exists()]
-            if existing_files:
-                self._load_files(existing_files)
+        # Load files (handle_files is the loader; there is no _load_files)
+        existing_files = self._recoverable_files(state)
+        if existing_files:
+            self.handle_files(existing_files)
         
         # Restore settings
         if hasattr(self, 'autofill_checkbox'):
@@ -1808,7 +1935,17 @@ class IconBuilderApp(QMainWindow):
         QApplication.instance().removeEventFilter(self)
         _ThemedToolTip.instance().hide_tip()
         
+        # Keep (or drop) the session for "Restore last session on startup"
+        try:
+            self._save_last_session()
+        except Exception as e:
+            logger.warning(f"Could not keep the last session: {e}")
+        
         # Stop timers
+        if hasattr(self, '_project_auto_save_timer') and self._project_auto_save_timer.isActive():
+            self._project_auto_save_timer.stop()
+            logger.debug("Stopped project auto-save timer")
+        
         if hasattr(self, '_status_timer') and self._status_timer.isActive():
             self._status_timer.stop()
             logger.debug("Stopped status timer")
@@ -1854,6 +1991,7 @@ class IconBuilderApp(QMainWindow):
         logger.debug("Setting up file list widget")
         self.file_listbox = QListWidget()
         self.file_listbox.setMaximumHeight(FILE_LIST_MAX_HEIGHT)
+        self.file_listbox.currentRowChanged.connect(self._on_file_row_changed)
         layout.addWidget(self.file_listbox)
     
     def _setup_preview_area(self, layout: QVBoxLayout) -> None:
@@ -1875,7 +2013,18 @@ class IconBuilderApp(QMainWindow):
         self.preview_frame.setLayout(preview_layout)
         
         scroll_area.setWidget(self.preview_frame)
-        layout.addWidget(scroll_area, 1)
+        
+        # The thumbnails, with the metadata panel beside them: the details of
+        # the size clicked in the thumbnails or the size list (#96 A)
+        preview_row = QHBoxLayout()
+        preview_row.setSpacing(5)
+        preview_row.addWidget(scroll_area, 1)
+        self.metadata_panel = MetadataPanel(self)
+        self.metadata_panel.setMaximumWidth(320)
+        self.metadata_panel.setToolTip("Details of the size selected in the thumbnails or the size list")
+        self.metadata_panel.clear("No images loaded")
+        preview_row.addWidget(self.metadata_panel)
+        layout.addLayout(preview_row, 1)
         
         # Context menu for thumbnails
         self.preview_frame.setContextMenuPolicy(Qt.ContextMenuPolicy.CustomContextMenu)
@@ -1895,7 +2044,7 @@ class IconBuilderApp(QMainWindow):
         """Setup floating theme toggle button."""
         logger.debug("Setting up theme toggle button")
         self.theme_button = QPushButton(self.theme_manager.get_theme_display_name(), self)
-        self.theme_button.setToolTip("Cycle theme: Dark → Light → Image (T)")
+        self.theme_button.setToolTip("Cycle theme: Dark → Light → Image (Ctrl+T)")
         self.theme_button.clicked.connect(self.cycle_theme)
         self.theme_button.raise_()
     
@@ -1987,12 +2136,19 @@ class IconBuilderApp(QMainWindow):
             logger.debug("Drag enter accepted")
             self._show_drag_highlight(True)
             
-            # Count valid files
+            # Count valid files, and folders, whose images load on the drop
+            paths = [url.toLocalFile() for url in event.mimeData().urls()]
+            folder_count = sum(1 for path in paths if path and os.path.isdir(path))
             valid_count = sum(
-                1 for url in event.mimeData().urls()
-                if any(url.toLocalFile().lower().endswith(ext) for ext in SUPPORTED_EXTENSIONS)
+                1 for path in paths
+                if any(path.lower().endswith(ext) for ext in SUPPORTED_EXTENSIONS)
+                and not os.path.isdir(path)
             )
-            self._show_status_message(f"Drop to add {valid_count} file(s)", 0)
+            if folder_count:
+                self._show_status_message(
+                    f"Drop to add {valid_count} file(s) and {folder_count} folder(s)", 0)
+            else:
+                self._show_status_message(f"Drop to add {valid_count} file(s)", 0)
     
     def dragLeaveEvent(self, event: QDragLeaveEvent) -> None:
         """
@@ -2012,14 +2168,38 @@ class IconBuilderApp(QMainWindow):
         Args:
             event: Drop event
         """
+        empty_folders = False
         if event.mimeData().hasUrls():
-            files = [url.toLocalFile() for url in event.mimeData().urls()]
-            logger.info(f"Files dropped: {len(files)} file(s)")
-            self.handle_files(files)
+            paths = [url.toLocalFile() for url in event.mimeData().urls()]
+            logger.info(f"Files dropped: {len(paths)} item(s)")
+            
+            # A dropped folder loads its images, as Select Folder does (#96 A)
+            files: list[str] = []
+            folders: list[str] = []
+            for path in paths:
+                if path and os.path.isdir(path):
+                    folders.append(path)
+                    self.recent_files_manager.add_folder(path)
+                    files.extend(self._scan_folder(path))
+                else:
+                    files.append(path)
+            
+            if files:
+                self.handle_files(files)
+            empty_folders = bool(folders) and not files
             event.acceptProposedAction()
         
         self._show_drag_highlight(False)
         self._clear_status_message()
+        
+        if empty_folders:
+            logger.warning("No PNG, ICO or SVG files found in the dropped folder")
+            self._show_status_message("No valid files found in folder")
+            DialogHelper.show_warning(
+                self,
+                "No PNG, ICO or SVG files found in the dropped folder.",
+                "No Files"
+            )
     
     def _show_drag_highlight(self, show: bool) -> None:
         """
@@ -2029,15 +2209,28 @@ class IconBuilderApp(QMainWindow):
             show: Whether to show highlight
         """
         if show:
+            # Each ground takes the ink the palettes pair with it (#99 A).
+            # text_on_accent is the ink for the SOLID accent; on the
+            # translucent tint it put black on the dark window and white on
+            # the light one. In dark and light the tint lies on the window,
+            # so it takes the window's ink, text_primary. In Image mode it
+            # lay on the picture, which can be any color, so the zone takes
+            # the solid accent and its ink, as a selected list row does.
+            image_mode = self.theme_manager.is_image_mode()
             _c = get_theme_colors(
-                is_dark=self.theme_manager.current_theme != 'light')
+                is_dark=self.theme_manager.current_theme != 'light',
+                is_image_mode=image_mode)
+            if image_mode:
+                ground, ink = _c['selected_bg'], _c['text_on_accent']
+            else:
+                ground, ink = _c['dropzone_active_bg'], _c['text_primary']
             self.drop_label.setStyleSheet(f"""
                 QLabel {{
                     border: 3px dashed {_c['border_accent']};
                     border-radius: 8px;
                     padding: 40px;
-                    background-color: {_c['dropzone_active_bg']};
-                    color: {_c['text_on_accent']};
+                    background-color: {ground};
+                    color: {ink};
                     font-size: 14px;
                     font-weight: bold;
                 }}
@@ -2086,17 +2279,7 @@ class IconBuilderApp(QMainWindow):
         # Add folder to recent history
         self.recent_files_manager.add_folder(folder)
         
-        recursive = self.recursive_checkbox.isChecked()
-        logger.debug(f"Recursive scan: {recursive}")
-        
-        files: list[str] = []
-        for root_dir, _, fnames in os.walk(folder):
-            for f in fnames:
-                if any(f.lower().endswith(ext) for ext in SUPPORTED_EXTENSIONS):
-                    files.append(os.path.join(root_dir, f))
-            
-            if not recursive:
-                break
+        files = self._scan_folder(folder)
         
         if files:
             logger.info(f"Found {len(files)} image file(s) in folder")
@@ -2109,6 +2292,34 @@ class IconBuilderApp(QMainWindow):
                 "No PNG or ICO files found.",
                 "No Files"
             )
+    
+    def _scan_folder(self, folder: str) -> list[str]:
+        """
+        The PNG, ICO and SVG files in a folder.
+        
+        With "Scan subfolders when selecting folder" checked, the subfolders'
+        files are included. Select Folder, a recent folder and a dropped
+        folder all scan this way.
+        
+        Args:
+            folder: Folder to scan
+            
+        Returns:
+            Paths of the image files found
+        """
+        recursive = self.recursive_checkbox.isChecked()
+        logger.debug(f"Scanning folder (recursive={recursive}): {folder}")
+        
+        files: list[str] = []
+        for root_dir, _, fnames in os.walk(folder):
+            for f in sorted(fnames):
+                if any(f.lower().endswith(ext) for ext in SUPPORTED_EXTENSIONS):
+                    files.append(os.path.join(root_dir, f))
+            
+            if not recursive:
+                break
+        
+        return files
     
     def handle_files(self, files: list[str]) -> None:
         """
@@ -2124,6 +2335,7 @@ class IconBuilderApp(QMainWindow):
         
         for file_path in files:
             ext = os.path.splitext(file_path)[1].lower()
+            before = dict(self.image_processor.detected_images)
             
             # Wrap in exception handler - errors are logged automatically
             with exception_handler(f"Loading {os.path.basename(file_path)}", show_error=False):
@@ -2139,14 +2351,53 @@ class IconBuilderApp(QMainWindow):
                     loaded = self.image_processor.load_svg(file_path)
                     if loaded > 0:
                         success_count += loaded
+            
+            self._note_source_file(file_path, before)
         
         self.update_file_listbox()
         self.update_preview()
         self._update_status_bar()
         self._update_file_size_estimate()
+        self._update_template_name()
         
         logger.info(f"Loaded {success_count} file(s)")
         self._show_status_message(f"Loaded {success_count} size(s) successfully")
+    
+    def _note_source_file(self, file_path: str, before: dict[int, Image.Image]) -> None:
+        """Record the sizes a file just supplied, so session recovery can load it again.
+        
+        A size supplied again by a later file belongs to that file from then on.
+        """
+        sizes = {size for size, img in self.image_processor.detected_images.items()
+                 if before.get(size) is not img}
+        if not sizes:
+            return
+        for supplied in self._source_files.values():
+            supplied -= sizes
+        path = os.path.abspath(file_path)
+        self._source_files.pop(path, None)
+        self._source_files[path] = sizes
+    
+    def _source_file_for_size(self, size: int) -> str | None:
+        """The file a loaded size came from, or None (autofilled, or from a project without one)."""
+        for path, sizes in reversed(list(self._source_files.items())):
+            if size in sizes:
+                return path
+        return None
+    
+    def _template_base_name(self) -> str:
+        """The filename template's {name}: the base name of the file the
+        largest loaded size came from, or "icon" when there is none."""
+        largest = self.image_processor.get_largest_size()
+        path = self._source_file_for_size(largest) if largest else None
+        if not path:
+            return "icon"
+        return os.path.splitext(os.path.basename(path))[0] or "icon"
+    
+    def _update_template_name(self) -> None:
+        """Show the current {name} in the settings dialog's template preview."""
+        if self.settings_dialog:
+            self.settings_dialog.set_template_name(self._template_base_name())
     
     def clear_files(self) -> None:
         """Clear all loaded files with confirmation."""
@@ -2164,10 +2415,13 @@ class IconBuilderApp(QMainWindow):
         ):
             logger.info("Clearing all files")
             self.image_processor.clear_images()
+            self._source_files.clear()
+            self.selected_size = None
             self.file_listbox.clear()
             self.clear_preview()
             self._update_status_bar()
             self._update_file_size_estimate()
+            self._update_template_name()
             self._show_status_message("All files cleared")
     
     def refresh_preview(self) -> None:
@@ -2180,7 +2434,60 @@ class IconBuilderApp(QMainWindow):
         """Clear current selection (Escape key)."""
         self.selected_size = None
         self.file_listbox.clearSelection()
+        self._refresh_metadata_panel()
         logger.debug("Selection cleared")
+    
+    # ==================== Metadata Panel (#96 A) ====================
+    
+    def _select_size(self, size: int) -> None:
+        """
+        Select a size: its row in the size list, and its details in the
+        metadata panel.
+        
+        Args:
+            size: Icon size
+        """
+        self.selected_size = size
+        self._refresh_metadata_panel()
+    
+    def _on_file_row_changed(self, row: int) -> None:
+        """A row clicked in the size list selects that size."""
+        if 0 <= row < len(ICON_SIZES) and ICON_SIZES[row] != self.selected_size:
+            self._select_size(ICON_SIZES[row])
+    
+    def _refresh_metadata_panel(self) -> None:
+        """
+        Show the selected size's details in the metadata panel.
+        
+        With no size selected, it shows the largest loaded size, the one
+        autofill works from. A loaded size shows the file it came from; an
+        autofilled one is an in-memory image; a missing one has none.
+        """
+        if not hasattr(self, 'metadata_panel'):
+            return
+        
+        size = self.selected_size
+        if size is None:
+            size = self.image_processor.get_largest_size()
+        
+        if size is None or size not in self.preview_images:
+            self.metadata_panel.clear("No images loaded")
+            return
+        
+        # Keep the size list's selected row on the size shown
+        if self.selected_size is not None and size in ICON_SIZES:
+            self.file_listbox.blockSignals(True)
+            self.file_listbox.setCurrentRow(ICON_SIZES.index(size))
+            self.file_listbox.blockSignals(False)
+        
+        img, tag = self.preview_images[size]
+        if tag == "(provided)":
+            image = self.image_processor.detected_images.get(size, img)
+            self.metadata_panel.set_image(image, self._source_file_for_size(size), size)
+        elif tag == "(autofill)":
+            self.metadata_panel.set_image(img, None, size)
+        else:
+            self.metadata_panel.clear(f"{size}x{size} is missing")
     
     # ==================== UI Updates ====================
     
@@ -2198,6 +2505,12 @@ class IconBuilderApp(QMainWindow):
                 item = QListWidgetItem(f"{size}x{size} \u2717")  # X mark
                 item.setForeground(QColor(BRAND_DARK_GOLD))
             self.file_listbox.addItem(item)
+        
+        # Keep the selected size's row selected (the metadata panel shows it)
+        if self.selected_size in ICON_SIZES:
+            self.file_listbox.blockSignals(True)
+            self.file_listbox.setCurrentRow(ICON_SIZES.index(self.selected_size))
+            self.file_listbox.blockSignals(False)
     
     def clear_preview(self) -> None:
         """Clear preview thumbnails and cache."""
@@ -2210,6 +2523,8 @@ class IconBuilderApp(QMainWindow):
                 count += 1
         self.thumbnail_widgets.clear()
         self.preview_images.clear()  # Phase 1: Clear stored preview images
+        if hasattr(self, 'metadata_panel'):
+            self.metadata_panel.clear("No images loaded")
         
         # Clear thumbnail cache for performance
         cache_cleared = clear_thumbnail_cache()
@@ -2260,6 +2575,9 @@ class IconBuilderApp(QMainWindow):
         
         self.preview_frame.layout().addStretch()
         logger.debug(f"Created {thumbnail_count} thumbnail(s)")
+        
+        # The metadata panel follows the images (#96 A)
+        self._refresh_metadata_panel()
         
         # Phase 6: Update color palette in settings dialog
         self._update_color_palette()
@@ -2411,6 +2729,11 @@ class IconBuilderApp(QMainWindow):
                 # Double-click on icon shows full preview
                 self._show_full_preview(size)
                 return True
+            
+            elif (event_type == QEvent.Type.MouseButtonPress
+                  and event.button() == Qt.MouseButton.LeftButton):
+                # A click selects the size: its details show in the metadata panel
+                self._select_size(size)
         
         # Frame: double-click anywhere on row shows full preview
         elif isinstance(obj, QFrame) and obj.property("icon_size") is not None:
@@ -2418,6 +2741,9 @@ class IconBuilderApp(QMainWindow):
                 size = obj.property("icon_size")
                 self._show_full_preview(size)
                 return True
+            elif (event_type == QEvent.Type.MouseButtonPress
+                  and event.button() == Qt.MouseButton.LeftButton):
+                self._select_size(obj.property("icon_size"))
         
         return super().eventFilter(obj, event)
     
@@ -2507,7 +2833,7 @@ class IconBuilderApp(QMainWindow):
             size: Icon size
         """
         logger.debug(f"Showing context menu for size {size}x{size}")
-        self.selected_size = size
+        self._select_size(size)
         menu = QMenu(self)
         
         # Preview options (Phase 1)
@@ -2799,6 +3125,12 @@ class IconBuilderApp(QMainWindow):
         autofill = self.autofill_checkbox.isChecked()
         exported_count = 0
         
+        # File names come from the output filename template (#95 A); its
+        # default, icon_{size}, gives the names this export always wrote
+        from datetime import datetime
+        base_name = self._template_base_name()
+        export_time = datetime.now()
+        
         for size in selected_sizes:
             # Get or generate image for this size
             if size in detected_images:
@@ -2813,7 +3145,9 @@ class IconBuilderApp(QMainWindow):
                 continue
             
             # Save PNG file
-            output_path = os.path.join(folder, f"icon_{size}.png")
+            file_name = FileUtils.render_filename_template(
+                self._filename_template, size, base_name, export_time) + ".png"
+            output_path = os.path.join(folder, file_name)
             try:
                 img.save(output_path, format='PNG', optimize=True)
                 exported_count += 1
@@ -3286,6 +3620,7 @@ class IconBuilderApp(QMainWindow):
         self._apply_preview_stylesheet(theme)
         self._apply_theme_button_stylesheet(theme)
         self._apply_status_bar_stylesheet(theme)
+        self.metadata_panel.apply_theme(is_dark=theme['name'] != 'Light')
     
     def _apply_image_mode_theme(self) -> None:
         """Apply Image Mode theme with background image."""
@@ -3618,6 +3953,9 @@ class IconBuilderApp(QMainWindow):
                 color: {im['main_btn_pressed_text']};
             }}
         """)
+
+        # Metadata panel: Image mode's translucent panel colors
+        self.metadata_panel.apply_theme(is_dark=True, is_image_mode=True)
 
         # Status bar
         self.status_bar.setStyleSheet(f"""

@@ -83,18 +83,21 @@ def create_parser() -> argparse.ArgumentParser:
     )
     
     # Positional arguments
+    # Optional to argparse so that --list-presets and --analyze can run without
+    # them; main() still requires both for a build (see require_build_args).
     parser.add_argument(
         'input',
         type=str,
-        help='Input file (PNG, ICO, SVG) or folder for batch mode'
+        nargs='?',
+        help='Input file (PNG, ICO, SVG) or folder for batch mode (not needed with --list-presets)'
     )
     
     # Output options
     parser.add_argument(
         '-o', '--output',
         type=str,
-        required=True,
-        help='Output file path (for single file) or folder (for batch/platform exports)'
+        help='Output file path (for single file) or folder (for batch/platform exports); '
+             'not needed with --analyze or --list-presets'
     )
     
     # Size options (mutually exclusive group)
@@ -107,7 +110,8 @@ def create_parser() -> argparse.ArgumentParser:
     size_group.add_argument(
         '--preset',
         type=str,
-        help='Use a named preset (e.g., favicon, windows, macos, all)'
+        help='Use a named preset; case does not matter (e.g., favicon, windows, macos, '
+             '"all sizes"). --list-presets shows every name'
     )
     
     # Processing options
@@ -302,6 +306,54 @@ def analyze_ico(file_path: str, quiet: bool = False) -> int:
     return EXIT_SUCCESS
 
 
+def find_preset(preset_manager: Any, name: str) -> SizePreset | None:
+    """
+    Find a preset by name, ignoring case.
+    
+    An exact match wins, so two custom presets whose names differ only in
+    case are still told apart; otherwise the first name that matches with
+    case ignored is used.
+    
+    Args:
+        preset_manager: The PresetManager to search
+        name: Preset name as typed on the command line
+        
+    Returns:
+        SizePreset or None if no preset has that name
+    """
+    # Preset names match case-insensitively: "favicon" finds "Favicon".
+    preset = preset_manager.get_preset(name)
+    if preset:
+        return preset
+    wanted = name.casefold()
+    for candidate in preset_manager.list_presets():
+        if candidate.name.casefold() == wanted:
+            return candidate
+    return None
+
+
+def require_build_args(parser: argparse.ArgumentParser, args: argparse.Namespace) -> None:
+    """
+    Exit with argparse's usage error (exit code 2) when a required argument is missing.
+    
+    --list-presets needs neither input nor -o, and --analyze needs only the
+    input. Every other run builds or exports, and needs both.
+    
+    Args:
+        parser: The parser, used to report the error
+        args: Parsed arguments
+    """
+    if args.list_presets:
+        return
+    missing = []
+    if args.input is None:
+        missing.append('input')
+    if args.output is None and not args.analyze:
+        missing.append('-o/--output')
+    if missing:
+        parser.error(f"the following arguments are required: {', '.join(missing)}")
+
+
 def get_sizes_from_args(args: argparse.Namespace) -> list[int]:
     """
     Determine which sizes to use based on arguments.
@@ -328,11 +380,13 @@ def get_sizes_from_args(args: argparse.Namespace) -> list[int]:
     elif args.preset:
         # Load from preset
         preset_manager = get_preset_manager()
-        preset = preset_manager.get_preset(args.preset)
+        preset = find_preset(preset_manager, args.preset)
         if preset:
             return list(preset.sizes)
         else:
-            print_msg(f"Preset not found: {args.preset}. Using default sizes.", is_error=True)
+            names = ", ".join(p.name for p in preset_manager.list_presets())
+            print_msg(f"Preset not found: {args.preset}. Using default sizes. "
+                      f"Available presets: {names}", is_error=True)
             return ICON_SIZES
     
     else:
@@ -824,6 +878,8 @@ def main() -> int:
     """
     parser = create_parser()
     args = parser.parse_args()
+    # (#92 A) --list-presets needs no input or -o, --analyze needs no -o, and --preset ignores case (find_preset).
+    require_build_args(parser, args)
     
     logger.info(f"CLI invoked with: {' '.join(sys.argv[1:])}")
     

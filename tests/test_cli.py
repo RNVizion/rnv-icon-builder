@@ -88,8 +88,8 @@ class TestCliSubprocess:
     def test_list_presets_succeeds(self, project_root, tmp_dir):
         """--list-presets should print presets and exit 0.
 
-        Note: this CLI's argparse requires input + -o even alongside utility
-        flags like --list-presets, so we pass dummy values that won't be used
+        Input and -o are not needed with --list-presets (see
+        TestCliUtilityFlagsNeedNoDummies); given anyway, they are ignored
         (list_presets is checked before input validation in main()).
         """
         dummy_in = os.path.join(tmp_dir, "dummy.png")
@@ -251,6 +251,86 @@ class TestCliSubprocess:
 
 
 # ══════════════════════════════════════════════════════════════════════════════
+# 1b. THE UTILITY FLAGS NEED NO DUMMY ARGUMENTS, AND PRESETS IGNORE CASE
+# ══════════════════════════════════════════════════════════════════════════════
+@pytest.mark.integration
+class TestCliUtilityFlagsNeedNoDummies:
+    """The README's commands, run as written.
+
+    `--list-presets` once needed an input and -o it never used, and
+    `--analyze` an -o it never used: argparse exited 2 on the bare commands.
+    And `--preset favicon` printed "Preset not found" and built all six sizes,
+    because the built-in preset is named "Favicon". A build still needs both
+    the input and -o.
+    """
+
+    @pytest.fixture(autouse=True)
+    def _skip_if_flat_layout(self, project_root):
+        if not _has_subdir_layout(project_root):
+            pytest.skip(
+                "Flat layout — cli.py subprocess can't resolve "
+                "'core'/'utils'/'ui' imports without conftest bootstrap")
+
+    def test_list_presets_runs_with_nothing_else(self, project_root):
+        result = _run_cli(project_root, "--list-presets")
+        assert result.returncode == 0, result.stderr
+        assert "Favicon" in result.stdout
+        assert "All Sizes" in result.stdout
+
+    def test_analyze_runs_without_an_output(
+            self, project_root, sample_png, tmp_dir):
+        png = sample_png(name="analyze_me.png", size=64)
+        ico_path = os.path.join(tmp_dir, "analyze_me.ico")
+        built = _run_cli(project_root, png, "-o", ico_path,
+                         "--sizes", "32,16", "--quiet")
+        assert built.returncode == 0, built.stderr
+
+        result = _run_cli(project_root, ico_path, "--analyze")
+        assert result.returncode == 0, result.stderr
+        assert "32x32" in result.stdout and "16x16" in result.stdout
+
+    def test_analyze_still_needs_an_input(self, project_root):
+        result = _run_cli(project_root, "--analyze")
+        assert result.returncode == 2
+        assert "input" in result.stderr
+
+    def test_a_build_still_needs_an_output(
+            self, project_root, sample_png):
+        png = sample_png(name="no_output.png", size=64)
+        result = _run_cli(project_root, png)
+        assert result.returncode == 2
+        assert "-o/--output" in result.stderr
+
+    def test_a_build_still_needs_an_input(self, project_root, tmp_dir):
+        result = _run_cli(project_root, "-o",
+                          os.path.join(tmp_dir, "no_input.ico"))
+        assert result.returncode == 2
+        assert "input" in result.stderr
+
+    def test_preset_in_lower_case_builds_the_presets_sizes(
+            self, project_root, sample_png, tmp_dir):
+        png = sample_png(name="favicon_case.png", size=128)
+        ico_path = os.path.join(tmp_dir, "favicon_case.ico")
+        result = _run_cli(project_root, png, "-o", ico_path,
+                          "--preset", "favicon")
+        assert result.returncode == 0, result.stderr
+        assert "Preset not found" not in result.stderr
+
+        analysis = _run_cli(project_root, ico_path, "--analyze")
+        assert analysis.returncode == 0, analysis.stderr
+        assert "Sizes: 48x48, 32x32, 16x16" in analysis.stdout
+
+    def test_an_unknown_preset_is_still_reported(
+            self, project_root, sample_png, tmp_dir):
+        png = sample_png(name="unknown_preset.png", size=64)
+        ico_path = os.path.join(tmp_dir, "unknown_preset.ico")
+        result = _run_cli(project_root, png, "-o", ico_path,
+                          "--preset", "no-such-preset")
+        assert "Preset not found: no-such-preset" in result.stderr
+        assert "Favicon" in result.stderr  # the names to choose from
+
+
+# ══════════════════════════════════════════════════════════════════════════════
 # 2. DIRECT-CALL TESTS — pure-logic helpers
 # ══════════════════════════════════════════════════════════════════════════════
 @pytest.mark.integration
@@ -311,3 +391,46 @@ class TestCliHelpers:
         print_msg("hello world")
         captured = capsys.readouterr()
         assert "hello world" in captured.out
+
+    def test_get_sizes_from_args_preset_ignores_case(self):
+        """--preset favicon, FAVICON and "all sizes" find the built-ins."""
+        from cli import create_parser, get_sizes_from_args
+        parser = create_parser()
+        for name, sizes in (("favicon", [48, 32, 16]),
+                            ("FAVICON", [48, 32, 16]),
+                            ("Favicon", [48, 32, 16]),
+                            ("all sizes", [256, 128, 64, 48, 32, 16])):
+            args = parser.parse_args(["x.png", "-o", "y.ico", "--preset", name])
+            assert sorted(get_sizes_from_args(args), reverse=True) == sizes, name
+
+    def test_get_sizes_from_args_unknown_preset_falls_back(self, capsys):
+        """An unknown preset is reported, and the build uses every size."""
+        from cli import create_parser, get_sizes_from_args
+        from utils.config import ICON_SIZES
+        parser = create_parser()
+        args = parser.parse_args(["x.png", "-o", "y.ico", "--preset", "nope"])
+        assert get_sizes_from_args(args) == ICON_SIZES
+        assert "Preset not found: nope" in capsys.readouterr().err
+
+    def test_find_preset_prefers_the_exact_name(self):
+        """Two names that differ only in case are still told apart."""
+        from types import SimpleNamespace
+        from cli import find_preset
+        lower = SimpleNamespace(name="mine")
+        upper = SimpleNamespace(name="Mine")
+        by_name = {"mine": lower, "Mine": upper}
+        manager = SimpleNamespace(get_preset=by_name.get,
+                                  list_presets=lambda: [lower, upper])
+        assert find_preset(manager, "Mine") is upper
+        assert find_preset(manager, "mine") is lower
+        assert find_preset(manager, "MINE") is lower
+        assert find_preset(manager, "yours") is None
+
+    def test_parser_accepts_the_utility_flags_alone(self):
+        """argparse itself no longer demands input and -o."""
+        from cli import create_parser
+        parser = create_parser()
+        args = parser.parse_args(["--list-presets"])
+        assert args.list_presets and args.input is None and args.output is None
+        args = parser.parse_args(["app.ico", "--analyze"])
+        assert args.analyze and args.input == "app.ico" and args.output is None

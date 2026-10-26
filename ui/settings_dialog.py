@@ -44,13 +44,16 @@ from PyQt6.QtWidgets import (
 from PyQt6.QtCore import Qt, pyqtSignal, QSize, QTimer
 from PyQt6.QtGui import QIcon, QPixmap, QColor
 
-from utils.config import ICON_SIZES
+from utils.config import (
+    ICON_SIZES, AUTO_SAVE_INTERVAL_SECONDS, DEFAULT_RESTORE_LAST_SESSION, ENABLE_AUTO_SAVE,
+)
 from utils.colors import (
     BRAND_GOLD, get_theme_colors,
     swatch_edge,
 )
 from utils.logger import Logger, get_logger_instance
 from utils.dialog_helper import DialogHelper
+from utils.file_utils import FileUtils, DEFAULT_FILENAME_TEMPLATE
 from ui.base_dialog import BaseDialog
 
 if TYPE_CHECKING:
@@ -184,6 +187,10 @@ class SettingsDialog(BaseDialog):
         
         # Track current theme to avoid unnecessary reapplication
         self._current_theme_is_dark: bool = True
+        
+        # The {name} the filename template preview shows: the base name of
+        # the loaded source, set by the main window (#95 A)
+        self._template_name: str = "icon"
         
         self._build_ui()
         self._apply_theme(is_dark=self._is_dark_theme())
@@ -461,8 +468,9 @@ class SettingsDialog(BaseDialog):
         template_layout.setSpacing(8)
         
         template_desc = QLabel(
-            "Customize output filenames using placeholders:\n"
-            "{name} = base name, {size} = dimensions, {date} = date"
+            "Names the files Export PNG Set writes, one per size:\n"
+            "{name} = source file name, {size} = size in pixels,\n"
+            "{date} = date, {time} = time"
         )
         template_desc.setObjectName("desc_label")
         template_desc.setWordWrap(True)
@@ -471,14 +479,18 @@ class SettingsDialog(BaseDialog):
         template_row = QHBoxLayout()
         template_row.addWidget(QLabel("Template:"))
         self.template_input = QLineEdit()
-        self.template_input.setToolTip("Output filename pattern — {name} is replaced with original filename")
-        self.template_input.setPlaceholderText("icon_{size}")
-        self.template_input.setText("icon_{size}")
+        self.template_input.setToolTip(
+            "File name pattern for Export PNG Set. Without {size}, _{size} is added\n"
+            "so each size gets its own file; characters a file name cannot hold become _"
+        )
+        self.template_input.setPlaceholderText(DEFAULT_FILENAME_TEMPLATE)
+        self.template_input.setText(DEFAULT_FILENAME_TEMPLATE)
         self.template_input.textChanged.connect(self._on_template_changed)
         template_row.addWidget(self.template_input)
         template_layout.addLayout(template_row)
         
-        self.template_preview = QLabel("Preview: icon_256.png")
+        self.template_preview = QLabel(
+            f"Preview: {self._generate_template_preview(DEFAULT_FILENAME_TEMPLATE, 256)}.png")
         self.template_preview.setObjectName("desc_label")
         template_layout.addWidget(self.template_preview)
         
@@ -512,13 +524,13 @@ class SettingsDialog(BaseDialog):
         
         self.undo_btn = QPushButton("\u21b6 Undo")
         self.undo_btn.setObjectName("action_btn")
-        self.undo_btn.setToolTip("Undo last adjustment (Ctrl+Z)")
+        self.undo_btn.setToolTip("Undo last adjustment")
         self.undo_btn.clicked.connect(self._on_undo)
         undo_layout.addWidget(self.undo_btn)
         
         self.redo_btn = QPushButton("Redo \u21b7")
         self.redo_btn.setObjectName("action_btn")
-        self.redo_btn.setToolTip("Redo last undone adjustment (Ctrl+Y)")
+        self.redo_btn.setToolTip("Redo last undone adjustment")
         self.redo_btn.clicked.connect(self._on_redo)
         undo_layout.addWidget(self.redo_btn)
         
@@ -1747,14 +1759,20 @@ class SettingsDialog(BaseDialog):
         session_layout.setSpacing(8)
         
         self.restore_session_cb = QCheckBox("Restore last session on startup")
-        self.restore_session_cb.setToolTip("Automatically reload your last working state when the app starts")
-        self.restore_session_cb.setChecked(True)
+        self.restore_session_cb.setToolTip(
+            "At startup, load the images and options you had when the app last closed,\n"
+            "without asking. After a crash, the offer to recover comes instead"
+        )
+        self.restore_session_cb.setChecked(DEFAULT_RESTORE_LAST_SESSION)
         self.restore_session_cb.stateChanged.connect(self._on_session_settings_changed)
         session_layout.addWidget(self.restore_session_cb)
         
         self.auto_save_cb = QCheckBox("Auto-save project periodically")
-        self.auto_save_cb.setToolTip("Automatically save a backup of your project")
-        self.auto_save_cb.setChecked(True)
+        self.auto_save_cb.setToolTip(
+            f"Every {AUTO_SAVE_INTERVAL_SECONDS // 60} minutes, save the open .rnvicon project to its file\n"
+            "if it has changed. A project never saved has no file and is not auto-saved"
+        )
+        self.auto_save_cb.setChecked(ENABLE_AUTO_SAVE)
         self.auto_save_cb.stateChanged.connect(self._on_session_settings_changed)
         session_layout.addWidget(self.auto_save_cb)
         
@@ -1963,9 +1981,14 @@ class SettingsDialog(BaseDialog):
         }
     
     def set_session_settings(self, settings: dict) -> None:
-        """Set session settings."""
-        self.restore_session_cb.setChecked(settings.get('restore_session', True))
-        self.auto_save_cb.setChecked(settings.get('auto_save', True))
+        """Show stored session settings, without reporting them as a change."""
+        for checkbox, key, default in (
+            (self.restore_session_cb, 'restore_session', DEFAULT_RESTORE_LAST_SESSION),
+            (self.auto_save_cb, 'auto_save', ENABLE_AUTO_SAVE),
+        ):
+            checkbox.blockSignals(True)
+            checkbox.setChecked(settings.get(key, default))
+            checkbox.blockSignals(False)
     
     def _build_stylesheet(self, c: dict) -> str:
         """
@@ -2562,6 +2585,9 @@ class SettingsDialog(BaseDialog):
         """
         Generate a preview filename from template.
         
+        The same function names the files Export PNG Set writes, so the
+        preview is the name the export gives this size.
+        
         Args:
             template: Template string with placeholders
             size: Example size for preview
@@ -2569,24 +2595,19 @@ class SettingsDialog(BaseDialog):
         Returns:
             Preview filename (without extension)
         """
-        from datetime import datetime
+        return FileUtils.render_filename_template(template, size, self._template_name)
+    
+    def set_template_name(self, name: str) -> None:
+        """
+        Set the {name} the template preview shows: the loaded source's base name.
         
-        if not template:
-            template = "icon_{size}"
-        
-        now = datetime.now()
-        result = template
-        result = result.replace("{name}", "myicon")
-        result = result.replace("{size}", str(size))
-        result = result.replace("{date}", now.strftime("%Y%m%d"))
-        result = result.replace("{time}", now.strftime("%H%M%S"))
-        
-        # Sanitize filename (remove invalid chars)
-        invalid_chars = '<>:"/\\|?*'
-        for char in invalid_chars:
-            result = result.replace(char, '_')
-        
-        return result
+        Args:
+            name: Base name without extension
+        """
+        self._template_name = name or "icon"
+        if hasattr(self, 'template_input'):
+            preview = self._generate_template_preview(self.template_input.text(), 256)
+            self.template_preview.setText(f"Preview: {preview}.png")
     
     def get_filename_template(self) -> str:
         """
@@ -2596,8 +2617,8 @@ class SettingsDialog(BaseDialog):
             Template string with placeholders
         """
         if hasattr(self, 'template_input'):
-            return self.template_input.text() or "icon_{size}"
-        return "icon_{size}"
+            return self.template_input.text() or DEFAULT_FILENAME_TEMPLATE
+        return DEFAULT_FILENAME_TEMPLATE
     
     def update_file_size_estimate(self, estimate_info: dict | None) -> None:
         """

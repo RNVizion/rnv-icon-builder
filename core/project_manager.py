@@ -6,7 +6,8 @@ Features:
 - Save/load complete project state
 - Embed images or reference external files
 - Track settings and adjustments
-- Auto-save support
+- Auto-save of a saved project to its own file
+- The last session, kept for "Restore last session on startup"
 """
 
 from __future__ import annotations
@@ -22,7 +23,7 @@ from datetime import datetime
 
 from PIL import Image
 
-from utils.config import ICON_SIZES, USER_DATA_DIR, AUTO_SAVE_PATH, LAST_SESSION_PATH
+from utils.config import ICON_SIZES, USER_DATA_DIR, LAST_SESSION_PATH
 from utils.logger import Logger, get_logger_instance
 from utils.file_utils import FileUtils
 from utils.atomic_write import atomic_write_json
@@ -416,35 +417,21 @@ class ProjectManager:
     
     def auto_save(self, project: Project) -> bool:
         """
-        Auto-save the project to a temporary location.
+        Auto-save the project to its own file, project.file_path (#95 A).
+        
+        The write is atomic, as every save_project() is. A project that has
+        never been saved has no file, so there is nowhere to auto-save it.
         
         Args:
             project: Project to auto-save
             
         Returns:
-            True if save successful
+            True if save successful; False for a project never saved
         """
-        return self.save_project(project, str(AUTO_SAVE_PATH))
-    
-    def load_auto_save(self) -> Project | None:
-        """
-        Load the auto-saved project if it exists.
-        
-        Returns:
-            Project or None if no auto-save exists
-        """
-        if AUTO_SAVE_PATH.exists():
-            return self.load_project(str(AUTO_SAVE_PATH))
-        return None
-    
-    def clear_auto_save(self) -> None:
-        """Delete the auto-save file if it exists."""
-        if AUTO_SAVE_PATH.exists():
-            try:
-                AUTO_SAVE_PATH.unlink()
-                logger.debug("Cleared auto-save file")
-            except Exception as e:
-                logger.warning(f"Failed to clear auto-save: {e}")
+        if not project.file_path:
+            logger.debug("Auto-save skipped: the project has never been saved")
+            return False
+        return self.save_project(project, project.file_path)
     
     def save_last_session(self, project: Project) -> bool:
         """
@@ -572,6 +559,5 @@ __all__: list[str] = [
     'ProjectManager',
     'get_project_manager',
     'PROJECT_EXTENSION',
-    'AUTO_SAVE_PATH',
     'LAST_SESSION_PATH',
 ]

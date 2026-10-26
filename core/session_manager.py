@@ -7,6 +7,8 @@ Features:
 - Session state persistence
 - Crash recovery detection
 - Recovery dialog on startup
+- The two session settings (restore last session, auto-save project),
+  kept in settings.json
 """
 
 from __future__ import annotations
@@ -20,7 +22,9 @@ from dataclasses import dataclass, field, asdict
 
 from PyQt6.QtCore import QObject, QTimer, pyqtSignal
 
-from utils.config import USER_DATA_DIR
+from utils.config import (
+    USER_DATA_DIR, SETTINGS_PATH, DEFAULT_RESTORE_LAST_SESSION, ENABLE_AUTO_SAVE,
+)
 from utils.logger import Logger, get_logger_instance
 from utils.async_file_ops import write_async
 from utils.atomic_write import atomic_write_json, atomic_write_text
@@ -38,6 +42,13 @@ RECOVERY_FLAG_PATH: Path = SESSION_DIR / ".recovery_needed"
 
 # Default auto-save interval (5 minutes in milliseconds)
 DEFAULT_AUTO_SAVE_INTERVAL: int = 5 * 60 * 1000  # 5 minutes
+
+# The session settings Settings > Auto shows, and their values before the
+# user changes them (#95 A)
+SESSION_SETTING_DEFAULTS: dict[str, bool] = {
+    'restore_session': DEFAULT_RESTORE_LAST_SESSION,
+    'auto_save': ENABLE_AUTO_SAVE,
+}
 
 
 @dataclass
@@ -331,10 +342,63 @@ class SessionManager(QObject):
             logger.debug(f"Could not clear saved session: {e}")
     
     def on_clean_shutdown(self) -> None:
-        """Called when application shuts down cleanly."""
+        """Called when application shuts down cleanly.
+        
+        The session auto-save exists for crash recovery only, so a clean close
+        removes it with the flag. Left behind, it made the next start offer to
+        recover a session that had closed normally: start_auto_save() sets the
+        flag again before the recovery check runs.
+        """
         self.stop_auto_save()
-        self._clear_recovery_flag()
+        self.clear_recovery()
         logger.debug("Clean shutdown recorded")
+    
+    # ==================== Session settings (#95 A) ====================
+    
+    @staticmethod
+    def _read_settings_file() -> dict[str, Any]:
+        """The settings file's content, or {} when it is missing or unreadable."""
+        try:
+            with open(SETTINGS_PATH, 'r', encoding='utf-8') as f:
+                data = json.load(f)
+            return data if isinstance(data, dict) else {}
+        except FileNotFoundError:
+            return {}
+        except Exception as e:
+            logger.warning(f"Could not read settings: {e}")
+            return {}
+    
+    def load_settings(self) -> dict[str, bool]:
+        """
+        The session settings: 'restore_session' and 'auto_save'.
+        
+        A value missing from settings.json, or not a true/false, takes its
+        default from SESSION_SETTING_DEFAULTS.
+        """
+        data = self._read_settings_file()
+        settings = dict(SESSION_SETTING_DEFAULTS)
+        for key in settings:
+            if isinstance(data.get(key), bool):
+                settings[key] = data[key]
+        return settings
+    
+    def save_settings(self, restore_session: bool, auto_save: bool) -> bool:
+        """
+        Store the session settings in settings.json, keeping its other keys.
+        
+        Returns:
+            True if the file was written
+        """
+        data = self._read_settings_file()
+        data['restore_session'] = bool(restore_session)
+        data['auto_save'] = bool(auto_save)
+        try:
+            SETTINGS_PATH.parent.mkdir(parents=True, exist_ok=True)
+            atomic_write_json(SETTINGS_PATH, data, indent=2)
+            return True
+        except Exception as e:
+            logger.warning(f"Could not save settings: {e}")
+            return False
     
     @property
     def is_auto_save_enabled(self) -> bool:
@@ -356,4 +420,5 @@ __all__: list[str] = [
     'SESSION_DIR',
     'SESSION_AUTO_SAVE_PATH',
     'DEFAULT_AUTO_SAVE_INTERVAL',
+    'SESSION_SETTING_DEFAULTS',
 ]

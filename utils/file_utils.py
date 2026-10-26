@@ -9,18 +9,28 @@ Features:
 - Directory creation helpers
 - File size utilities
 - Backup file creation
+- Output filename templates ({name}, {size}, {date}, {time})
 """
 
 from __future__ import annotations
 
 import os
+import re
 import shutil
+from datetime import datetime
 from pathlib import Path
 
 from utils.logger import Logger, get_logger_instance
 
 # Setup logger
 logger: Logger = get_logger_instance(__name__)
+
+#: The output filename template's default. It gives the PNG set the names it
+#: always had: icon_256.png, icon_128.png and so on.
+DEFAULT_FILENAME_TEMPLATE: str = "icon_{size}"
+
+#: The placeholders a filename template fills.
+_TEMPLATE_PLACEHOLDER = re.compile(r"\{(name|size|date|time)\}")
 
 
 class FileUtils:
@@ -165,6 +175,53 @@ class FileUtils:
             safe_name = "unnamed"
             
         return safe_name
+    
+    @staticmethod
+    def render_filename_template(
+        template: str,
+        size: int,
+        name: str = "icon",
+        when: datetime | None = None,
+        extension: str = ".png"
+    ) -> str:
+        """
+        The file name, without its extension, that a template gives one size.
+        
+        {name} is the source file's base name, {size} the size in pixels,
+        {date} YYYYMMDD and {time} HHMMSS. An empty template is the default,
+        icon_{size}. A template without {size} gets _{size} added, so each
+        size has a file of its own. Characters a file name cannot hold,
+        control characters among them, become underscores, and the name
+        leaves room for the extension.
+        
+        Args:
+            template: Template with placeholders
+            size: The size this file holds
+            name: The value of {name}
+            when: The time {date} and {time} show (default: now)
+            extension: The extension the caller adds, for the length limit
+            
+        Returns:
+            A safe file name without its extension
+        
+        Example:
+            >>> FileUtils.render_filename_template("{name}-{size}px", 32, "logo")
+            'logo-32px'
+        """
+        template = template or DEFAULT_FILENAME_TEMPLATE
+        if "{size}" not in template:
+            template += "_{size}"
+        when = when or datetime.now()
+        values = {
+            "name": name,
+            "size": str(size),
+            "date": when.strftime("%Y%m%d"),
+            "time": when.strftime("%H%M%S"),
+        }
+        stem = _TEMPLATE_PLACEHOLDER.sub(lambda m: values[m.group(1)], template)
+        stem = "".join("_" if ord(c) < 32 else c for c in stem)
+        return FileUtils.get_safe_filename(
+            stem, max_length=FileUtils.MAX_FILENAME_LENGTH - len(extension))
     
     @staticmethod
     def create_directory_if_not_exists(directory: str | Path) -> bool:
@@ -514,6 +571,7 @@ def mkdir(directory: str | Path) -> bool:
 
 __all__: list[str] = [
     'FileUtils',
+    'DEFAULT_FILENAME_TEMPLATE',
     'ensure_extension',
     'safe_filename',
     'file_exists',

@@ -402,20 +402,22 @@ class TestProjectManagerSessionAndInfo:
         pm.clear_last_session()
         assert pm.load_last_session() is None
 
-    def test_clear_auto_save_when_absent_does_not_raise(self):
-        """Calling clear_auto_save with no file present is a safe no-op."""
-        from core.project_manager import ProjectManager
+    def test_auto_save_writes_the_project_to_its_own_file(self, tmp_dir):
+        """auto_save() saves a saved project where it was saved (#95 A)."""
+        from core.project_manager import ProjectManager, Project, ProjectSettings
         pm = ProjectManager()
-        pm.clear_auto_save()  # No file → no-op, no exception.
+        path = os.path.join(tmp_dir, "own.rnvicon")
+        project = Project(name="Own", settings=ProjectSettings(autofill=False))
+        project.file_path = path
+        assert pm.auto_save(project) is True
+        assert pm.load_project(path).settings.autofill is False
+        assert os.listdir(tmp_dir) == ["own.rnvicon"]
 
-    def test_load_auto_save_when_absent_returns_none(self):
-        from core.project_manager import ProjectManager
-        pm = ProjectManager()
-        # Don't assume there is no auto-save file in this CI env; clear first.
-        pm.clear_auto_save()
-        # After clear, load should return None.
-        result = pm.load_auto_save()
-        assert result is None
+    def test_auto_save_of_a_project_never_saved_writes_nothing(self, tmp_dir):
+        """A project with no file has nowhere to auto-save to (#95 A); it used
+        to go to an autosave.rnvicon that nothing ever read."""
+        from core.project_manager import ProjectManager, Project
+        assert ProjectManager().auto_save(Project(name="Unsaved")) is False
 
 
 # ══════════════════════════════════════════════════════════════════════════════

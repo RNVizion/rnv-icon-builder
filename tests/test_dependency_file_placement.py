@@ -26,7 +26,7 @@ TEXT_SUFFIXES = {".py", ".md", ".txt", ".toml", ".yml", ".yaml", ".ini",
 # written. Rewriting them would read as tests/tests/... to a reader.
 DIAGRAM_LINES = {
     "README.md": "│   ├── requirements-dev.txt   # Test-only dependencies",
-    "TEST_SYSTEM.md": "│   └── requirements-dev.txt    ← Pinned test dependencies",
+    "TEST_SYSTEM.md": "│   └── requirements-dev.txt    ← Test dependencies, and rnv-brand at its pinned commit",
 }
 
 

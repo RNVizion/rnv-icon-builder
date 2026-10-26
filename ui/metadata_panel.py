@@ -85,6 +85,9 @@ class MetadataPanel(QFrame):
         scroll.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
         
         scroll_content = QWidget()
+        # Transparent, so the panel's own background shows through the scroll area
+        scroll_content.setObjectName("metadata_content")
+        scroll.viewport().setAutoFillBackground(False)
         self.metadata_layout = QVBoxLayout(scroll_content)
         self.metadata_layout.setContentsMargins(0, 0, 0, 0)
         self.metadata_layout.setSpacing(10)
@@ -154,15 +157,18 @@ class MetadataPanel(QFrame):
         while grid.count():
             item = grid.takeAt(0)
             if item.widget():
+                # Hidden at once: a row deleted later would otherwise still
+                # paint under the new rows until the event loop deletes it
+                item.widget().hide()
                 item.widget().deleteLater()
     
-    def _show_empty_state(self) -> None:
+    def _show_empty_state(self, message: str = "No image selected") -> None:
         """Show empty state when no image is loaded."""
         self._clear_grid(self.file_grid)
         self._clear_grid(self.image_grid)
         self._clear_grid(self.format_grid)
         
-        self._add_metadata_row(self.file_grid, 0, "Status", "No image selected")
+        self._add_metadata_row(self.file_grid, 0, "Status", message)
         
         self.image_group.hide()
         self.format_group.hide()
@@ -380,9 +386,9 @@ class MetadataPanel(QFrame):
         
         return details
     
-    def _apply_theme(self, is_dark: bool = True) -> None:
+    def _apply_theme(self, is_dark: bool = True, is_image_mode: bool = False) -> None:
         """Apply theme styling to the panel."""
-        c = get_theme_colors(is_dark=is_dark)
+        c = get_theme_colors(is_dark=is_dark, is_image_mode=is_image_mode)
 
         self.setStyleSheet(f"""
             MetadataPanel {{
@@ -429,22 +435,32 @@ class MetadataPanel(QFrame):
                 background-color: transparent;
                 border: none;
             }}
+            
+            QWidget#metadata_content {{
+                background-color: transparent;
+            }}
         """)
     
-    def apply_theme(self, is_dark: bool) -> None:
+    def apply_theme(self, is_dark: bool, is_image_mode: bool = False) -> None:
         """
         Apply theme from external source.
         
         Args:
             is_dark: True for dark theme, False for light
+            is_image_mode: True for Image mode's translucent panel colors
         """
-        self._apply_theme(is_dark)
+        self._apply_theme(is_dark, is_image_mode)
     
-    def clear(self) -> None:
-        """Clear the metadata display."""
+    def clear(self, message: str = "No image selected") -> None:
+        """
+        Clear the metadata display.
+        
+        Args:
+            message: What the Status row says instead
+        """
         self._current_image = None
         self._current_path = None
-        self._show_empty_state()
+        self._show_empty_state(message)
 
 
 # Module exports

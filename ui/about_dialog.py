@@ -216,7 +216,7 @@ image manipulation, multiple export formats, and workflow automation.</p>
 <li><b>Platform Export</b> - Export for Windows, macOS, iOS, Android, and Web</li>
 <li><b>Batch Processing</b> - Process multiple files in a queue</li>
 <li><b>Image Adjustments</b> - Rotate, flip, crop, resize, and color corrections</li>
-<li><b>Session Management</b> - Auto-save and crash recovery</li>
+<li><b>Session Management</b> - Auto-save, crash recovery and restoring the last session</li>
 </ul>
 
 <h4>System Information:</h4>
@@ -275,26 +275,26 @@ image manipulation, multiple export formats, and workflow automation.</p>
 <li><b>Multi-Resolution Support</b> - Standard sizes: 256, 128, 64, 48, 32, 16px</li>
 <li><b>PNG Compression</b> - Smaller files with PNG for large sizes</li>
 <li><b>Autofill Sizes</b> - Automatically generate missing smaller sizes</li>
-<li><b>Smart Detection</b> - Auto-detect image sizes from filenames</li>
+<li><b>Size Detection</b> - Each image's size comes from its pixel dimensions</li>
 </ul>
 
 <h4>🖌️ Image Adjustments</h4>
 <ul>
-<li><b>Transform</b> - Rotate 90°, flip horizontal/vertical</li>
+<li><b>Transform</b> - Rotate 90° either way or 180°, flip horizontal/vertical</li>
 <li><b>Crop & Resize</b> - Auto-crop, add padding, center resize</li>
 <li><b>Borders</b> - Add colored borders with custom width</li>
 <li><b>Color Adjustments</b> - Brightness, contrast, saturation, grayscale</li>
-<li><b>Undo/Redo</b> - Full history for each size slot</li>
+<li><b>Undo/Redo</b> - One shared 20-step history for all sizes</li>
 </ul>
 
 <h4>📤 Export Formats</h4>
 <ul>
 <li><b>Windows ICO</b> - Multi-resolution icon files</li>
 <li><b>macOS ICNS</b> - Apple icon format with Retina support</li>
-<li><b>PNG Set</b> - Individual PNG files for each size</li>
+<li><b>PNG Set</b> - Individual PNG files for each size, named by the filename template</li>
 <li><b>Favicon Package</b> - Complete web favicon set with manifest</li>
 <li><b>Android Icons</b> - mipmap folders (mdpi to xxxhdpi)</li>
-<li><b>iOS App Icons</b> - Complete Assets.xcassets structure</li>
+<li><b>iOS App Icons</b> - AppIcon.appiconset folder with Contents.json</li>
 </ul>
 
 <h4>⚙️ Workflow Automation</h4>
@@ -303,6 +303,7 @@ image manipulation, multiple export formats, and workflow automation.</p>
 <li><b>Folder Watching</b> - Auto-process new files in a folder</li>
 <li><b>Size Presets</b> - Save and load size configurations</li>
 <li><b>Project Files</b> - Save complete application state</li>
+<li><b>Project Auto-Save</b> - A saved project that changed is saved again every 5 minutes</li>
 </ul>
 
 <h4>🔍 Preview & Analysis</h4>
@@ -311,13 +312,15 @@ image manipulation, multiple export formats, and workflow automation.</p>
 <li><b>Context Preview</b> - View icons in OS context mockups</li>
 <li><b>ICO Analyzer</b> - Examine existing ICO file structure</li>
 <li><b>Color Palette</b> - Extract dominant colors from images</li>
+<li><b>Metadata Panel</b> - File, dimensions and color mode of the selected size</li>
 </ul>
 
 <h4>💾 Session & History</h4>
 <ul>
 <li><b>Auto-Save</b> - Periodic session backup every 5 minutes</li>
 <li><b>Crash Recovery</b> - Restore sessions after unexpected close</li>
-<li><b>Export History</b> - Track all export operations</li>
+<li><b>Restore Last Session</b> - Optionally reload the last session's images at startup</li>
+<li><b>Export History</b> - A log of recent ICO builds</li>
 <li><b>Compression Stats</b> - View file size savings</li>
 </ul>
 """
@@ -381,15 +384,16 @@ image manipulation, multiple export formats, and workflow automation.</p>
 
 <h4>Preview Navigation</h4>
 <table width="100%">
-<tr><td width="40%"><b>Single Click</b></td><td>Select Size for Adjustments</td></tr>
+<tr><td width="40%"><b>Click</b></td><td>Show the Size's Details in the Metadata Panel</td></tr>
 <tr><td><b>Double Click</b></td><td>Open Full Preview Dialog</td></tr>
 <tr><td><b>Hover</b></td><td>Show Enlarged Thumbnail</td></tr>
+<tr><td><b>Right Click</b></td><td>Preview, Compare, Replace or Remove a Size</td></tr>
 </table>
 
 <h4>Drag & Drop</h4>
 <table width="100%">
 <tr><td width="40%"><b>Drop Files</b></td><td>Load PNG/ICO/SVG Images</td></tr>
-<tr><td><b>Drop Folder</b></td><td>Scan Folder for Images</td></tr>
+<tr><td><b>Drop a Folder</b></td><td>Load the Images in It (and Its Subfolders when Scanning Them)</td></tr>
 </table>
 """
         

@@ -520,3 +520,116 @@ class TestSettingsChangedHook:
         """Settings change while files loaded — triggers preview refresh."""
         app.handle_files([sample_png(name="settings_chg.png", size=64)])
         app._on_settings_changed()
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+# 13. PRESET SAVE / DELETE FROM SETTINGS (#94 A)
+# ══════════════════════════════════════════════════════════════════════════════
+@pytest.mark.application
+class TestPresetSaveAndDeleteFromSettings:
+    """Saving or deleting a preset in Settings closed the app. The main
+    window's handlers called update_preset_list() with the preset names, but
+    it takes none; the TypeError was raised inside a Qt slot, and Qt aborts
+    on that (exit 134). Driven from the dialog's own buttons, through the
+    real signals, so pytest-qt reports an exception in any slot on the way."""
+
+    @staticmethod
+    def _names(dialog) -> list[str]:
+        combo = dialog.preset_combo
+        return [combo.itemText(i) for i in range(combo.count())]
+
+    def test_save_then_delete_a_preset_with_the_dialog_buttons(self, app, tmp_dir,
+                                                               monkeypatch):
+        import core.preset_manager as preset_module
+        from pathlib import Path
+        monkeypatch.setattr(preset_module, "PRESETS_FILE",
+                            Path(tmp_dir) / "presets.json")
+
+        app._open_settings()
+        dialog = app.settings_dialog
+
+        dialog.preset_name_edit.setText("ZZ Test")
+        dialog.preset_save_btn.click()
+        assert app.preset_manager.get_preset("ZZ Test") is not None
+        assert "ZZ Test" in self._names(dialog), "the list was not refreshed after a save"
+
+        dialog.preset_combo.setCurrentText("ZZ Test")
+        dialog.preset_delete_btn.click()
+        assert app.preset_manager.get_preset("ZZ Test") is None
+        assert "ZZ Test" not in self._names(dialog), "the list was not refreshed after a delete"
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+# 14. SESSION RECOVERY RESTORES THE LOADED FILES (#94 A)
+# ══════════════════════════════════════════════════════════════════════════════
+@pytest.mark.application
+class TestSessionRecoveryRestoresFiles:
+    """The session saved the file list's labels ("256x256 ✓") instead of the
+    files' paths, and the restore called a loader that does not exist, so a
+    recovered session restored the window and two checkboxes but no images."""
+
+    @staticmethod
+    def _session_paths(monkeypatch, tmp_dir):
+        import core.session_manager as session_module
+        from pathlib import Path
+        monkeypatch.setattr(session_module, "SESSION_AUTO_SAVE_PATH",
+                            Path(tmp_dir) / "autosave.json")
+        monkeypatch.setattr(session_module, "RECOVERY_FLAG_PATH",
+                            Path(tmp_dir) / ".recovery_needed")
+        return session_module
+
+    def test_a_recovered_session_loads_the_same_files(self, app, sample_png,
+                                                      tmp_dir, monkeypatch):
+        import json
+        session_module = self._session_paths(monkeypatch, tmp_dir)
+        large = sample_png(name="large_256.png", size=256)
+        small = sample_png(name="small_32.png", size=32)
+        app.handle_files([large, small])
+
+        app.session_manager.save_session(app._get_session_state(), async_write=False)
+        saved = json.loads(session_module.SESSION_AUTO_SAVE_PATH.read_text(encoding="utf-8"))
+        assert saved["loaded_files"] == [os.path.abspath(large), os.path.abspath(small)]
+
+        # What an unexpected close leaves behind, then the next start's restore.
+        session_module.RECOVERY_FLAG_PATH.write_text("1", encoding="utf-8")
+        app.clear_files()
+        assert not app.image_processor.get_detected_images()
+        state = app.session_manager.get_recovery_state()
+        assert state is not None
+        app._restore_session_state(state)
+        assert sorted(app.image_processor.get_detected_images()) == [32, 256]
+
+    def test_a_size_loaded_again_belongs_to_the_newer_file(self, app, sample_png):
+        first = sample_png(name="first_64.png", size=64)
+        second = sample_png(name="second_64.png", size=64)
+        kept = sample_png(name="kept_16.png", size=16)
+        app.handle_files([first, kept])
+        app.handle_files([second])
+        assert app._get_session_state().loaded_files == [os.path.abspath(kept),
+                                                         os.path.abspath(second)]
+        app.remove_size(16)
+        assert app._get_session_state().loaded_files == [os.path.abspath(second)]
+
+    def test_an_old_session_of_labels_recovers_what_is_a_path(self, app, sample_png,
+                                                              tmp_dir, monkeypatch):
+        """A session file written before the fix holds labels; it must not
+        crash recovery, and anything in it that is an image path still loads."""
+        import json
+        from datetime import datetime
+        session_module = self._session_paths(monkeypatch, tmp_dir)
+        real = sample_png(name="still_here_128.png", size=128)
+        session_module.SESSION_AUTO_SAVE_PATH.write_text(json.dumps({
+            "timestamp": datetime.now().isoformat(),
+            "loaded_files": ["256x256 ✓", "128x128 ✗", 42, "relative.png",
+                             os.path.join(tmp_dir, "gone.png"), real],
+            "autofill_enabled": False,
+            "png_compression": True,
+            "window_geometry": {},
+        }), encoding="utf-8")
+        session_module.RECOVERY_FLAG_PATH.write_text("1", encoding="utf-8")
+
+        state = app.session_manager.get_recovery_state()
+        assert state is not None
+        app._restore_session_state(state)
+        assert sorted(app.image_processor.get_detected_images()) == [128]
+        assert app.autofill_checkbox.isChecked() is False
