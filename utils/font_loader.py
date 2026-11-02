@@ -15,6 +15,7 @@ from PyQt6.QtCore import QByteArray
 from PyQt6.QtGui import QFont, QFontDatabase
 
 from utils.config import FONT_PATH
+from utils import brand_fonts
 from utils.logger import Logger, get_logger_instance
 
 # Setup logger for this module
@@ -45,7 +46,7 @@ def load_embedded_font() -> QFont:
         1. Cached font family (if previously loaded)
         2. Embedded base64 font (if available)
         3. External font file (resources/fonts/Montserrat-Black.ttf)
-        4. System fallback (Arial)
+        4. The brand's body face, Inter (ruling 107 A; Arial until 2026-11-02)
     
     Returns:
         QFont object ready to use
@@ -61,6 +62,9 @@ def load_embedded_font() -> QFont:
         logger.debug(f"Using cached font family: {_cached_font_family}")
         return QFont(_cached_font_family, 10)
     
+    # The brand's interface faces, Inter and JetBrains Mono (ruling 107 A)
+    brand_fonts.register(FONT_PATH.parent)
+
     # Try embedded font first
     if MONT_FONT.strip() and "<BASE64 FONT STRING" not in MONT_FONT:
         logger.debug("Attempting to load embedded base64 font")
@@ -102,9 +106,9 @@ def load_embedded_font() -> QFont:
         logger.warning(f"Font file not found: {FONT_PATH}")
     
     # Fallback to system font (also cache so we don't retry every time)
-    _cached_font_family = "Arial"
-    logger.warning("Using fallback font (Arial)")
-    return QFont("Arial", 10)
+    _cached_font_family = brand_fonts.family("body")
+    logger.warning(f"Using fallback font ({_cached_font_family})")
+    return QFont(_cached_font_family, 10)
 
 
 def get_bold_font(size: int = 10) -> QFont:
@@ -162,26 +166,10 @@ def get_monospace_font(size: int = 10) -> QFont:
         >>> code_font = get_monospace_font(9)
         >>> code_editor.setFont(code_font)
     """
-    logger.debug(f"Creating monospace font with size {size}")
-    # Try common monospace fonts in order of preference
-    monospace_families: list[str] = [
-        "Consolas",
-        "Monaco", 
-        "Courier New",
-        "DejaVu Sans Mono",
-        "monospace"
-    ]
-    
-    for family in monospace_families:
-        font = QFont(family, size)
-        if font.exactMatch() or family == "monospace":
-            font.setStyleHint(QFont.StyleHint.Monospace)
-            return font
-    
-    # Fallback
-    font = QFont("Courier", size)
-    font.setStyleHint(QFont.StyleHint.Monospace)
-    return font
+    # The brand's mono face, JetBrains Mono (ruling 107 A). Until 2026-11-02
+    # this took the first of Consolas, Monaco, Courier New and DejaVu Sans
+    # Mono the system had, and Courier after them.
+    return brand_fonts.font("mono", size)
 
 
 # ==================== Module Exports ====================

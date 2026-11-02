@@ -52,6 +52,7 @@ from utils.colors import (
     swatch_edge,
 )
 from utils.logger import Logger, get_logger_instance
+from utils import brand_fonts
 from utils.dialog_helper import DialogHelper
 from utils.file_utils import FileUtils, DEFAULT_FILENAME_TEMPLATE
 from ui.base_dialog import BaseDialog
@@ -2187,7 +2188,7 @@ class SettingsDialog(BaseDialog):
             QLabel[objectName="mono_label"] {{
                 color: {c['text_secondary']};
                 font-size: 10px;
-                font-family: monospace;
+                font-family: {brand_fonts.css('mono')};
             }}
             
             /* Title label */
