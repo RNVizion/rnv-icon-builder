@@ -277,24 +277,24 @@ GRAY_DD: Final[str] = "#dddddd"  # app-owned
 with APP_TEXT without being text. The register's APP["text"] is ink;
 a gridline is not, and moving the ink should not move the grid."""
 
-GRAY_66: Final[str] = "#666666"  # app-owned
+GRAY_66: Final[str] = "#666666"  # brand: GRAY.gray-6
 """gray(6) on the ramp, #666666. Secondary and muted text on light."""
 
-GRAY_88: Final[str] = "#888888"  # app-owned
+GRAY_88: Final[str] = "#888888"  # brand: GRAY.gray-8
 """gray(8) on the ramp, #888888. Muted text on dark, a scrollbar handle
 hover on light."""
 
-GRAY_55: Final[str] = "#555555"  # app-owned
+GRAY_55: Final[str] = "#555555"  # brand: GRAY.gray-5
 """gray(5) on the ramp, #555555. Disabled text and a checkbox edge on dark."""
 
-GRAY_44: Final[str] = "#444444"  # app-owned
+GRAY_44: Final[str] = "#444444"  # brand: GRAY.gray-4
 """gray(4) on the ramp, #444444. The pressed plate and the scrollbar
 handle on dark."""
 
 # RNV-LIGHT-WIRING (2026-09-06): moved up from below the
 # palettes, unchanged. It now has palette callers, and a
 # name defined after its use is a NameError at import.
-GRAY_CC: Final[str] = "#cccccc"  # app-owned
+GRAY_CC: Final[str] = "#cccccc"  # brand: GRAY.gray-12
 """Gray cc. The light edge swatch_edge() reaches for on a dark ground.
 
 RNV-INK-RULE (2026-09-02). It used to be three digits under a role name,
@@ -318,10 +318,10 @@ APP_PROVENANCE: Final[dict[str, str]] = {
     "GRAY_E0": "app-ramp",
     "GRAY_EE": "app-ramp",
     "GRAY_DD": "app-ramp",
-    "GRAY_66": "app-ramp",
-    "GRAY_88": "app-ramp",
-    "GRAY_55": "app-ramp",
-    "GRAY_44": "app-ramp",
+    "GRAY_66": "register",
+    "GRAY_88": "register",
+    "GRAY_55": "register",
+    "GRAY_44": "register",
 }
 """Declarative, and read by tests/test_app_mirror.py. A classification that
 lives only in a test drifts from the thing it classifies."""

@@ -48,26 +48,11 @@
       "app": "#dddddd",
       "why": "gray(13) on the ramp. Edges and grid lines that share APP text's hex without being ink."
     },
-    "GRAY_66": {
-      "app": "#666666",
-      "why": "gray(6) on the register's ink grid, which the register states as a rule and does not name. Secondary and muted text on light."
-    },
-    "GRAY_88": {
-      "app": "#888888",
-      "why": "gray(8) on the register's ink grid, which the register states as a rule and does not name. Muted text on dark; a scrollbar handle's hover on light."
-    },
-    "GRAY_55": {
-      "app": "#555555",
-      "why": "gray(5) on the register's ink grid, which the register states as a rule and does not name. Disabled text and a checkbox edge on dark."
-    },
-    "GRAY_44": {
-      "app": "#444444",
-      "why": "gray(4) on the register's ink grid, which the register states as a rule and does not name. The pressed plate and the scrollbar handle."
-    },
-    "GRAY_CC": {
-      "app": "#cccccc",
-      "why": "gray(12) on the register's ink grid, which the register states as a rule and does not name. The light edge a swatch takes on a dark ground."
-    },
+    "GRAY_66": "GRAY.gray-6",
+    "GRAY_88": "GRAY.gray-8",
+    "GRAY_55": "GRAY.gray-5",
+    "GRAY_44": "GRAY.gray-4",
+    "GRAY_CC": "GRAY.gray-12",
     "DEFAULT_CUSTOM_BG_COLOR": {
       "app": "#808080",
       "why": "Data: the neutral gray a custom preview background starts as."

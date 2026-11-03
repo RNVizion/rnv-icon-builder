@@ -142,7 +142,7 @@ def test_the_wiring_map_is_not_empty():
 
 def test_the_new_constants_hold_the_registered_values():
     """The local half of the mirror. Runs everywhere, including where
-    engine.brand is not importable -- which is exactly why it is not optional.
+    rnv_brand.brand is not importable -- which is exactly why it is not optional.
 
     RNV-COLOR-SYNC, 2026-10-16: it held each value written out. It holds now
     that brand_map.json takes each from its APP key; the value is written from
@@ -156,7 +156,7 @@ def test_the_new_constants_hold_the_registered_values():
 def test_the_new_constants_match_rnv_brand():
     """The upstream half. Skips where rnv-brand is not importable."""
     brand = pytest.importorskip(
-        'engine.brand',
+        'rnv_brand.brand',
         reason='rnv-brand not importable here; the local pin is doing the work')
     drift = []
     for name, key in NEW.items():
